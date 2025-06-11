@@ -10,12 +10,15 @@ import org.datcheems.swp_projectnosmoking.mapper.UserMapper;
 import org.datcheems.swp_projectnosmoking.repository.RoleRepository;
 import org.datcheems.swp_projectnosmoking.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,12 +36,16 @@ public class UserService {
     private RoleRepository roleRepository;
 
     @Transactional
-    public ResponseObject<UserResponse> createUser(RegisterRequest request) {
+    public ResponseEntity<ResponseObject<UserResponse>> createUser(RegisterRequest request) {
         ResponseObject<UserResponse> response = new ResponseObject<>();
 
         try {
             if (userRepository.existsByUsername(request.getUsername())) {
-                throw new RuntimeException("Username already exists");
+                response.setStatus("error");
+                response.setMessage("Username already exists");
+                response.setData(null);
+
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
             }
 
             User user = new User();
@@ -56,9 +63,6 @@ public class UserService {
 
             User savedUser = userRepository.save(user);
 
-            User verifiedUser = userRepository.findById(savedUser.getId())
-                    .orElseThrow(() -> new RuntimeException("User not found after save"));
-
             UserResponse userResponse = UserResponse.builder()
                     .id(savedUser.getId())
                     .username(savedUser.getUsername())
@@ -66,19 +70,22 @@ public class UserService {
                     .fullName(savedUser.getFullName())
                     .roles(savedUser.getRoles().stream()
                             .map(role -> role.getName().name())
-                            .collect(java.util.stream.Collectors.toSet()))
+                            .collect(Collectors.toSet()))
                     .build();
 
             response.setStatus("success");
             response.setMessage("User created successfully");
             response.setData(userResponse);
 
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
         } catch (RuntimeException e) {
             response.setStatus("error");
-            response.setMessage(e.getMessage());
+            response.setMessage("Failed to create user: " + e.getMessage());
             response.setData(null);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        return response;
     }
 
 

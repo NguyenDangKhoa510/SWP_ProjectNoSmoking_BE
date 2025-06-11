@@ -13,6 +13,8 @@ import org.datcheems.swp_projectnosmoking.repository.UserRepository;
 import org.datcheems.swp_projectnosmoking.uitls.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,8 +39,9 @@ public class AuthenticationService {
     @Autowired
     private JwtUtils jwtUtils;
 
-    public ResponseObject<AuthenticationResponse> authenticate(AuthenticationRequest request){
+    public ResponseEntity<ResponseObject<AuthenticationResponse>> authenticate(AuthenticationRequest request) {
         ResponseObject<AuthenticationResponse> response = new ResponseObject<>();
+
         try {
             var user = userRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
@@ -46,8 +49,9 @@ public class AuthenticationService {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
             boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-            if (!authenticated)
+            if (!authenticated) {
                 throw new RuntimeException("Invalid username or password");
+            }
 
             var token = jwtUtils.generateToken(user);
 
@@ -58,13 +62,16 @@ public class AuthenticationService {
                     .authenticated(true)
                     .build());
 
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
         } catch (RuntimeException e) {
             response.setStatus("error");
             response.setMessage(e.getMessage());
             response.setData(null);
-        }
 
-        return response;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
     }
+
 
 }
