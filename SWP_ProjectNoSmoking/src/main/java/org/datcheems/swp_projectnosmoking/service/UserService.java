@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,10 +33,8 @@ public class UserService {
 
     @Transactional
     public UserResponse createUser(RegisterRequest request) {
-        log.info("Creating new user with username: {}", request.getUsername());
 
         if (userRepository.existsByUsername(request.getUsername())) {
-            log.error("Username already exists: {}", request.getUsername());
             throw new RuntimeException("Username already exists: " + request.getUsername());
         }
 
@@ -74,12 +73,11 @@ public class UserService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public List<User> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         List<User> users = userRepository.findAll();
-        return users;
-//                users.stream()
-//                        .map(userMapper::toUserResponse)
-//                        .collect(Collectors.toList());
+        return users.stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
     }
 
 
