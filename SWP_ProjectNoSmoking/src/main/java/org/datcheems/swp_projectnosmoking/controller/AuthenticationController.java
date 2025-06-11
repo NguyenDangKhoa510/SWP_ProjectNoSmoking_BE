@@ -3,6 +3,7 @@ package org.datcheems.swp_projectnosmoking.controller;
 import org.datcheems.swp_projectnosmoking.dto.request.AuthenticationRequest;
 import org.datcheems.swp_projectnosmoking.dto.request.RegisterRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.AuthenticationResponse;
+import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
 import org.datcheems.swp_projectnosmoking.dto.response.UserResponse;
 import org.datcheems.swp_projectnosmoking.service.AuthenticationService;
 import org.datcheems.swp_projectnosmoking.service.UserService;
@@ -22,15 +23,14 @@ public class AuthenticationController {
     private AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    AuthenticationResponse authenticate(@RequestBody AuthenticationRequest request){
+    ResponseObject<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
         var result = authenticationService.authenticate(request);
         return result;
     }
 
     @PostMapping("/register")
-    UserResponse createUser(@RequestBody RegisterRequest request) {
+    ResponseObject<UserResponse> createUser(@RequestBody RegisterRequest request) {
         return userService.createUser(request);
     }
-
 
 }

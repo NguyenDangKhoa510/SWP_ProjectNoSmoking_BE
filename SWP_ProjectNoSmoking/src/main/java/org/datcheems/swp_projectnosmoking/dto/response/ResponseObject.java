@@ -3,8 +3,9 @@ package org.datcheems.swp_projectnosmoking.dto.response;
 import lombok.Data;
 
 @Data
-public class ResponseObject {
+public class ResponseObject<T> {
     private String status;
     private String message;
-    private Object data;
+    private T data;
 }
+
