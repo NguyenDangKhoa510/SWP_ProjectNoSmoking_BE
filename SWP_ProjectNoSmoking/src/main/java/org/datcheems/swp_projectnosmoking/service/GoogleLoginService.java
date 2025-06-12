@@ -2,6 +2,7 @@ package org.datcheems.swp_projectnosmoking.service;
 
 import com.nimbusds.jose.shaded.gson.Gson;
 import org.datcheems.swp_projectnosmoking.dto.response.AuthenticationResponse;
+import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
 import org.datcheems.swp_projectnosmoking.entity.Role;
 import org.datcheems.swp_projectnosmoking.entity.User;
 import org.datcheems.swp_projectnosmoking.repository.RoleRepository;
@@ -32,42 +33,51 @@ public class GoogleLoginService {
 
     private static final String GOOGLE_USER_INFO_URL = "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=";
 
-    public AuthenticationResponse authenticateWithGoogle(String googleAccessToken) {
-        // Xác minh Access Token từ Google
-        String userInfoJson = verifyGoogleToken(googleAccessToken);
+    public ResponseObject<AuthenticationResponse> authenticateWithGoogle(String googleAccessToken) {
+        ResponseObject<AuthenticationResponse> response = new ResponseObject<>();
 
-        // Lấy thông tin người dùng từ Google
-        Map<String, Object> userInfo = parseGoogleUserInfo(userInfoJson);
+        try {
+            // Xác minh token Google và lấy thông tin người dùng
+            String userInfoJson = verifyGoogleToken(googleAccessToken);
 
-        // Kiểm tra người dùng trong hệ thống
-        User user = userRepository.findByUsername((String) userInfo.get("email"))
-                .orElseGet(() -> {
-                    // Nếu người dùng không tồn tại, tạo mới người dùng
-                    User newUser = new User();
-                    newUser.setUsername((String) userInfo.get("email"));  // Email từ Google sẽ là tên đăng nhập
-                    newUser.setEmail((String) userInfo.get("email"));
-                    newUser.setFullName((String) userInfo.get("name"));  // Tên đầy đủ từ Google
+            Map<String, Object> userInfo = parseGoogleUserInfo(userInfoJson);
 
-                    // Mã hóa mật khẩu mặc định hoặc tự tạo mật khẩu (nếu cần)
-                    // Có thể tạo mật khẩu mặc định hoặc để trống vì Google đã xác thực người dùng
-                    newUser.setPassword("defaultPassword");  // Mật khẩu mặc định (hãy mã hóa nó trước khi lưu)
+            // Tìm người dùng trong hệ thống hoặc tạo mới nếu không có
+            User user = userRepository.findByUsername((String) userInfo.get("email"))
+                    .orElseGet(() -> {
+                        User newUser = new User();
+                        newUser.setUsername((String) userInfo.get("email"));
+                        newUser.setEmail((String) userInfo.get("email"));
+                        newUser.setFullName((String) userInfo.get("name"));
+                        newUser.setPassword("defaultPassword");
 
-                    // Gán vai trò cho người dùng (ví dụ gán role USER)
-                    Role defaultRole = roleRepository.findByName(Role.RoleName.MEMBER)
-                            .orElseThrow(() -> new RuntimeException("Default role not found"));
-                    newUser.getRoles().clear();  // Xóa các vai trò cũ (nếu có)
-                    newUser.getRoles().add(defaultRole);  // Thêm vai trò cho người dùng
+                        // Gán role mặc định cho người dùng mới
+                        Role defaultRole = roleRepository.findByName(Role.RoleName.MEMBER)
+                                .orElseThrow(() -> new RuntimeException("Default role not found"));
+                        newUser.getRoles().clear();
+                        newUser.getRoles().add(defaultRole);
 
-                    // Lưu người dùng vào cơ sở dữ liệu
-                    userRepository.save(newUser);
+                        userRepository.save(newUser);
 
-                    return newUser; // Trả lại người dùng mới đã được lưu
-                });
+                        return newUser;
+                    });
 
-        // Tạo JWT token
-        String token = jwtUtils.generateToken(user);
+            // Tạo token JWT
+            String token = jwtUtils.generateToken(user);
 
-        return new AuthenticationResponse(token, true);
+            // Thiết lập ResponseObject với thông tin thành công
+            response.setStatus("success");
+            response.setMessage("Google authentication successful");
+            response.setData(new AuthenticationResponse(token, true));
+
+        } catch (RuntimeException e) {
+            // Trong trường hợp có lỗi, thiết lập ResponseObject lỗi
+            response.setStatus("error");
+            response.setMessage(e.getMessage());
+            response.setData(null);  // Có thể thêm chi tiết lỗi vào đây nếu muốn, như stack trace hoặc code lỗi.
+        }
+
+        return response;
     }
 
     private String verifyGoogleToken(String googleAccessToken) {
@@ -78,7 +88,6 @@ public class GoogleLoginService {
     }
 
     private Map<String, Object> parseGoogleUserInfo(String userInfoJson) {
-        // Parse thông tin người dùng từ JSON trả về từ Google
         Gson gson = new Gson();
         return gson.fromJson(userInfoJson, HashMap.class);
     }

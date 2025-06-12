@@ -6,11 +6,15 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.extern.slf4j.Slf4j;
 import org.datcheems.swp_projectnosmoking.dto.request.AuthenticationRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.AuthenticationResponse;
+import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
 import org.datcheems.swp_projectnosmoking.entity.User;
 import org.datcheems.swp_projectnosmoking.repository.RoleRepository;
 import org.datcheems.swp_projectnosmoking.repository.UserRepository;
+import org.datcheems.swp_projectnosmoking.uitls.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,65 +36,42 @@ public class AuthenticationService {
     @Autowired
     private RoleRepository roleRepository;
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request){
-        var user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found with username: " + request.getUsername()));
+    @Autowired
+    private JwtUtils jwtUtils;
 
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-        boolean authenticated =  passwordEncoder.matches(request.getPassword(), user.getPassword());
-
-        if(!authenticated)
-            throw new RuntimeException("Invalid username or password");
-
-        var token = generateToken(user);
-
-        return AuthenticationResponse.builder()
-                .token(token)
-                .authenticated(true)
-                .build();
-    }
-
-
-    private String generateToken(User user) {
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
-
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getUsername())
-                .issuer("datcheems")
-                .issueTime(new Date())
-                .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli(
-                        )))
-                .claim("scope", buildScope(user))
-                .build();
-
-        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
-
-        JWSObject jwsObject = new JWSObject(header, payload);
+    public ResponseEntity<ResponseObject<AuthenticationResponse>> authenticate(AuthenticationRequest request) {
+        ResponseObject<AuthenticationResponse> response = new ResponseObject<>();
 
         try {
-            jwsObject.sign(new MACSigner(SIGNING_KEY.getBytes()));
-            return jwsObject.serialize();
-        } catch (JOSEException e) {
-            log.error("Cannot create JWT token", e);
-            throw new RuntimeException(e);
-        }
-    }
+            var user = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
+            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+            boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-    private String buildScope(User user) {
-        if (user == null || user.getRoles() == null || user.getRoles().isEmpty()) {
-            return "";
-        }
-
-        StringJoiner stringJoiner = new StringJoiner(" ");
-        user.getRoles().forEach(role -> {
-            if (role != null && role.getName() != null) {
-                stringJoiner.add(role.getName().name());
+            if (!authenticated) {
+                throw new RuntimeException("Invalid username or password");
             }
-        });
 
-        return stringJoiner.toString();
+            var token = jwtUtils.generateToken(user);
+
+            response.setStatus("success");
+            response.setMessage("Authentication successful");
+            response.setData(AuthenticationResponse.builder()
+                    .token(token)
+                    .authenticated(true)
+                    .build());
+
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
+        } catch (RuntimeException e) {
+            response.setStatus("error");
+            response.setMessage(e.getMessage());
+            response.setData(null);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
     }
+
 
 }
