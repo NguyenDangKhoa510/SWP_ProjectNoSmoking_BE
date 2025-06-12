@@ -5,6 +5,7 @@ import org.datcheems.swp_projectnosmoking.dto.request.MembershipPackageRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.MembershipPackageResponse;
 import org.datcheems.swp_projectnosmoking.entity.MembershipPackage;
 import org.datcheems.swp_projectnosmoking.repository.MembershipPackageRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,24 +18,28 @@ public class MembershipPackageService {
 
     private final MembershipPackageRepository membershipPackageRepository;
 
+    @PreAuthorize("hasRole('ADMIN')")
     public List<MembershipPackageResponse> getAllPackages() {
         return membershipPackageRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public MembershipPackageResponse getPackageById(Long id) {
         MembershipPackage pkg = membershipPackageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Membership package not found with id: " + id));
         return mapToResponse(pkg);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public MembershipPackageResponse createPackage(MembershipPackageRequest request) {
         MembershipPackage pkg = mapToEntity(request);
         MembershipPackage saved = membershipPackageRepository.save(pkg);
         return mapToResponse(saved);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public MembershipPackageResponse updatePackage(Long id, MembershipPackageRequest request) {
         MembershipPackage existing = membershipPackageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Membership package not found with id: " + id));
@@ -49,6 +54,7 @@ public class MembershipPackageService {
         return mapToResponse(updated);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public void deletePackage(Long id) {
         if (!membershipPackageRepository.existsById(id)) {
             throw new RuntimeException("Membership package not found with id: " + id);
