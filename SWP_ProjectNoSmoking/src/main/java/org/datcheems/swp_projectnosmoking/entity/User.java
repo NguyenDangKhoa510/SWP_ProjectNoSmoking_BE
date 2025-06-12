@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,6 +20,11 @@ public class User {
     private String email;
     private String password;
     private String fullName;
+    private String phoneNumber;
+    private LocalDate birthDate;
+    private String address;
+
+
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

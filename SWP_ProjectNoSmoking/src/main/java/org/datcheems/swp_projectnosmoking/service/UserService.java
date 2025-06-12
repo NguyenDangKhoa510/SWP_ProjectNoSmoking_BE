@@ -1,7 +1,10 @@
 package org.datcheems.swp_projectnosmoking.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.datcheems.swp_projectnosmoking.exception.ResourceNotFoundException;
 import org.datcheems.swp_projectnosmoking.dto.request.RegisterRequest;
+import org.datcheems.swp_projectnosmoking.dto.request.UserProfileUpdateRequest;
+import org.datcheems.swp_projectnosmoking.dto.response.UserProfileResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
 import org.datcheems.swp_projectnosmoking.dto.response.UserResponse;
 import org.datcheems.swp_projectnosmoking.entity.Role;
@@ -19,8 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -88,7 +91,6 @@ public class UserService {
         }
     }
 
-
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getAllUsers() {
         List<User> users = userRepository.findAll();
@@ -99,12 +101,60 @@ public class UserService {
 
 
 
-    public UserResponse getMyInfo(){
-        var context = SecurityContextHolder.getContext();
-        String name = context.getAuthentication().getName();
+    public UserProfileResponse getCurrentUserProfile(String username) {
+        // Tìm user theo username
+        Optional<User> optionalUser = userRepository.findByUsername(username);
 
-        User user = userRepository.findByUsername(name).
-                orElseThrow(() -> new RuntimeException("User not found with username: " + name));
-        return userMapper.toUserResponse(user);
+        if (!optionalUser.isPresent()) {
+            throw new ResourceNotFoundException("User not found with username: " + username);
+        }
+
+        User user = optionalUser.get();
+
+        // Tạo response object
+        UserProfileResponse response = new UserProfileResponse();
+        response.setUsername(user.getUsername());
+        response.setEmail(user.getEmail());
+        response.setFullName(user.getFullName());
+        response.setPhoneNumber(user.getPhoneNumber());
+        response.setBirthDate(user.getBirthDate());
+        response.setAddress(user.getAddress());
+
+        // Trả response về
+        return response;
     }
+
+
+
+    public void updateCurrentUserProfile(String username, UserProfileUpdateRequest request) {
+        // Tìm user theo username
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+
+        if (!optionalUser.isPresent()) {
+            throw new ResourceNotFoundException("User not found with username: " + username);
+        }
+
+        User user = optionalUser.get();
+
+        // Cập nhật thông tin user từ request
+
+        user.setFullName(request.getFullName());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setBirthDate(request.getBirthDate());
+        user.setAddress(request.getAddress());
+
+        // Lưu lại vào database
+        userRepository.save(user);
+    }
+
+
+
+
+
+
+
+
+
+
+
 }
