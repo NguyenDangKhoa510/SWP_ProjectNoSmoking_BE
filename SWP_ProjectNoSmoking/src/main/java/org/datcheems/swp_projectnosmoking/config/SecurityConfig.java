@@ -35,6 +35,7 @@ public class SecurityConfig {
             "/api/auth/register",
             "/api/auth/login",
             "/api/auth/introspect",
+            "/api/auth/google-login"
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
