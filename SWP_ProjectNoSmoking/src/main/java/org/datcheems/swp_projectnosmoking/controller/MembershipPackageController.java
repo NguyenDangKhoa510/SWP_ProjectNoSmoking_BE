@@ -49,4 +49,5 @@ public class MembershipPackageController {
         membershipPackageService.deletePackage(id);
         return ResponseEntity.noContent().build();
     }
+
 }
