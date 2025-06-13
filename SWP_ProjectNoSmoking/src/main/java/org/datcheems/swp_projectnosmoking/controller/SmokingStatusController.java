@@ -69,5 +69,4 @@ public class SmokingStatusController {
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
 }
