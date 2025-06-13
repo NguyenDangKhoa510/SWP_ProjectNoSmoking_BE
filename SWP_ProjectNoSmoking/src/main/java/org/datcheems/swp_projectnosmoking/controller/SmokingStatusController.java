@@ -25,9 +25,16 @@ public class SmokingStatusController {
     // Member xem tình trạng của chính mình
     @PreAuthorize("hasRole('MEMBER')")
     @GetMapping("/my")
-    public SmokingStatusResponse getSmokingStatus(@AuthenticationPrincipal Jwt principal) {
-        String username = principal.getClaimAsString("sub"); // Lấy username từ Jwt token
-        return smokingStatusService.getSmokingStatus(username);
+    public ResponseEntity<ResponseObject<SmokingStatusResponse>> getSmokingStatus(@AuthenticationPrincipal Jwt principal) {
+        String username = principal.getClaimAsString("sub");
+        SmokingStatusResponse smokingStatusResponse = smokingStatusService.getSmokingStatus(username);
+
+        ResponseObject<SmokingStatusResponse> response = new ResponseObject<>();
+        response.setStatus("success");
+        response.setMessage("Smoking status retrieved successfully");
+        response.setData(smokingStatusResponse);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     // Member ghi nhận / update tình trạng của chính mình
@@ -37,13 +44,10 @@ public class SmokingStatusController {
                                                                                            @RequestBody SmokingStatusRequest request) {
         String username = principal.getClaimAsString("sub");
 
-        // Save or update
         smokingStatusService.saveOrUpdateSmokingStatus(username, request);
 
-        // Lấy lại data mới
         SmokingStatusResponse updatedStatus = smokingStatusService.getSmokingStatus(username);
 
-        // Build ResponseObject
         ResponseObject<SmokingStatusResponse> response = new ResponseObject<>();
         response.setStatus("success");
         response.setMessage("Smoking status saved successfully");
@@ -55,7 +59,14 @@ public class SmokingStatusController {
     // Coach xem tình trạng của member bất kỳ
     @PreAuthorize("hasRole('COACH')")
     @GetMapping("/{username}")
-    public SmokingStatusResponse getSmokingStatusForUser(@PathVariable String username) {
-        return smokingStatusService.getSmokingStatus(username);
+    public ResponseEntity<ResponseObject<SmokingStatusResponse>> getSmokingStatusForUser(@PathVariable String username) {
+        SmokingStatusResponse smokingStatusResponse = smokingStatusService.getSmokingStatus(username);
+
+        ResponseObject<SmokingStatusResponse> response = new ResponseObject<>();
+        response.setStatus("success");
+        response.setMessage("Smoking status retrieved successfully for user: " + username);
+        response.setData(smokingStatusResponse);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
