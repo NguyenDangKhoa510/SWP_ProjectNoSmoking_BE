@@ -1,0 +1,20 @@
+package org.datcheems.swp_projectnosmoking.dto.response;
+
+import jakarta.persistence.Id;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+
+
+public class BadgeResponse {
+    int id;
+    String name;
+    String description;
+    String condition_description;
+    int score;
+}
