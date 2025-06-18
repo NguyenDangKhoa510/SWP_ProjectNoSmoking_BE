@@ -44,9 +44,10 @@ public class MembershipPackageController {
     }
 
     
-    @DeleteMapping("//deletepackage{id}")
+    @DeleteMapping("/deletepackage/{id}")
     public ResponseEntity<Void> deletePackage(@PathVariable Long id) {
         membershipPackageService.deletePackage(id);
         return ResponseEntity.noContent().build();
     }
+
 }
