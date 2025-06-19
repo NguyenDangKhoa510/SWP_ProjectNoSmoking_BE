@@ -12,6 +12,7 @@ public class BlogResponse {
     private String content;
     private String coverImage;
     private BlogStatus status;
-    private BlogCategory category;
+    private Long categoryId;
+    private String categoryName;
     private LocalDateTime createdAt;
 }
