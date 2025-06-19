@@ -82,7 +82,19 @@ public class BlogService {
     }
 
 
-    public List<BlogPost> getAllBlogs() {
-        return blogRepository.findAll();
+    public ResponseEntity<ResponseObject<List<BlogResponse>>> getAllBlogs() {
+        ResponseObject<List<BlogResponse>> response = new ResponseObject<>();
+
+        List<BlogPost> blogs = blogRepository.findAll();
+
+        List<BlogResponse> blogResponses = blogs.stream()
+                .map(blogMapper::toResponse)
+                .toList();
+
+        response.setStatus("success");
+        response.setMessage("Blogs fetched successfully");
+        response.setData(blogResponses);
+
+        return ResponseEntity.ok(response);
     }
 }

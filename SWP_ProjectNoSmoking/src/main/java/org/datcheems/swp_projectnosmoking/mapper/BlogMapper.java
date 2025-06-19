@@ -17,6 +17,8 @@ public interface BlogMapper {
     BlogPost toEntity(BlogPostRequest request);
 
     @Mapping(target = "status", source = "status")
+    @Mapping(target = "categoryId", expression = "java(blogPost.getCategory().getId())")
+    @Mapping(target = "categoryName", expression = "java(blogPost.getCategory().getName())")
     BlogResponse toResponse(BlogPost blogPost);
 }
 
