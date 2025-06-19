@@ -16,5 +16,7 @@ public interface BlogMapper {
     @Mapping(target = "createdAt", ignore = true)
     BlogPost toEntity(BlogPostRequest request);
 
+    @Mapping(target = "status", source = "status")
     BlogResponse toResponse(BlogPost blogPost);
 }
+

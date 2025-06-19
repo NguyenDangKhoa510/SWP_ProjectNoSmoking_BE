@@ -23,4 +23,15 @@ public class BlogController {
     public ResponseEntity<ResponseObject<BlogResponse>> createBlogPost(@RequestBody BlogPostRequest request) {
         return blogService.createBlog(request);
     }
+
+    @PutMapping("/approve/{id}")
+    public ResponseEntity<?> approveBlog(@PathVariable Long id) {
+        return blogService.approveBlog(id);
+    }
+
+    @PutMapping("/reject/{id}")
+    public ResponseEntity<?> rejectBlog(@PathVariable Long id) {
+        return blogService.rejectBlog(id);
+    }
+
 }

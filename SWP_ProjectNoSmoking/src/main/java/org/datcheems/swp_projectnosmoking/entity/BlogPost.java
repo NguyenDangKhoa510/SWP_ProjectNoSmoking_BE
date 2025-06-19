@@ -18,7 +18,10 @@ public class BlogPost {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private String coverImage; // URL hoặc path ảnh
+    private String coverImage;
+
+    @Enumerated(EnumType.STRING)
+    private BlogStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
