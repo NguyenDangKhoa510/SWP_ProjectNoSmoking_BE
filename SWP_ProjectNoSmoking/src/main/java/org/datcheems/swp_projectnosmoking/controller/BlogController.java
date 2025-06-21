@@ -20,7 +20,6 @@ public class BlogController {
 
     BlogService blogService;
 
-
     @PostMapping("/create")
     public ResponseEntity<ResponseObject<BlogResponse>> createBlogPost(@RequestBody BlogPostRequest request) {
         return blogService.createBlog(request);
