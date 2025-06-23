@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Data
 public class UserProfileUpdateRequest {
     @NotBlank
-    @Size(min = 1, max = 10)
+    @Size(min = 1, max = 40)
     private String fullName;
     private String phoneNumber;
     private LocalDate birthDate;
