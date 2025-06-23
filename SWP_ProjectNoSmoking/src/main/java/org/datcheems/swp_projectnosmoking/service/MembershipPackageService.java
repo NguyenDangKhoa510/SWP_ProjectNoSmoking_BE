@@ -3,13 +3,13 @@ package org.datcheems.swp_projectnosmoking.service;
 import lombok.RequiredArgsConstructor;
 import org.datcheems.swp_projectnosmoking.dto.request.MembershipPackageRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.MembershipPackageResponse;
+import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
 import org.datcheems.swp_projectnosmoking.entity.MembershipPackage;
 import org.datcheems.swp_projectnosmoking.repository.MembershipPackageRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,28 +19,30 @@ public class MembershipPackageService {
     private final MembershipPackageRepository membershipPackageRepository;
 
     @PreAuthorize("hasRole('ADMIN')")
-    public List<MembershipPackageResponse> getAllPackages() {
-        return membershipPackageRepository.findAll().stream()
+    public ResponseObject<List<MembershipPackageResponse>> getAllPackages() {
+        List<MembershipPackageResponse> packages = membershipPackageRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+
+        return createResponse("success", "Fetched all membership packages", packages);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public MembershipPackageResponse getPackageById(Long id) {
+    public ResponseObject<MembershipPackageResponse> getPackageById(Long id) {
         MembershipPackage pkg = membershipPackageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Membership package not found with id: " + id));
-        return mapToResponse(pkg);
+        return createResponse("success", "Fetched membership package", mapToResponse(pkg));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public MembershipPackageResponse createPackage(MembershipPackageRequest request) {
+    public ResponseObject<MembershipPackageResponse> createPackage(MembershipPackageRequest request) {
         MembershipPackage pkg = mapToEntity(request);
         MembershipPackage saved = membershipPackageRepository.save(pkg);
-        return mapToResponse(saved);
+        return createResponse("success", "Membership package created", mapToResponse(saved));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public MembershipPackageResponse updatePackage(Long id, MembershipPackageRequest request) {
+    public ResponseObject<MembershipPackageResponse> updatePackage(Long id, MembershipPackageRequest request) {
         MembershipPackage existing = membershipPackageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Membership package not found with id: " + id));
 
@@ -51,15 +53,25 @@ public class MembershipPackageService {
         existing.setEndDate(request.getEndDate());
 
         MembershipPackage updated = membershipPackageRepository.save(existing);
-        return mapToResponse(updated);
+        return createResponse("success", "Membership package updated", mapToResponse(updated));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public void deletePackage(Long id) {
+    public ResponseObject<String> deletePackage(Long id) {
         if (!membershipPackageRepository.existsById(id)) {
             throw new RuntimeException("Membership package not found with id: " + id);
         }
         membershipPackageRepository.deleteById(id);
+        return createResponse("success", "Membership package deleted", "Deleted package with id: " + id);
+    }
+
+    // Helper method to wrap response
+    private <T> ResponseObject<T> createResponse(String status, String message, T data) {
+        ResponseObject<T> response = new ResponseObject<>();
+        response.setStatus(status);
+        response.setMessage(message);
+        response.setData(data);
+        return response;
     }
 
     // Mapping methods
