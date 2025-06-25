@@ -1,13 +1,8 @@
 package org.datcheems.swp_projectnosmoking.service;
 
 import lombok.extern.slf4j.Slf4j;
-<<<<<<< Updated upstream
 import org.datcheems.swp_projectnosmoking.dto.response.PasswordResetResponse;
 import org.datcheems.swp_projectnosmoking.dto.request.PasswordResetRequest;
-=======
-import org.datcheems.swp_projectnosmoking.dto.request.PasswordResetDto;
-import org.datcheems.swp_projectnosmoking.dto.request.PasswordResetRequestDto;
->>>>>>> Stashed changes
 import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
 import org.datcheems.swp_projectnosmoking.entity.PasswordResetToken;
 import org.datcheems.swp_projectnosmoking.entity.User;
@@ -46,11 +41,7 @@ public class PasswordResetService {
     private static final int CODE_LENGTH = 6;
 
     @Transactional
-<<<<<<< Updated upstream
     public ResponseEntity<ResponseObject<String>> requestPasswordReset(PasswordResetRequest requestDto) {
-=======
-    public ResponseEntity<ResponseObject<String>> requestPasswordReset(PasswordResetRequestDto requestDto) {
->>>>>>> Stashed changes
         ResponseObject<String> response = new ResponseObject<>();
 
         try {
@@ -95,11 +86,7 @@ public class PasswordResetService {
     }
 
     @Transactional
-<<<<<<< Updated upstream
     public ResponseEntity<ResponseObject<String>> resetPassword(PasswordResetResponse resetDto) {
-=======
-    public ResponseEntity<ResponseObject<String>> resetPassword(PasswordResetDto resetDto) {
->>>>>>> Stashed changes
         ResponseObject<String> response = new ResponseObject<>();
 
         try {

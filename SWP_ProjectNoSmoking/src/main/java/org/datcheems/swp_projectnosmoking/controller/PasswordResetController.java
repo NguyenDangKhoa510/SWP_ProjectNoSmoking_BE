@@ -1,12 +1,7 @@
 package org.datcheems.swp_projectnosmoking.controller;
 
-<<<<<<< Updated upstream
 import org.datcheems.swp_projectnosmoking.dto.response.PasswordResetResponse;
 import org.datcheems.swp_projectnosmoking.dto.request.PasswordResetRequest;
-=======
-import org.datcheems.swp_projectnosmoking.dto.request.PasswordResetDto;
-import org.datcheems.swp_projectnosmoking.dto.request.PasswordResetRequestDto;
->>>>>>> Stashed changes
 import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
 import org.datcheems.swp_projectnosmoking.service.PasswordResetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,20 +17,12 @@ public class PasswordResetController {
     private PasswordResetService passwordResetService;
 
     @PostMapping("/forgot")
-<<<<<<< Updated upstream
     public ResponseEntity<ResponseObject<String>> requestPasswordReset(@RequestBody PasswordResetRequest requestDto) {
-=======
-    public ResponseEntity<ResponseObject<String>> requestPasswordReset(@RequestBody PasswordResetRequestDto requestDto) {
->>>>>>> Stashed changes
         return passwordResetService.requestPasswordReset(requestDto);
     }
 
     @PostMapping("/reset")
-<<<<<<< Updated upstream
     public ResponseEntity<ResponseObject<String>> resetPassword(@RequestBody PasswordResetResponse resetDto) {
-=======
-    public ResponseEntity<ResponseObject<String>> resetPassword(@RequestBody PasswordResetDto resetDto) {
->>>>>>> Stashed changes
         return passwordResetService.resetPassword(resetDto);
     }
 
