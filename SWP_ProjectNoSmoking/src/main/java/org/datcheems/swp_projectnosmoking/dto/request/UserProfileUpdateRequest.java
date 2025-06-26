@@ -14,4 +14,6 @@ public class UserProfileUpdateRequest {
     private String phoneNumber;
     private LocalDate birthDate;
     private String address;
+    private String gender;
+
 }

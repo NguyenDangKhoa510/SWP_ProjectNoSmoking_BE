@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,11 +21,6 @@ public class User {
     private String email;
     private String password;
     private String fullName;
-    private String phoneNumber;
-    private LocalDate birthDate;
-    private String address;
-
-
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -34,4 +30,21 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
+    public enum Status {
+        ACTIVE,
+        INACTIVE,
+        BANNED
+    }
 }

@@ -3,6 +3,7 @@ package org.datcheems.swp_projectnosmoking.config;
 import lombok.extern.slf4j.Slf4j;
 
 import org.datcheems.swp_projectnosmoking.entity.Role;
+import org.datcheems.swp_projectnosmoking.entity.User;
 import org.datcheems.swp_projectnosmoking.repository.RoleRepository;
 import org.datcheems.swp_projectnosmoking.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,7 @@ public class ApplicationInitConfig {
                 admin.setFullName("Administrator");
                 admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.getRoles().add(adminRole);
+                admin.setStatus(User.Status.valueOf("ACTIVE"));
 
                 userRepository.save(admin);
                 log.info("Default admin user created with username 'admin' and password 'admin123'");
