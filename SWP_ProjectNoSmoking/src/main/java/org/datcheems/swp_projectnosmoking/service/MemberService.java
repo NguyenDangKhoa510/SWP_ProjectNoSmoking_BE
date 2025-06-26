@@ -49,13 +49,12 @@ public class MemberService {
             response.setBirthDate(member.getBirthDate());
             response.setAddress(member.getAddress());
             response.setGender(member.getGender());
-            response.setAvatarUrl(member.getAvatarUrl());
         } else {
             response.setPhoneNumber(null);
             response.setBirthDate(null);
             response.setAddress(null);
             response.setGender(null);
-            response.setAvatarUrl(null);
+
         }
 
         return response;
@@ -88,7 +87,7 @@ public class MemberService {
         member.setBirthDate(request.getBirthDate());
         member.setAddress(request.getAddress());
         member.setGender(request.getGender());
-        member.setAvatarUrl(request.getAvatarUrl());
+
 
         memberRepository.save(member);
     }

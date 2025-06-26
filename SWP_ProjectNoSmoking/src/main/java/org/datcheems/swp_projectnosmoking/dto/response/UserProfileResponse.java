@@ -13,5 +13,5 @@ public class UserProfileResponse {
     private LocalDate birthDate;
     private String address;
     private String gender;
-    private String avatarUrl;
+
 }
