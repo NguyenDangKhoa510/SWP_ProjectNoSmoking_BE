@@ -63,6 +63,7 @@ public class UserService {
                     .orElseThrow(() -> new RuntimeException("Default role not found"));
             user.getRoles().clear();
             user.getRoles().add(defaultRole);
+            user.setStatus(User.Status.ACTIVE);
 
             User savedUser = userRepository.save(user);
 
@@ -79,6 +80,12 @@ public class UserService {
             response.setStatus("success");
             response.setMessage("User created successfully");
             response.setData(userResponse);
+
+            if (savedUser.getRoles().stream().anyMatch(r -> r.getName().equals(Role.RoleName.MEMBER))) {
+                Member member = new Member();
+                member.setUser(savedUser);
+                memberRepository.save(member);
+            }
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
