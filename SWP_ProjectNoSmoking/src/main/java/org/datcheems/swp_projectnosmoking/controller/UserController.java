@@ -5,6 +5,7 @@ import org.datcheems.swp_projectnosmoking.dto.request.UserProfileUpdateRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.UserProfileResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.UserResponse;
 import org.datcheems.swp_projectnosmoking.entity.User;
+import org.datcheems.swp_projectnosmoking.service.MemberService;
 import org.datcheems.swp_projectnosmoking.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,6 +25,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private MemberService memberService;
+
     @GetMapping("/getAll")
     public List<UserResponse> getAllUsers() {
         return userService.getAllUsers();
@@ -33,14 +37,14 @@ public class UserController {
     @GetMapping("/profile")
     public UserProfileResponse getProfile(@AuthenticationPrincipal Jwt principal) {
         String username = principal.getSubject();
-        return userService.getCurrentUserProfile(username);
+        return memberService.getCurrentUserProfile(username);
     }
 
     @PutMapping("/profile")
     public String updateProfile(@AuthenticationPrincipal Jwt principal,
                                 @Valid @RequestBody UserProfileUpdateRequest request) {
         String username = principal.getSubject();
-        userService.updateCurrentUserProfile(username, request);
+        memberService.updateCurrentUserProfile(username, request);
         return "Profile updated successfully";
     }
 

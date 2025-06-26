@@ -12,4 +12,6 @@ public class UserProfileResponse {
     private String phoneNumber;
     private LocalDate birthDate;
     private String address;
+    private String gender;
+    private String avatarUrl;
 }
