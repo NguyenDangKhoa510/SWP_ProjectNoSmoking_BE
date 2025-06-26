@@ -18,7 +18,7 @@ public class MembershipPackageService {
 
     private final MembershipPackageRepository membershipPackageRepository;
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     public ResponseObject<List<MembershipPackageResponse>> getAllPackages() {
         List<MembershipPackageResponse> packages = membershipPackageRepository.findAll().stream()
                 .map(this::mapToResponse)
