@@ -3,6 +3,7 @@ package org.datcheems.swp_projectnosmoking.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,9 +18,14 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String username;
+
     private String email;
+
     private String password;
+
+    @Nationalized
     private String fullName;
 
     @ManyToMany(fetch = FetchType.EAGER)

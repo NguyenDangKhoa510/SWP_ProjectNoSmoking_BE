@@ -2,6 +2,7 @@ package org.datcheems.swp_projectnosmoking.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDateTime;
 
@@ -13,9 +14,11 @@ public class BlogPost {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Nationalized
     private String title;
 
     @Column(columnDefinition = "TEXT")
+    @Nationalized
     private String content;
 
     private String coverImage;
@@ -25,6 +28,7 @@ public class BlogPost {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
+    @Nationalized
     private BlogCategory category;
 
     private LocalDateTime createdAt;
