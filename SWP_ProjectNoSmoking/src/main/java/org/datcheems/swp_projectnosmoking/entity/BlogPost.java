@@ -17,8 +17,8 @@ public class BlogPost {
     @Nationalized
     private String title;
 
-    @Column(columnDefinition = "TEXT")
     @Nationalized
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String content;
 
     private String coverImage;
