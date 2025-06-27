@@ -3,8 +3,10 @@ package org.datcheems.swp_projectnosmoking.service;
 import com.nimbusds.jose.shaded.gson.Gson;
 import org.datcheems.swp_projectnosmoking.dto.response.AuthenticationResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
+import org.datcheems.swp_projectnosmoking.entity.Member;
 import org.datcheems.swp_projectnosmoking.entity.Role;
 import org.datcheems.swp_projectnosmoking.entity.User;
+import org.datcheems.swp_projectnosmoking.repository.MemberRepository;
 import org.datcheems.swp_projectnosmoking.repository.RoleRepository;
 import org.datcheems.swp_projectnosmoking.repository.UserRepository;
 import org.datcheems.swp_projectnosmoking.uitls.JwtUtils;
@@ -29,6 +31,9 @@ public class GoogleLoginService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
 
     private static final String GOOGLE_USER_INFO_URL = "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=";
@@ -56,8 +61,13 @@ public class GoogleLoginService {
                                 .orElseThrow(() -> new RuntimeException("Default role not found"));
                         newUser.getRoles().clear();
                         newUser.getRoles().add(defaultRole);
+                        newUser.setStatus(User.Status.ACTIVE);
 
                         userRepository.save(newUser);
+
+                        Member member = new Member();
+                        member.setUser(newUser);
+                        memberRepository.save(member);
 
                         return newUser;
                     });

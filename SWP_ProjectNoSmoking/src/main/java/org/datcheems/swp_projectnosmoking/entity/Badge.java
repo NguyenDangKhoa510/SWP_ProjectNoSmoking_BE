@@ -2,6 +2,7 @@ package org.datcheems.swp_projectnosmoking.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.Nationalized;
 
 @Entity
 @Table(name = "tblBadge")
@@ -11,8 +12,12 @@ public class Badge {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Nationalized
     private String name;
+    @Nationalized
     private String description;
+    @Nationalized
     private String condition_description;
     private int score;
 }

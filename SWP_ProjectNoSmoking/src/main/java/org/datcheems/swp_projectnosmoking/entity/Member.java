@@ -3,6 +3,7 @@ package org.datcheems.swp_projectnosmoking.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDate;
 
@@ -21,6 +22,7 @@ public class Member {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Nationalized
     private String gender;
 
     private LocalDate birthDate;
@@ -28,6 +30,7 @@ public class Member {
     private String avatarUrl;
 
     @Column(columnDefinition = "TEXT")
+    @Nationalized
     private String address;
 
     private String phoneNumber;
