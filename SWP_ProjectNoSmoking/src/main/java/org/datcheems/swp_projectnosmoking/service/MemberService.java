@@ -45,11 +45,13 @@ public class MemberService {
         response.setFullName(user.getFullName());
 
         if (member != null) {
+            response.setUserId(member.getUserId());
             response.setPhoneNumber(member.getPhoneNumber());
             response.setBirthDate(member.getBirthDate());
             response.setAddress(member.getAddress());
             response.setGender(member.getGender());
         } else {
+
             response.setPhoneNumber(null);
             response.setBirthDate(null);
             response.setAddress(null);

@@ -29,9 +29,10 @@ public class Member {
 
     private String avatarUrl;
 
-    @Column(columnDefinition = "TEXT")
     @Nationalized
+    @Column(name = "address", length = 1000) // hoặc bỏ length để Hibernate tự xử lý
     private String address;
+
 
     private String phoneNumber;
 }

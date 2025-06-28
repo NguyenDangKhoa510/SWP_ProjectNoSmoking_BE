@@ -3,8 +3,13 @@ package org.datcheems.swp_projectnosmoking.uitls;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
+
 import org.datcheems.swp_projectnosmoking.entity.User;
 import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -29,6 +34,7 @@ public class JwtUtils {
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli(
                         )))
                 .claim("scope", buildScope(user))
+                .claim("userId", user.getId())
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -57,4 +63,22 @@ public class JwtUtils {
 
         return stringJoiner.toString();
     }
+
+    public static Long extractUserIdFromAuthentication(Authentication authentication) {
+        // Nếu dùng JWT (Spring Security 6)
+        if (authentication.getPrincipal() instanceof Jwt jwt) {
+            return jwt.getClaim("userId");
+        }
+
+        // Nếu dùng UserDetails (Spring Security cổ điển)
+        if (authentication.getPrincipal() instanceof UserDetails userDetails) {
+            User user = (User) userDetails;
+            return user.getId();
+        }
+
+        throw new IllegalArgumentException("Cannot extract userId from authentication");
+    }
 }
+
+
+
