@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/password/validate-code").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/blog-categories/getAll").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/blogs/getAll").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
                         .anyRequest().authenticated()
                 )

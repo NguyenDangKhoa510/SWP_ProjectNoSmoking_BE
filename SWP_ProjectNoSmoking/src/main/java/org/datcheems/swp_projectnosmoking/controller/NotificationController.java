@@ -1,6 +1,6 @@
 package org.datcheems.swp_projectnosmoking.controller;
 import org.datcheems.swp_projectnosmoking.dto.response.NotificationBrief;
-import org.datcheems.swp_projectnosmoking.uitls.JwtUtils;
+import org.datcheems.swp_projectnosmoking.utils.JwtUtils;
 import org.springframework.security.core.Authentication;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.datcheems.swp_projectnosmoking.uitls.JwtUtils.extractUserIdFromAuthentication;
+import static org.datcheems.swp_projectnosmoking.utils.JwtUtils.extractUserIdFromAuthentication;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -31,14 +31,13 @@ public class NotificationController {
     @Autowired
     private UserRepository userRepository;
 
-
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
     public ResponseEntity<NotificationResponse> create(
             @RequestBody NotificationRequest dto,
             Authentication authentication) {
 
-        Long createdById = JwtUtils.extractUserIdFromAuthentication(authentication);
+        Long createdById = extractUserIdFromAuthentication(authentication);
         return ResponseEntity.ok(notificationService.createNotification(dto, createdById));
     }
 
@@ -57,7 +56,6 @@ public class NotificationController {
 
         return ResponseEntity.ok(notificationService.getUserNotifications(userId));
 
-
     }
 
     @GetMapping("/active")
@@ -69,12 +67,11 @@ public class NotificationController {
     @PutMapping("/mark-as-read/{id}")
     @PreAuthorize("hasRole('MEMBER')")
     public ResponseEntity<String> markAsRead(@PathVariable Long id, Authentication auth) {
-        Long userId = JwtUtils.extractUserIdFromAuthentication(auth);
+        Long userId = extractUserIdFromAuthentication(auth);
         notificationService.markAsRead(id, userId);
         return ResponseEntity.ok("Notification marked as read.");
 
     }
-
 
 
     @GetMapping("/history/{userId}")
@@ -82,11 +79,6 @@ public class NotificationController {
     public ResponseEntity<List<UserNotificationResponse>> getUserNotificationHistory(@PathVariable Long userId) {
         return ResponseEntity.ok(notificationService.getUserNotifications(userId));
     }
-
-
-
-
-
 
 }
 
