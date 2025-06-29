@@ -5,16 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class MembershipPackageRequest {
-    String Name;
-    int Duration;
-    String Description;
-    Double Price;
-    Date ReleaseDate;
-    Date EndDate;
+public class UserMembershipRequest {
+    Long userId;
+    Long membershipPackageId;
+    LocalDate startDate;
+    LocalDate endDate;
+    String status;
 }

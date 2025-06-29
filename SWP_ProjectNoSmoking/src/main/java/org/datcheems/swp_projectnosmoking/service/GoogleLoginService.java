@@ -9,7 +9,7 @@ import org.datcheems.swp_projectnosmoking.entity.User;
 import org.datcheems.swp_projectnosmoking.repository.MemberRepository;
 import org.datcheems.swp_projectnosmoking.repository.RoleRepository;
 import org.datcheems.swp_projectnosmoking.repository.UserRepository;
-import org.datcheems.swp_projectnosmoking.uitls.JwtUtils;
+import org.datcheems.swp_projectnosmoking.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

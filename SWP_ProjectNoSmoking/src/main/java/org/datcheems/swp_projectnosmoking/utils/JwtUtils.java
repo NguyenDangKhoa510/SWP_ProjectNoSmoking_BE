@@ -1,4 +1,4 @@
-package org.datcheems.swp_projectnosmoking.uitls;
+package org.datcheems.swp_projectnosmoking.utils;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;

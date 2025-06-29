@@ -14,10 +14,12 @@ import java.util.Date;
 public class MembershipPackage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int Id;
+    private long Id;
 
     @Nationalized
     private String Name;
+
+    private int Duration;
 
     @Nationalized
     private String Description;

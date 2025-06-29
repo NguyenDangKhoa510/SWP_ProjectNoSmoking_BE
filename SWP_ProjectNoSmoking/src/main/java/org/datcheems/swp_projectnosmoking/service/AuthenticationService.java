@@ -1,16 +1,12 @@
 package org.datcheems.swp_projectnosmoking.service;
 
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.extern.slf4j.Slf4j;
 import org.datcheems.swp_projectnosmoking.dto.request.AuthenticationRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.AuthenticationResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
-import org.datcheems.swp_projectnosmoking.entity.User;
 import org.datcheems.swp_projectnosmoking.repository.RoleRepository;
 import org.datcheems.swp_projectnosmoking.repository.UserRepository;
-import org.datcheems.swp_projectnosmoking.uitls.JwtUtils;
+import org.datcheems.swp_projectnosmoking.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -18,11 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.StringJoiner;
 
 @Slf4j
 @Service
