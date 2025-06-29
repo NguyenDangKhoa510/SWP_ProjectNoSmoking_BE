@@ -33,6 +33,11 @@ public class Member {
     @Column(name = "address", length = 1000) // hoặc bỏ length để Hibernate tự xử lý
     private String address;
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private java.util.List<SmokingLog> smokingLogs;
+
+
+
 
     private String phoneNumber;
 
