@@ -1,0 +1,31 @@
+package org.datcheems.swp_projectnosmoking.mapper;
+
+import org.datcheems.swp_projectnosmoking.dto.request.SmokingLogRequest;
+import org.datcheems.swp_projectnosmoking.dto.response.SmokingLogResponse;
+import org.datcheems.swp_projectnosmoking.entity.Member;
+import org.datcheems.swp_projectnosmoking.entity.SmokingLog;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.factory.Mappers;
+
+@Mapper(componentModel = "spring")
+public interface SmokingLogMapper {
+
+    SmokingLogMapper INSTANCE = Mappers.getMapper(SmokingLogMapper.class);
+
+    @Mapping(target = "logId", ignore = true)
+    @Mapping(target = "member", source = "member")
+        // KHÔNG cần dòng này nữa vì mapstruct tự lấy từ request nếu tên giống
+    SmokingLog toEntity(SmokingLogRequest request, Member member);
+
+    @Mapping(target = "userId", source = "member.userId")
+    @Mapping(target = "memberName", source = "member.user.fullName")
+    @Mapping(target = "previousSmokeCount", ignore = true)
+    @Mapping(target = "isImprovement", ignore = true)
+    SmokingLogResponse toResponse(SmokingLog smokingLog);
+
+    // KHÔNG cần ghi source nếu update trực tiếp từ request
+    void updateEntityFromRequest(SmokingLogRequest request, @MappingTarget SmokingLog smokingLog);
+}
+

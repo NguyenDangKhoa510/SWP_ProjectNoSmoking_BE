@@ -6,6 +6,7 @@ import java.time.LocalDate;
 
 @Data
 public class UserProfileResponse {
+    private Long userId;
     private String username;
     private String email;
     private String fullName;
