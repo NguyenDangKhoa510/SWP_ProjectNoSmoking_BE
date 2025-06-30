@@ -84,12 +84,10 @@ public class MemberService {
                     return newMember;
                 });
 
-        // Cập nhật thông tin Member từ request
         member.setPhoneNumber(request.getPhoneNumber());
         member.setBirthDate(request.getBirthDate());
         member.setAddress(request.getAddress());
         member.setGender(request.getGender());
-
 
         memberRepository.save(member);
     }
