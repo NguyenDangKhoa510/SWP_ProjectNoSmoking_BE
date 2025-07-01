@@ -12,11 +12,11 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 
 public class MembershipPackageResponse {
-    long Id;
-    String Name;
-    int Duration;
-    String Description;
-    Double Price;
-    Date ReleaseDate;
-    Date EndDate;
+    long id;
+    String name;
+    int duration;
+    String description;
+    Double price;
+    Date releaseDate;
+    Date endDate;
 }

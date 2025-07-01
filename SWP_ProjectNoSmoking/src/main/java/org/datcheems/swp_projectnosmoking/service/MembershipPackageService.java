@@ -20,13 +20,13 @@ public class MembershipPackageService {
 
     private MembershipPackageResponse toResponse(MembershipPackage pkg) {
         return MembershipPackageResponse.builder()
-                .Id(pkg.getId())
-                .Name(pkg.getName())
-                .Description(pkg.getDescription())
-                .Duration(pkg.getDuration())
-                .Price(pkg.getPrice())
-                .ReleaseDate(pkg.getReleaseDate())
-                .EndDate(pkg.getEndDate())
+                .id(pkg.getId())
+                .name(pkg.getName())
+                .description(pkg.getDescription())
+                .duration(pkg.getDuration())
+                .price(pkg.getPrice())
+                .releaseDate(pkg.getReleaseDate())
+                .endDate(pkg.getEndDate())
                 .build();
     }
 

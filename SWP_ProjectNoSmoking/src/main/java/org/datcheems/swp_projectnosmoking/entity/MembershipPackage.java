@@ -14,15 +14,15 @@ import java.util.Date;
 public class MembershipPackage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long Id;
+    private long id;
 
     @Nationalized
-    private String Name;
+    private String name;
 
-    private int Duration;
+    private int duration;
 
     @Nationalized
-    private String Description;
+    private String description;
 
     private Double Price;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
