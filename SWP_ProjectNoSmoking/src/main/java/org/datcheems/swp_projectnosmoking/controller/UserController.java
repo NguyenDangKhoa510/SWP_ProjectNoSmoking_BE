@@ -2,12 +2,13 @@ package org.datcheems.swp_projectnosmoking.controller;
 
 import jakarta.validation.Valid;
 import org.datcheems.swp_projectnosmoking.dto.request.UserProfileUpdateRequest;
+import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
 import org.datcheems.swp_projectnosmoking.dto.response.UserProfileResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.UserResponse;
-import org.datcheems.swp_projectnosmoking.entity.User;
 import org.datcheems.swp_projectnosmoking.service.MemberService;
 import org.datcheems.swp_projectnosmoking.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +47,14 @@ public class UserController {
         String username = principal.getSubject();
         memberService.updateCurrentUserProfile(username, request);
         return "Profile updated successfully";
+    }
+
+    @PostMapping("/api/members/{memberId}/select-coach/{coachId}")
+    public ResponseEntity<ResponseObject<String>> selectCoach(
+            @PathVariable Long memberId,
+            @PathVariable Long coachId
+    ) {
+        return memberService.selectCoach(memberId, coachId);
     }
 
 
