@@ -78,6 +78,16 @@ public class JwtUtils {
 
         throw new IllegalArgumentException("Cannot extract userId from authentication");
     }
+
+    public String extractUsername(String token) {
+        try {
+            JWSObject jwsObject = JWSObject.parse(token);
+            JWTClaimsSet claimsSet = JWTClaimsSet.parse(jwsObject.getPayload().toJSONObject());
+            return claimsSet.getSubject(); // đây chính là username
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot parse JWT token", e);
+        }
+    }
 }
 
 

@@ -1,18 +1,25 @@
 package org.datcheems.swp_projectnosmoking.service;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.datcheems.swp_projectnosmoking.dto.request.UserProfileUpdateRequest;
+import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
 import org.datcheems.swp_projectnosmoking.dto.response.UserProfileResponse;
-import org.datcheems.swp_projectnosmoking.entity.Member;
-import org.datcheems.swp_projectnosmoking.entity.User;
+import org.datcheems.swp_projectnosmoking.entity.*;
 import org.datcheems.swp_projectnosmoking.exception.ResourceNotFoundException;
+import org.datcheems.swp_projectnosmoking.repository.CoachRepository;
+import org.datcheems.swp_projectnosmoking.repository.MemberCoachSelectionRepository;
 import org.datcheems.swp_projectnosmoking.repository.MemberRepository;
 import org.datcheems.swp_projectnosmoking.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -23,6 +30,10 @@ public class MemberService {
     UserRepository userRepository;
 
     MemberRepository memberRepository;
+
+    MemberCoachSelectionRepository memberCoachSelectionRepository;
+
+    CoachRepository coachRepository;
 
     public UserProfileResponse getCurrentUserProfile(String username) {
         // Tìm user theo username
@@ -92,5 +103,62 @@ public class MemberService {
         memberRepository.save(member);
     }
 
+    @Transactional
+    public ResponseEntity<ResponseObject<String>> selectCoach(Long coachId) {
+        ResponseObject<String> response = new ResponseObject<>();
+
+        try {
+            // Lấy username đang login
+            String username = SecurityContextHolder
+                    .getContext()
+                    .getAuthentication()
+                    .getName();
+
+            // Lấy User
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            // Lấy Member
+            Member member = memberRepository.findByUser(user)
+                    .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+
+            // Lấy Coach entity
+            Coach coach = coachRepository.findById(coachId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Coach not found"));
+
+            boolean exists = memberCoachSelectionRepository
+                    .existsByMemberAndCoach(member, coach);
+
+            if (exists) {
+                response.setStatus("success");
+                response.setMessage("Member already selected this coach");
+                response.setData(null);
+                return ResponseEntity.status(HttpStatus.OK).body(response);
+            }
+
+            MemberCoachSelection selection = new MemberCoachSelection();
+            selection.setMember(member);
+            selection.setCoach(coach);
+            selection.setSelectedAt(LocalDateTime.now());
+
+            memberCoachSelectionRepository.save(selection);
+
+            response.setStatus("success");
+            response.setMessage("Coach selected successfully");
+            response.setData(null);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
+        } catch (ResourceNotFoundException e) {
+            response.setStatus("error");
+            response.setMessage(e.getMessage());
+            response.setData(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            response.setStatus("error");
+            response.setMessage("Internal server error: " + e.getMessage());
+            response.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 
 }

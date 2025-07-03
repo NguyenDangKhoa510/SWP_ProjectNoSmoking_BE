@@ -14,7 +14,7 @@ public class SmokingLogScheduler {
     private final SmokingLogService smokingLogService;
 
     /**
-     * Scheduled task that runs daily at 9:00 AM to check for members who haven't logged their smoking data
+     * Scheduled task that runs daily at 23:00 PM to check for members who haven't logged their smoking data
      * for the previous day and send them notifications.
      */
     @Scheduled(cron = "0 0 23 * * ?") // Run every day
