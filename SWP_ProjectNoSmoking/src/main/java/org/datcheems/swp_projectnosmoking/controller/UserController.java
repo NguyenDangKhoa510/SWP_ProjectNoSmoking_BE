@@ -49,13 +49,9 @@ public class UserController {
         return "Profile updated successfully";
     }
 
-    @PostMapping("/api/members/{memberId}/select-coach/{coachId}")
-    public ResponseEntity<ResponseObject<String>> selectCoach(
-            @PathVariable Long memberId,
-            @PathVariable Long coachId
-    ) {
-        return memberService.selectCoach(memberId, coachId);
+    @PostMapping("/members/select-coach/{coachId}")
+    public ResponseEntity<ResponseObject<String>> selectCoach(@PathVariable Long coachId) {
+        return memberService.selectCoach(coachId);
     }
-
 
 }

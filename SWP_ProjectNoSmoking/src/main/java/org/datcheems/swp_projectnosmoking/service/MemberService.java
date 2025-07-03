@@ -7,17 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.datcheems.swp_projectnosmoking.dto.request.UserProfileUpdateRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
 import org.datcheems.swp_projectnosmoking.dto.response.UserProfileResponse;
-import org.datcheems.swp_projectnosmoking.entity.Member;
-import org.datcheems.swp_projectnosmoking.entity.MemberCoachSelection;
-import org.datcheems.swp_projectnosmoking.entity.Role;
-import org.datcheems.swp_projectnosmoking.entity.User;
+import org.datcheems.swp_projectnosmoking.entity.*;
 import org.datcheems.swp_projectnosmoking.exception.ResourceNotFoundException;
+import org.datcheems.swp_projectnosmoking.repository.CoachRepository;
 import org.datcheems.swp_projectnosmoking.repository.MemberCoachSelectionRepository;
 import org.datcheems.swp_projectnosmoking.repository.MemberRepository;
 import org.datcheems.swp_projectnosmoking.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -33,6 +32,8 @@ public class MemberService {
     MemberRepository memberRepository;
 
     MemberCoachSelectionRepository memberCoachSelectionRepository;
+
+    CoachRepository coachRepository;
 
     public UserProfileResponse getCurrentUserProfile(String username) {
         // Tìm user theo username
@@ -103,26 +104,27 @@ public class MemberService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseObject<String>> selectCoach(Long memberId, Long coachId) {
+    public ResponseEntity<ResponseObject<String>> selectCoach(Long coachId) {
         ResponseObject<String> response = new ResponseObject<>();
 
         try {
-            Member member = memberRepository.findById(memberId)
+            // Lấy username đang login
+            String username = SecurityContextHolder
+                    .getContext()
+                    .getAuthentication()
+                    .getName();
+
+            // Lấy User
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            // Lấy Member
+            Member member = memberRepository.findByUser(user)
                     .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
 
-            User coach = userRepository.findById(coachId)
+            // Lấy Coach entity
+            Coach coach = coachRepository.findById(coachId)
                     .orElseThrow(() -> new ResourceNotFoundException("Coach not found"));
-
-            // Check coach role
-            boolean isCoach = coach.getRoles().stream()
-                    .anyMatch(role -> role.getName() == Role.RoleName.COACH);
-
-            if (!isCoach) {
-                response.setStatus("error");
-                response.setMessage("Selected user is not a coach");
-                response.setData(null);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-            }
 
             boolean exists = memberCoachSelectionRepository
                     .existsByMemberAndCoach(member, coach);
@@ -158,7 +160,5 @@ public class MemberService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
-
 
 }

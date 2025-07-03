@@ -22,7 +22,7 @@ public class MemberCoachSelection {
 
     @ManyToOne
     @JoinColumn(name = "coach_id")
-    private User coach;
+    private Coach coach;
 
     private LocalDateTime selectedAt;
 }
