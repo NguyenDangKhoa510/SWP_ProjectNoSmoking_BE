@@ -60,4 +60,16 @@ public class BlogCategoryController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/getBlogCategory/{id}")
+    public ResponseEntity<ResponseObject<BlogCategoryResponse>> getById(@PathVariable Long id) {
+        BlogCategoryResponse category = blogCategoryService.getCategoryById(id);
+
+        ResponseObject<BlogCategoryResponse> response = new ResponseObject<>();
+        response.setStatus("success");
+        response.setMessage("Fetched blog category successfully");
+        response.setData(category);
+
+        return ResponseEntity.ok(response);
+    }
 }

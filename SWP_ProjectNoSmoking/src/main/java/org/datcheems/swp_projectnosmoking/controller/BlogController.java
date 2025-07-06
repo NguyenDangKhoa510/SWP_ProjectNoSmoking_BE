@@ -40,4 +40,17 @@ public class BlogController {
         return blogService.rejectBlog(id);
     }
 
+    @GetMapping("/getBlogById/{id}")
+    public ResponseEntity<ResponseObject<BlogResponse>> getBlogById(@PathVariable Long id) {
+        return blogService.getBlogById(id);
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ResponseObject<BlogResponse>> updateBlog(
+            @PathVariable Long id,
+            @RequestBody BlogPostRequest request
+    ) {
+        return blogService.updateBlog(id, request);
+    }
+
 }

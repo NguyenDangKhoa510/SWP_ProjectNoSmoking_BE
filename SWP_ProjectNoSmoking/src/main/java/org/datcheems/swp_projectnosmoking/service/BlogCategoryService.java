@@ -55,4 +55,15 @@ public class BlogCategoryService {
             return res;
         }).collect(Collectors.toList());
     }
+
+    public BlogCategoryResponse getCategoryById(Long id) {
+        BlogCategory category = blogCategoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        BlogCategoryResponse response = new BlogCategoryResponse();
+        response.setId(category.getId());
+        response.setName(category.getName());
+
+        return response;
+    }
 }
