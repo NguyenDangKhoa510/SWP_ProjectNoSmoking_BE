@@ -16,6 +16,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/coach")
 @AllArgsConstructor
@@ -43,4 +45,11 @@ public class CoachController {
     public ResponseEntity<ResponseObject<CoachProfileResponse>> getCoachProfileById(@PathVariable Long id) {
         return coachService.getCoachProfileById(id);
     }
+
+    @GetMapping("/getAllCoachProfiles")
+    public ResponseEntity<ResponseObject<List<CoachProfileResponse>>> getAllCoachProfiles() {
+        return coachService.getAllCoachProfile();
+    }
+
+
 }

@@ -97,4 +97,61 @@ public class BlogService {
 
         return ResponseEntity.ok(response);
     }
+
+    public ResponseEntity<ResponseObject<BlogResponse>> getBlogById(Long id) {
+        ResponseObject<BlogResponse> response = new ResponseObject<>();
+
+        BlogPost blogPost = blogRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Blog not found"));
+
+        BlogResponse blogResponse = blogMapper.toResponse(blogPost);
+
+        response.setStatus("success");
+        response.setMessage("Blog fetched successfully");
+        response.setData(blogResponse);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
+    public ResponseEntity<ResponseObject<BlogResponse>> updateBlog(Long blogId, BlogPostRequest request) {
+        ResponseObject<BlogResponse> response = new ResponseObject<>();
+
+        try {
+            BlogPost blogPost = blogRepository.findById(blogId)
+                    .orElseThrow(() -> new IllegalArgumentException("Blog not found with ID: " + blogId));
+
+            // Update fields
+            blogPost.setTitle(request.getTitle());
+            blogPost.setContent(request.getContent());
+            blogPost.setCoverImage(request.getCoverImage());
+
+            if (request.getCategoryId() != null) {
+                BlogCategory category = blogCategoryRepository.findById(request.getCategoryId())
+                        .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+                blogPost.setCategory(category);
+            }
+
+            // Nếu update blog, mình muốn reset lại trạng thái về PENDING
+            blogPost.setStatus(BlogStatus.PENDING);
+
+            blogRepository.save(blogPost);
+
+            BlogResponse blogResponse = blogMapper.toResponse(blogPost);
+
+            response.setStatus("success");
+            response.setMessage("Blog updated successfully and set to PENDING status.");
+            response.setData(blogResponse);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.setStatus("error");
+            response.setMessage("Failed to update blog: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+
+
 }

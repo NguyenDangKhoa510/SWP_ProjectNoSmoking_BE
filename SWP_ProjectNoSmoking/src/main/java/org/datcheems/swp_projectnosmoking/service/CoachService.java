@@ -25,6 +25,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -214,5 +215,33 @@ public class CoachService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    public ResponseEntity<ResponseObject<List<CoachProfileResponse>>> getAllCoachProfile() {
+        ResponseObject<List<CoachProfileResponse>> response = new ResponseObject<>();
+
+        try {
+            List<Coach> coaches = coachRepository.findAll();
+
+            List<CoachProfileResponse> coachProfiles = coaches.stream()
+                    .map(coach -> {
+                        User user = coach.getUser();
+                        return coachMapper.mapToResponse(user, coach);
+                    })
+                    .collect(Collectors.toList());
+
+            response.setStatus("success");
+            response.setMessage("Get all coach profiles successfully");
+            response.setData(coachProfiles);
+
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
+        } catch (Exception e) {
+            response.setStatus("error");
+            response.setMessage("Internal server error: " + e.getMessage());
+            response.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
 
 }
