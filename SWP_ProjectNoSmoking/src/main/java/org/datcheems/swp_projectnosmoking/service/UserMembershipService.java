@@ -184,4 +184,34 @@ public class UserMembershipService {
 
         return response;
     }
+
+    public ResponseObject<UserMembershipResponse> checkUserMembership(Long userId) {
+        ResponseObject<UserMembershipResponse> response = new ResponseObject<>();
+
+        try {
+            List<User_Membership> memberships = userMembershipRepository.findByMember_UserId(userId);
+
+            // Tìm membership active và chưa hết hạn
+            Optional<User_Membership> activeMembership = memberships.stream()
+                    .filter(m -> "ACTIVE".equalsIgnoreCase(m.getStatus()))
+                    .filter(m -> m.getEndDate() != null && !m.getEndDate().isBefore(LocalDate.now()))
+                    .findFirst();
+
+            if (activeMembership.isPresent()) {
+                response.setStatus("success");
+                response.setMessage("User has active membership");
+                response.setData(toResponse(activeMembership.get()));
+            } else {
+                response.setStatus("error");
+                response.setMessage("No active membership found");
+                response.setData(null);
+            }
+
+        } catch (Exception e) {
+            response.setStatus("error");
+            response.setMessage("Failed to check membership: " + e.getMessage());
+            response.setData(null);
+        }
+        return response;
+    }
 }
