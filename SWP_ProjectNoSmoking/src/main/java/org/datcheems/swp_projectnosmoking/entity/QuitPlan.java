@@ -4,40 +4,32 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.List;
 
 @Data
-@NoArgsConstructor
 @Entity
 @Table(name = "QuitPlan")
+@NoArgsConstructor
 public class QuitPlan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @Column(name = "member_id")
-    private Integer memberId;
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
-    @Column(name = "selection_id")
-    private Integer selectionId;
+    @ManyToOne
+    @JoinColumn(name = "coach_id", nullable = false)
+    private Coach coach;
 
-    @Column(name = "coach_id")
-    private Integer coachId;
+    private LocalDate startDate;
 
-    @Column(name = "goal_description", columnDefinition = "TEXT")
-    private String goalDescription;
+    private String goal;
 
-    @Enumerated(EnumType.STRING)
-    private PlanStatus status;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    public enum PlanStatus {
-        ACTIVE, COMPLETED, CANCELLED
-    }
+    @OneToMany(mappedBy = "quitPlan", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuitPlanStage> stages;
 }
+

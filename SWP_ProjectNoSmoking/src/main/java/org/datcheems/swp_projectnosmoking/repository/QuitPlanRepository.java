@@ -1,11 +1,15 @@
 package org.datcheems.swp_projectnosmoking.repository;
 
+import org.datcheems.swp_projectnosmoking.entity.Coach;
+import org.datcheems.swp_projectnosmoking.entity.Member;
 import org.datcheems.swp_projectnosmoking.entity.QuitPlan;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface QuitPlanRepository extends JpaRepository<QuitPlan, Integer> {
-    List<QuitPlan> findByMemberId(Integer memberId);
-    List<QuitPlan> findByCoachId(Integer coachId);
+@Repository
+public interface QuitPlanRepository extends JpaRepository<QuitPlan, Long> {
+    List<QuitPlan> findByMember(Member member);
+    List<QuitPlan> findByCoach(Coach coach);
 }
