@@ -38,7 +38,8 @@ public class SecurityConfig {
             "/api/auth/google-login",
             "/api/password/forgot",
             "/api/password/reset",
-            "/api/password/validate-code"
+            "/api/password/validate-code",
+            "/api/auth/set-username"
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
