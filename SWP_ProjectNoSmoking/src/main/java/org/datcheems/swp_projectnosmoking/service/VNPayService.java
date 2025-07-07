@@ -20,6 +20,12 @@ public class VNPayService {
 
     public String createPaymentUrl(HttpServletRequest request, long amount, String orderInfo) {
         try {
+            if (amount <= 0) {
+                throw new IllegalArgumentException("Amount must be greater than 0");
+            }
+            if (orderInfo == null || orderInfo.trim().isEmpty()) {
+                throw new IllegalArgumentException("Order info cannot be empty");
+            }
             String vnp_TxnRef = String.valueOf(System.currentTimeMillis());
             String vnp_IpAddr = request.getRemoteAddr();
             String vnp_TmnCode = vnPayConfig.getTmnCode();
@@ -50,7 +56,7 @@ public class VNPayService {
             StringBuilder query = new StringBuilder();
 
             for (String fieldName : fieldNames) {
-                String value = URLEncoder.encode(vnp_Params.get(fieldName), StandardCharsets.US_ASCII);
+                String value = URLEncoder.encode(vnp_Params.get(fieldName), StandardCharsets.UTF_8);
                 hashData.append(fieldName).append('=').append(value).append('&');
                 query.append(fieldName).append('=').append(value).append('&');
             }
@@ -68,5 +74,22 @@ public class VNPayService {
             e.printStackTrace();
             return null;
         }
+    }
+    public String getIpAddress(HttpServletRequest request) {
+        String ipAddress = request.getHeader("X-Forwarded-For");
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("Proxy-Client-IP");
+        }
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getRemoteAddr();
+        }
+        // Nếu là IPv6 localhost, chuyển thành IPv4
+        if ("0:0:0:0:0:0:0:1".equals(ipAddress)) {
+            ipAddress = "127.0.0.1";
+        }
+        return ipAddress;
     }
 }
