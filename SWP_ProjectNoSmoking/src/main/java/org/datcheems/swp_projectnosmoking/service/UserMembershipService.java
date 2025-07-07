@@ -12,6 +12,7 @@ import org.datcheems.swp_projectnosmoking.repository.MembershipPackageRepository
 import org.datcheems.swp_projectnosmoking.repository.UserMembershipRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -165,6 +166,21 @@ public class UserMembershipService {
             response.setMessage("Không tìm thấy bản ghi để xóa");
             response.setData(null);
         }
+
+        return response;
+    }
+    public ResponseObject<Boolean> checkUserHasActiveMembership(Long userId) {
+        ResponseObject<Boolean> response = new ResponseObject<>();
+
+        List<User_Membership> memberships = userMembershipRepository.findByMember_UserId(userId);
+        boolean hasActive = memberships.stream().anyMatch(m ->
+                "ACTIVE".equalsIgnoreCase(m.getStatus()) &&
+                        m.getEndDate() != null &&
+                        !m.getEndDate().isBefore(LocalDate.now())
+        );
+        response.setStatus("success");
+        response.setMessage("Kiểm tra thành công");
+        response.setData(hasActive);
 
         return response;
     }

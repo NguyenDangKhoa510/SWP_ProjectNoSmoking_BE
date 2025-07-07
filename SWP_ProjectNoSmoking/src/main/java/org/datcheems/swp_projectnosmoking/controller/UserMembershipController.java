@@ -54,4 +54,10 @@ public class UserMembershipController {
     public ResponseEntity<ResponseObject<Double>> getTotalRevenue() {
         return ResponseEntity.ok(userMembershipService.getTotalRevenue());
     }
+
+    @GetMapping("/check-active/{userId}")
+    public ResponseEntity<ResponseObject<Boolean>> checkUserHasActiveMembership(@PathVariable Long userId) {
+        return ResponseEntity.ok(userMembershipService.checkUserHasActiveMembership(userId));
+    }
+
 }
