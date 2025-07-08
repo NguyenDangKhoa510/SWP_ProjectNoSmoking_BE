@@ -35,6 +35,27 @@ public interface SmokingLogRepository extends JpaRepository<SmokingLog, Long> {
 
 
 
+    @Query(value = """
+    SELECT TOP 5 
+        m.user_id, 
+        u.full_name, 
+        SUM(s.smoke_count) AS total_smoke
+    FROM members m
+    JOIN smoking_logs s ON m.user_id = s.member_id
+    JOIN tbl_User u ON u.id = m.user_id
+    WHERE s.log_date BETWEEN :startDate AND :endDate
+    GROUP BY m.user_id, u.full_name
+    ORDER BY total_smoke ASC
+""", nativeQuery = true)
+    List<Object[]> findTop5MembersWithLeastSmoking(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+
+
+
+
 
 
 }

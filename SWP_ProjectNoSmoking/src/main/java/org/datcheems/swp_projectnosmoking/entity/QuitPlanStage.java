@@ -7,33 +7,22 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Data
-@NoArgsConstructor
 @Entity
 @Table(name = "QuitPlanStage")
+@NoArgsConstructor
 public class QuitPlanStage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @Column(name = "quit_plan_id")
-    private Integer quitPlanId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quit_plan_id", nullable = false)
+    private QuitPlan quitPlan;
 
-    @Column(name = "stage_number")
-    private Integer stageNumber;
+    private int day;
 
-    @Column(name = "milestone_date")
-    private LocalDate milestoneDate;
+    private String description;
 
-    @Enumerated(EnumType.STRING)
-    private StageStatus status;
-
-    @Column(columnDefinition = "TEXT")
-    private String advice;
-
-    public enum StageStatus {
-        ACTIVE,
-        COMPLETED,
-        CANCELLED
-    }
+    private LocalDate targetDate;
 }

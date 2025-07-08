@@ -1,36 +1,91 @@
 package org.datcheems.swp_projectnosmoking.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.datcheems.swp_projectnosmoking.dto.request.QuitPlanRequest;
+import org.datcheems.swp_projectnosmoking.dto.request.QuitPlanStageRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.QuitPlanResponse;
-import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
+import org.datcheems.swp_projectnosmoking.dto.response.QuitPlanStageResponse;
 import org.datcheems.swp_projectnosmoking.service.QuitPlanService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
-@RequestMapping("/api/quit-plan")
-@CrossOrigin(origins = {"http://localhost:5175", "http://localhost:3000"})
+@RequestMapping("/api/quitplan")
+@RequiredArgsConstructor
 public class QuitPlanController {
 
     private final QuitPlanService quitPlanService;
 
-    public QuitPlanController(QuitPlanService quitPlanService) {
-        this.quitPlanService = quitPlanService;
+    @PreAuthorize("hasRole('COACH')")
+    @PostMapping("/create")
+    public ResponseEntity<?> createQuitPlan(@RequestBody QuitPlanRequest request) {
+        QuitPlanResponse response = quitPlanService.createQuitPlan(request);
+        return ResponseEntity.ok(Map.of(
+                "message", "Quit plan created successfully",
+                "data", response
+        ));
     }
 
-    // Coach tạo kế hoạch cho member
+    @PreAuthorize("hasAnyRole('COACH', 'MEMBER')")
+    @GetMapping("/{quitPlanId}")
+    public ResponseEntity<?> getQuitPlanById(@PathVariable Long quitPlanId) {
+        QuitPlanResponse response = quitPlanService.getQuitPlanById(quitPlanId);
+        return ResponseEntity.ok(Map.of(
+                "message", "Quit plan details fetched successfully",
+                "data", response
+        ));
+    }
+
+    @PreAuthorize("hasRole('MEMBER')")
+    @GetMapping("/member")
+    public ResponseEntity<?> getQuitPlansForCurrentMember() {
+        List<QuitPlanResponse> responses = quitPlanService.getQuitPlansForCurrentMember();
+        return ResponseEntity.ok(Map.of(
+                "message", "Quit plans for member retrieved successfully",
+                "data", responses
+        ));
+    }
+
     @PreAuthorize("hasRole('COACH')")
-    @PostMapping
-    public ResponseEntity<ResponseObject<QuitPlanResponse>> createQuitPlan(@RequestBody QuitPlanRequest request) {
-        QuitPlanResponse responseData = quitPlanService.createQuitPlan(request);
+    @GetMapping("/coach")
+    public ResponseEntity<?> getQuitPlansForCurrentCoach() {
+        List<QuitPlanResponse> responses = quitPlanService.getQuitPlansForCurrentCoach();
+        return ResponseEntity.ok(Map.of(
+                "message", "Quit plans for coach retrieved successfully",
+                "data", responses
+        ));
+    }
 
-        ResponseObject<QuitPlanResponse> response = new ResponseObject<>();
-        response.setStatus("success");
-        response.setMessage("Quit plan created successfully");
-        response.setData(responseData);
+    @PreAuthorize("hasRole('COACH')")
+    @PostMapping("/{quitPlanId}/stage")
+    public ResponseEntity<?> addQuitPlanStage(@PathVariable Long quitPlanId, @RequestBody QuitPlanStageRequest request) {
+        QuitPlanStageResponse response = quitPlanService.addQuitPlanStage(quitPlanId, request);
+        return ResponseEntity.ok(Map.of(
+                "message", "Quit plan stage added successfully",
+                "data", response
+        ));
+    }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @PreAuthorize("hasRole('COACH')")
+    @PutMapping("/stage/{stageId}")
+    public ResponseEntity<?> updateQuitPlanStage(@PathVariable Long stageId, @RequestBody QuitPlanStageRequest request) {
+        QuitPlanStageResponse response = quitPlanService.updateQuitPlanStage(stageId, request);
+        return ResponseEntity.ok(Map.of(
+                "message", "Quit plan stage updated successfully",
+                "data", response
+        ));
+    }
+
+    @PreAuthorize("hasRole('COACH')")
+    @DeleteMapping("/stage/{stageId}")
+    public ResponseEntity<?> deleteQuitPlanStage(@PathVariable Long stageId) {
+        quitPlanService.deleteQuitPlanStage(stageId);
+        return ResponseEntity.ok(Map.of(
+                "message", "Quit plan stage deleted successfully"
+        ));
     }
 }
