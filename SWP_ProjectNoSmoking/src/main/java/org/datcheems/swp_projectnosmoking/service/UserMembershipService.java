@@ -12,6 +12,7 @@ import org.datcheems.swp_projectnosmoking.repository.MembershipPackageRepository
 import org.datcheems.swp_projectnosmoking.repository.UserMembershipRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -166,6 +167,51 @@ public class UserMembershipService {
             response.setData(null);
         }
 
+        return response;
+    }
+    public ResponseObject<Boolean> checkUserHasActiveMembership(Long userId) {
+        ResponseObject<Boolean> response = new ResponseObject<>();
+
+        List<User_Membership> memberships = userMembershipRepository.findByMember_UserId(userId);
+        boolean hasActive = memberships.stream().anyMatch(m ->
+                "ACTIVE".equalsIgnoreCase(m.getStatus()) &&
+                        m.getEndDate() != null &&
+                        !m.getEndDate().isBefore(LocalDate.now())
+        );
+        response.setStatus("success");
+        response.setMessage("Kiểm tra thành công");
+        response.setData(hasActive);
+
+        return response;
+    }
+
+    public ResponseObject<UserMembershipResponse> checkUserMembership(Long userId) {
+        ResponseObject<UserMembershipResponse> response = new ResponseObject<>();
+
+        try {
+            List<User_Membership> memberships = userMembershipRepository.findByMember_UserId(userId);
+
+            // Tìm membership active và chưa hết hạn
+            Optional<User_Membership> activeMembership = memberships.stream()
+                    .filter(m -> "ACTIVE".equalsIgnoreCase(m.getStatus()))
+                    .filter(m -> m.getEndDate() != null && !m.getEndDate().isBefore(LocalDate.now()))
+                    .findFirst();
+
+            if (activeMembership.isPresent()) {
+                response.setStatus("success");
+                response.setMessage("User has active membership");
+                response.setData(toResponse(activeMembership.get()));
+            } else {
+                response.setStatus("error");
+                response.setMessage("No active membership found");
+                response.setData(null);
+            }
+
+        } catch (Exception e) {
+            response.setStatus("error");
+            response.setMessage("Failed to check membership: " + e.getMessage());
+            response.setData(null);
+        }
         return response;
     }
 }

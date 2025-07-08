@@ -18,40 +18,51 @@ public class UserMembershipController {
 
     private final UserMembershipService userMembershipService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     @GetMapping("/getAll")
     public ResponseEntity<ResponseObject<List<UserMembershipResponse>>> getAll() {
         return ResponseEntity.ok(userMembershipService.getAll());
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     @GetMapping("/getById/{id}")
     public ResponseEntity<ResponseObject<UserMembershipResponse>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(userMembershipService.getById(id));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     @PostMapping("/create")
     public ResponseEntity<ResponseObject<UserMembershipResponse>> create(@RequestBody UserMembershipRequest request) {
         return ResponseEntity.ok(userMembershipService.create(request));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     @PutMapping("/update/{id}")
     public ResponseEntity<ResponseObject<UserMembershipResponse>> update(@PathVariable Long id,
                                                                          @RequestBody UserMembershipRequest request) {
         return ResponseEntity.ok(userMembershipService.update(id, request));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<ResponseObject<String>> delete(@PathVariable Long id) {
         return ResponseEntity.ok(userMembershipService.delete(id));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     @GetMapping("/revenue")
     public ResponseEntity<ResponseObject<Double>> getTotalRevenue() {
         return ResponseEntity.ok(userMembershipService.getTotalRevenue());
     }
+
+    @GetMapping("/check-active/{userId}")
+    public ResponseEntity<ResponseObject<Boolean>> checkUserHasActiveMembership(@PathVariable Long userId) {
+        return ResponseEntity.ok(userMembershipService.checkUserHasActiveMembership(userId));
+    }
+
+    @GetMapping("/check-user-membership/{userId}")
+    public ResponseEntity<ResponseObject<UserMembershipResponse>> checkUserMembership(@PathVariable Long userId) {
+        return ResponseEntity.ok(userMembershipService.checkUserMembership(userId));
+    }
+
 }
