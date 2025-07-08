@@ -28,13 +28,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic");
+        registry.enableSimpleBroker("/topic", "/queue", "/user");
         registry.setApplicationDestinationPrefixes("/app");
+        registry.setUserDestinationPrefix("/user");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("*");
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
     }
 
     @Override
@@ -51,7 +54,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         String username = jwtUtils.extractUsername(token);
                         if (username != null) {
                             Authentication auth = new UsernamePasswordAuthenticationToken(
-                                    username, null, List.of() // không có quyền gì
+                                    username, null, List.of()
                             );
                             accessor.setUser(auth);
                         }
@@ -61,5 +64,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             }
         });
     }
-
 }
+

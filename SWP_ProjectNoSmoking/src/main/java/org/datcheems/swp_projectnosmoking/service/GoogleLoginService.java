@@ -51,11 +51,12 @@ public class GoogleLoginService {
             if (optionalUser.isPresent()) {
                 User user = optionalUser.get();
                 String token = jwtUtils.generateToken(user);
+                String refreshToken = jwtUtils.generateRefreshToken(user);
 
                 ResponseObject<AuthenticationResponse> successResponse = new ResponseObject<>();
                 successResponse.setStatus("success");
                 successResponse.setMessage("Google authentication successful");
-                successResponse.setData(new AuthenticationResponse(token, true));
+                successResponse.setData(new AuthenticationResponse(token, refreshToken, true));
                 return successResponse;
             } else {
                 NeedUsernameResponse data = new NeedUsernameResponse(
@@ -111,10 +112,11 @@ public class GoogleLoginService {
 
         // Generate JWT
         String token = jwtUtils.generateToken(newUser);
+        String refreshToken = jwtUtils.generateRefreshToken(newUser);
 
         response.setStatus("success");
         response.setMessage("Account created successfully");
-        response.setData(new AuthenticationResponse(token, true));
+        response.setData(new AuthenticationResponse(token, refreshToken, true));
 
         return response;
     }
