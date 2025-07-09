@@ -39,6 +39,7 @@ public class SecurityConfig {
             "/api/password/forgot",
             "/api/password/reset",
             "/api/password/validate-code",
+            "/api/member-badge/admin/manualadd",
             "/api/auth/set-username"
     };
     @Bean
@@ -53,6 +54,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/blog/getAllBlog").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/membership-packages/getAll").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/coach/getAllCoachProfiles").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/member-badge/getallbage").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/member-badge/total-score").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/member-badge/ranking").permitAll()
                         .requestMatchers("/api/chat/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.Nationalized;
 
+import java.util.List;
+
 @Entity
 @Table(name = "tblBadge")
 @Data
@@ -11,7 +13,7 @@ import org.hibernate.annotations.Nationalized;
 public class Badge {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private long id;
 
     @Nationalized
     private String name;
