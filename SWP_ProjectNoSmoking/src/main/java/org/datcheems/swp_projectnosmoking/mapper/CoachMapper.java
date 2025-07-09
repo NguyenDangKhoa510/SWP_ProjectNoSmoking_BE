@@ -17,6 +17,8 @@ public class CoachMapper {
         response.setBio(profile.getBio());
         response.setRating(profile.getRating());
         response.setYearsOfExperience(profile.getYearsOfExperience());
+        response.setImageUrl(profile.getImageUrl());
+        response.setMaxMembers(profile.getMaxMembers());
         return response;
     }
 
