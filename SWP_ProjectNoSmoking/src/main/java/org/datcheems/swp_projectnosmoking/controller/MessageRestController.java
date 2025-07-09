@@ -14,6 +14,7 @@ import org.datcheems.swp_projectnosmoking.repository.MemberRepository;
 import org.datcheems.swp_projectnosmoking.repository.CoachRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ public class MessageRestController {
     private final MemberCoachSelectionRepository selectionRepository;
     private final MemberRepository memberRepository;
     private final CoachRepository coachRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/history/{selectionId}")
     public ResponseEntity<ResponseObject<List<MessageRestResponse>>> getChatHistory(@PathVariable Long selectionId) {
@@ -135,6 +137,14 @@ public class MessageRestController {
             Message savedMessage = messageRepository.save(message);
 
             MessageRestResponse messageResponse = toResponse(savedMessage);
+            try {
+                String destination = "/user/queue/messages/" + selection.getSelectionId();
+                messagingTemplate.convertAndSend(destination, messageResponse);
+                System.out.println("Broadcasted message to: " + destination);
+            } catch (Exception e) {
+                System.err.println("Failed to broadcast message: " + e.getMessage());
+                // Không throw error vì message đã được lưu thành công
+            }
 
             response.setStatus("success");
             response.setMessage("Gửi tin nhắn thành công");
