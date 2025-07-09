@@ -2,6 +2,7 @@ package org.datcheems.swp_projectnosmoking.utils;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.stereotype.Component;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -23,7 +25,21 @@ public class JwtUtils {
     @Value("${jwt.signerKey}")
     private String SIGNING_KEY;
 
+    // Access token expiration: 1 hour
+    private static final long ACCESS_TOKEN_EXPIRATION = 1;
+
+    // Refresh token expiration: 7 days
+    private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24;
+
     public String generateToken(User user) {
+        return generateToken(user, ACCESS_TOKEN_EXPIRATION);
+    }
+
+    public String generateRefreshToken(User user) {
+        return generateToken(user, REFRESH_TOKEN_EXPIRATION);
+    }
+
+    private String generateToken(User user, long expirationHours) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
@@ -31,7 +47,7 @@ public class JwtUtils {
                 .issuer("datcheems")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli(
+                        Instant.now().plus(expirationHours, ChronoUnit.HOURS).toEpochMilli(
                         )))
                 .claim("scope", buildScope(user))
                 .claim("userId", user.getId())
@@ -88,7 +104,30 @@ public class JwtUtils {
             throw new RuntimeException("Cannot parse JWT token", e);
         }
     }
+
+    public boolean validateToken(String token) {
+        try {
+            JWSObject jwsObject = JWSObject.parse(token);
+            JWTClaimsSet claimsSet = JWTClaimsSet.parse(jwsObject.getPayload().toJSONObject());
+
+            // Verify signature
+            jwsObject.verify(new MACVerifier(SIGNING_KEY.getBytes()));
+
+            // Check if token is expired
+            Date expirationTime = claimsSet.getExpirationTime();
+            return expirationTime != null && expirationTime.after(new Date());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public Long extractUserId(String token) {
+        try {
+            JWSObject jwsObject = JWSObject.parse(token);
+            JWTClaimsSet claimsSet = JWTClaimsSet.parse(jwsObject.getPayload().toJSONObject());
+            return claimsSet.getLongClaim("userId");
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot extract userId from token", e);
+        }
+    }
 }
-
-
-

@@ -45,11 +45,51 @@ public class AuthenticationService {
             }
 
             var token = jwtUtils.generateToken(user);
+            var refreshToken = jwtUtils.generateRefreshToken(user);
 
             response.setStatus("success");
             response.setMessage("Authentication successful");
             response.setData(AuthenticationResponse.builder()
                     .token(token)
+                    .refreshToken(refreshToken)
+                    .authenticated(true)
+                    .build());
+
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
+        } catch (RuntimeException e) {
+            response.setStatus("error");
+            response.setMessage(e.getMessage());
+            response.setData(null);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    public ResponseEntity<ResponseObject<AuthenticationResponse>> refreshToken(String refreshToken) {
+        ResponseObject<AuthenticationResponse> response = new ResponseObject<>();
+
+        try {
+            // Validate refresh token
+            if (!jwtUtils.validateToken(refreshToken)) {
+                throw new RuntimeException("Invalid or expired refresh token");
+            }
+
+            // Extract username from refresh token
+            String username = jwtUtils.extractUsername(refreshToken);
+
+            // Find user by username
+            var user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Generate new access token
+            var newToken = jwtUtils.generateToken(user);
+
+            response.setStatus("success");
+            response.setMessage("Token refreshed successfully");
+            response.setData(AuthenticationResponse.builder()
+                    .token(newToken)
+                    .refreshToken(refreshToken) // Return the same refresh token
                     .authenticated(true)
                     .build());
 
