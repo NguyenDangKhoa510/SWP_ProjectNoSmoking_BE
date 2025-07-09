@@ -53,7 +53,6 @@ public class CoachService {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
             }
 
-            // ✅ Tạo mật khẩu random
             String rawPassword = RandomStringUtils.randomAlphanumeric(10);
 
             User user = new User();
@@ -72,13 +71,12 @@ public class CoachService {
 
             User savedUser = userRepository.save(user);
 
-            // Tạo CoachProfile
             Coach coachProfile = new Coach();
             coachProfile.setUser(savedUser);
+            coachProfile.setMaxMembers(10);
 
             coachRepository.save(coachProfile);
 
-            // ✅ Gửi email cho coach
             emailService.sendCoachCredentials(savedUser.getEmail(), savedUser.getUsername(), rawPassword);
 
             UserResponse userResponse = UserResponse.builder()
@@ -105,6 +103,7 @@ public class CoachService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
 
     public ResponseEntity<ResponseObject<CoachProfileResponse>> getCurrentCoachProfile(String username) {
         ResponseObject<CoachProfileResponse> response = new ResponseObject<>();

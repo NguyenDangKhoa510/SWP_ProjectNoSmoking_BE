@@ -12,4 +12,6 @@ public class CoachProfileResponse {
     private String bio;
     private Double rating;
     private Integer yearsOfExperience;
+    private String imageUrl;
+    private Integer maxMembers;
 }
