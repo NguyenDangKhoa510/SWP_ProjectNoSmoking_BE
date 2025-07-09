@@ -19,6 +19,30 @@ public class CoachReviewController {
 
     private final CoachReviewService coachReviewService;
 
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/all")
+    public ResponseEntity<List<CoachReviewResponse>> getAllReviews() {
+        List<CoachReviewResponse> reviews = coachReviewService.getAllReviews();
+        return ResponseEntity.ok(reviews);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/coach/{coachId}")
+    public ResponseEntity<List<CoachReviewResponse>> getReviewsByCoachId(@PathVariable Long coachId) {
+        List<CoachReviewResponse> reviews = coachReviewService.getReviewsByCoachId(coachId);
+        return ResponseEntity.ok(reviews);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/statistics/{coachId}")
+    public ResponseEntity<Map<String, Object>> getStatisticsByCoachId(@PathVariable Long coachId) {
+        return ResponseEntity.ok(coachReviewService.getReviewStatisticsByCoachId(coachId));
+    }
+
+
+
+
     @PreAuthorize("hasRole('MEMBER')")
     @PostMapping
     public ResponseEntity<?> createReview(@RequestBody CoachReviewRequest request) {
