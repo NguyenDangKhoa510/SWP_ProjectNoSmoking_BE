@@ -31,6 +31,12 @@ public class Coach {
     @Column(name = "years_of_experience")
     private int yearsOfExperience;
 
+    @Column(name = "max_members")
+    private Integer maxMembers;
+
+    @Column(name = "image_url", columnDefinition = "NVARCHAR(500)")
+    private String imageUrl;
+
     private Double rating;
 }
 

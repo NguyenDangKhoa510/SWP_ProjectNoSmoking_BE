@@ -8,4 +8,5 @@ public class CoachProfileUpdateRequest {
     private String specialization;
     private String bio;
     private Integer yearsOfExperience;
+    private String imageUrl;
 }
