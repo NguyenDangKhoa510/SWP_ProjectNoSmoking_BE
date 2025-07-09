@@ -128,6 +128,69 @@ public class CoachReviewService {
     }
 
 
+    public List<CoachReviewResponse> getAllReviews() {
+        User currentUser = getCurrentUser();
+
+        if (!hasRole(currentUser, "ADMIN")) {
+            throw new RuntimeException("Only admin can access all reviews");
+        }
+
+        List<CoachReview> reviews = coachReviewRepository.findAll();
+
+        return reviews.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+
+
+    public Map<String, Object> getReviewStatisticsByCoachId(Long coachId) {
+        User currentUser = getCurrentUser();
+
+        if (!hasRole(currentUser, "ADMIN")) {
+            throw new RuntimeException("Only admin can access this statistic");
+        }
+
+        Coach coach = coachRepository.findById(coachId)
+                .orElseThrow(() -> new RuntimeException("Coach not found"));
+
+        List<CoachReview> reviews = coachReviewRepository.findByCoach(coach);
+
+        double average = reviews.stream()
+                .mapToInt(CoachReview::getRating)
+                .average()
+                .orElse(0);
+
+        int totalReviews = reviews.size();
+
+        return Map.of(
+                "totalReviews", totalReviews,
+                "averageRating", average
+        );
+    }
+
+
+
+    public List<CoachReviewResponse> getReviewsByCoachId(Long coachId) {
+        User currentUser = getCurrentUser();
+
+        if (!hasRole(currentUser, "ADMIN")) {
+            throw new RuntimeException("Only admin can view reviews by coach");
+        }
+
+        Coach coach = coachRepository.findById(coachId)
+                .orElseThrow(() -> new RuntimeException("Coach not found"));
+
+        List<CoachReview> reviews = coachReviewRepository.findByCoach(coach);
+
+        return reviews.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+
+
+
 
 
 
