@@ -160,6 +160,7 @@ public class CoachService {
             coachProfile.setSpecialization(request.getSpecialization());
             coachProfile.setBio(request.getBio());
             coachProfile.setYearsOfExperience(request.getYearsOfExperience());
+            coachProfile.setImageUrl(request.getImageUrl());
 
             coachRepository.save(coachProfile);
 
