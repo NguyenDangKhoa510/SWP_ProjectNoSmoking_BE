@@ -10,9 +10,7 @@ import org.datcheems.swp_projectnosmoking.entity.Member;
 import org.datcheems.swp_projectnosmoking.entity.SmokingLog;
 import org.datcheems.swp_projectnosmoking.entity.User;
 import org.datcheems.swp_projectnosmoking.mapper.SmokingLogMapper;
-import org.datcheems.swp_projectnosmoking.repository.MemberRepository;
-import org.datcheems.swp_projectnosmoking.repository.SmokingLogRepository;
-import org.datcheems.swp_projectnosmoking.repository.UserRepository;
+import org.datcheems.swp_projectnosmoking.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,11 +28,16 @@ public class SmokingLogService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final SmokingLogMapper smokingLogMapper;
+    private final MemberCoachSelectionRepository memberCoachSelectionRepository;
+    private final MemberInitialInfoRepository memberInitialInfoRepository;
+
 
     @Transactional
     public SmokingLogResponse createSmokingLog(SmokingLogRequest request, Long userId) {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        validateMemberCanLog(member);
 
         // Check if log already exists for this date
         LocalDate logDate = request.getLogDate() != null ? request.getLogDate() : LocalDate.now();
@@ -80,6 +83,8 @@ public class SmokingLogService {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 
+        validateMemberCanLog(member);
+
         List<SmokingLog> logs = smokingLogRepository.findByMemberOrderByLogDateDesc(member);
 
         return logs.stream()
@@ -102,6 +107,8 @@ public class SmokingLogService {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 
+        validateMemberCanLog(member);
+
         LocalDate today = LocalDate.now();
         Optional<SmokingLog> todayLog = smokingLogRepository.findTodayLog(member, today);
 
@@ -121,6 +128,22 @@ public class SmokingLogService {
             return null;
         }
     }
+
+
+    private void validateMemberCanLog(Member member) {
+        // Check đã chọn coach chưa
+        boolean hasCoach = memberCoachSelectionRepository.existsByMember(member);
+        if (!hasCoach) {
+            throw new RuntimeException("You must select a coach before logging smoking data.");
+        }
+
+        // Check đã điền thông tin sơ bộ chưa
+        boolean hasInitialInfo = memberInitialInfoRepository.findByMember(member).isPresent();
+        if (!hasInitialInfo) {
+            throw new RuntimeException("You must submit your initial information before logging smoking data.");
+        }
+    }
+
 
 
     @Transactional

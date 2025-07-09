@@ -14,6 +14,8 @@ import java.util.Optional;
 public interface MemberCoachSelectionRepository extends JpaRepository<MemberCoachSelection, Long> {
     boolean existsByMemberAndCoach(Member member, Coach coach);
 
+    boolean existsByMember(Member member);
+
     Optional<MemberCoachSelection> findByMemberAndCoach(Member member, Coach coach);
 
     List<MemberCoachSelection> findByCoach(Coach coach);
