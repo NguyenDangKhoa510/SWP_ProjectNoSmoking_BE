@@ -15,5 +15,6 @@ public interface QuitPlanRepository extends JpaRepository<QuitPlan, Long> {
     List<QuitPlan> findByCoach(Coach coach);
 
     long countByStartDateBetween(LocalDate start, LocalDate end);
+    long countByCoach(Coach coach);
 
 }
