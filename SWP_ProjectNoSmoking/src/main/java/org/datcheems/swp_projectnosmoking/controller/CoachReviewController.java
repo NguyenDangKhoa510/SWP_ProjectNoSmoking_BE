@@ -52,7 +52,7 @@ public class CoachReviewController {
 
 
 
-    @PreAuthorize("hasRole('COACH')")
+    @PreAuthorize("hasAnyRole('COACH', 'ADMIN')")
     @GetMapping("/my-reviews-coach")
     public ResponseEntity<?> getCoachReviews() {
         List<CoachReviewResponse> responses = coachReviewService.getReviewsForCurrentCoach();
@@ -62,7 +62,7 @@ public class CoachReviewController {
         ));
     }
 
-    @PreAuthorize("hasRole('COACH')")
+    @PreAuthorize("hasAnyRole('COACH', 'ADMIN')")
     @GetMapping("/me/statistics")
     public ResponseEntity<?> getMyReviewStatistics() {
         Map<String, Object> stats = coachReviewService.getReviewStatisticsForCurrentCoach();
