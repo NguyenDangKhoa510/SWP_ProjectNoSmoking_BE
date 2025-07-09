@@ -166,7 +166,7 @@ public class MemberBadgeService {
                     res.setMemberId(member.getUserId());
                     res.setFullName(member.getUser().getFullName());
                     res.setEmail(member.getUser().getEmail());
-                    res.setAvatarUrl(member.getAvatarUrl()); // ✅ lấy từ Member
+                    res.setAvatarUrl(member.getAvatarUrl());
                     res.setTotalScore(totalScore);
                     return res;
                 }).sorted((a, b) -> Integer.compare(b.getTotalScore(), a.getTotalScore()))
