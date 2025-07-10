@@ -49,7 +49,7 @@ public class NotificationController {
     }
 
     @GetMapping("/me")
-    @PreAuthorize("hasRole('MEMBER' or hasRole('COACH') )")
+    @PreAuthorize("hasRole('MEMBER') or hasRole('COACH')")
     public ResponseEntity<List<UserNotificationResponse>> getMyNotifications(Authentication authentication) {
         Long userId = extractUserIdFromAuthentication(authentication);
         System.out.println("UserId in /me: " + userId);
@@ -65,7 +65,7 @@ public class NotificationController {
     }
 
     @PutMapping("/mark-as-read/{id}")
-    @PreAuthorize("hasRole('MEMBER' or hasRole('COACH') )")
+    @PreAuthorize("hasRole('MEMBER') or hasRole('COACH')")
     public ResponseEntity<String> markAsRead(@PathVariable Long id, Authentication auth) {
         Long userId = extractUserIdFromAuthentication(auth);
         notificationService.markAsRead(id, userId);
@@ -80,14 +80,27 @@ public class NotificationController {
         return ResponseEntity.ok(notifications);
     }
 
-    
 
 
-  
+    @PostMapping("/send-to-member")
+    @PreAuthorize("hasRole('COACH')")
+    public ResponseEntity<String> sendNotificationToMyMember(
+            @RequestBody UserNotificationRequest dto,
+            Authentication authentication) {
+
+        Long coachUserId = JwtUtils.extractUserIdFromAuthentication(authentication);
+
+        notificationService.sendNotificationToMemberByCoach(dto, coachUserId);
+
+        return ResponseEntity.ok("Notification sent successfully to member.");
+    }
 
 
 
-    
+
+
+
+
 
 
 

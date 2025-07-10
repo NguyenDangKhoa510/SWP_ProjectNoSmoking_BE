@@ -1,18 +1,15 @@
 package org.datcheems.swp_projectnosmoking.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.datcheems.swp_projectnosmoking.dto.request.NotificationRequest;
 import org.datcheems.swp_projectnosmoking.dto.request.UserNotificationRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.NotificationBrief;
 import org.datcheems.swp_projectnosmoking.dto.response.NotificationResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.UserNotificationResponse;
-import org.datcheems.swp_projectnosmoking.entity.Notification;
-import org.datcheems.swp_projectnosmoking.entity.User;
-import org.datcheems.swp_projectnosmoking.entity.UserNotification;
+import org.datcheems.swp_projectnosmoking.entity.*;
 import org.datcheems.swp_projectnosmoking.mapper.NotificationMapper;
-import org.datcheems.swp_projectnosmoking.repository.NotificationRepository;
-import org.datcheems.swp_projectnosmoking.repository.UserNotificationRepository;
-import org.datcheems.swp_projectnosmoking.repository.UserRepository;
+import org.datcheems.swp_projectnosmoking.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -29,6 +26,9 @@ public class NotificationService {
     private final UserNotificationRepository userNotificationRepository;
     private final UserRepository userRepository;
     private final NotificationMapper notificationMapper;
+    private final CoachRepository coachRepository;
+    private final MemberCoachSelectionRepository memberCoachSelectionRepository;
+    private final MemberRepository memberRepository;
 
     public NotificationResponse createNotification(NotificationRequest dto, Long createdById) {
         User creator = userRepository.findById(createdById)
@@ -85,6 +85,30 @@ public class NotificationService {
         userNotificationRepository.deleteByNotificationId(notificationId);
         notificationRepository.delete(notification);
     }
+
+
+
+    public void sendNotificationToMemberByCoach(UserNotificationRequest dto, Long coachUserId) {
+        User coachUser = userRepository.findById(coachUserId)
+                .orElseThrow(() -> new RuntimeException("Coach user not found"));
+
+        Coach coach = coachRepository.findByUserId(coachUser.getId())
+                .orElseThrow(() -> new RuntimeException("Coach profile not found"));
+
+        // Check xem Member này có đang chọn Coach này không
+        Member member = memberRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        boolean isLinked = memberCoachSelectionRepository.existsByMemberAndCoach(member, coach);
+        if (!isLinked) {
+            throw new RuntimeException("You can only send notifications to members who have selected you as their coach.");
+        }
+
+        // Gửi notification giống Admin
+        sendNotificationToUser(dto);
+    }
+
+
 
 
     public List<NotificationBrief> getActiveNotifications() {
