@@ -1,5 +1,6 @@
 package org.datcheems.swp_projectnosmoking.controller;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.datcheems.swp_projectnosmoking.dto.request.MessageSendRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.MessageRestResponse;
@@ -122,6 +123,7 @@ public class MessageRestController {
             message.setSelection(selection);
             message.setContent(request.getContent().trim());
             message.setSentAt(LocalDateTime.now());
+            message.setIsRead(false);
 
             if ("USER".equalsIgnoreCase(request.getSenderType())) {
                 message.setSenderType(Message.SenderType.MEMBER);
@@ -140,6 +142,7 @@ public class MessageRestController {
             try {
                 String destination = "/user/queue/messages/" + selection.getSelectionId();
                 messagingTemplate.convertAndSend(destination, messageResponse);
+                messagingTemplate.convertAndSend("/user/queue/messages/global", messageResponse);
                 System.out.println("Broadcasted message to: " + destination);
             } catch (Exception e) {
                 System.err.println("Failed to broadcast message: " + e.getMessage());
@@ -160,16 +163,25 @@ public class MessageRestController {
         }
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("MessageRestController is working on port 5175!");
+    @Transactional
+    @PutMapping("/mark-read/{selectionId}")
+    public ResponseEntity<ResponseObject<String>> markMessagesAsRead(@PathVariable Long selectionId) {
+        ResponseObject<String> response = new ResponseObject<>();
+        try {
+            int updatedRows = messageRepository.markAllMessagesAsRead(selectionId);
+            response.setStatus("success");
+            response.setMessage("Đã mark read " + updatedRows + " tin nhắn.");
+            response.setData("Ok");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus("error");
+            response.setMessage("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
-    @PostMapping("/test-post")
-    public ResponseEntity<String> testPost(@RequestBody(required = false) String body) {
-        System.out.println("POST /api/chat/test-post called with body: " + body);
-        return ResponseEntity.ok("POST endpoint working! Body: " + body);
-    }
+
 
     private MessageRestResponse toResponse(Message message) {
         MessageRestResponse res = new MessageRestResponse();
@@ -178,6 +190,7 @@ public class MessageRestController {
         res.setSenderType(message.getSenderType().name());
         res.setContent(message.getContent());
         res.setSentAt(message.getSentAt());
+        res.setIsRead(message.getIsRead());
         return res;
     }
 
