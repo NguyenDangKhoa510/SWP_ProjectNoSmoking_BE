@@ -80,6 +80,7 @@ public class NotificationController {
         return ResponseEntity.ok(notifications);
     }
 
+    
 
 
     @DeleteMapping("/{notificationId}")
@@ -88,6 +89,7 @@ public class NotificationController {
         notificationService.deleteNotification(notificationId);
         return ResponseEntity.ok("Notification deleted successfully");
     }
+
 
 
 
