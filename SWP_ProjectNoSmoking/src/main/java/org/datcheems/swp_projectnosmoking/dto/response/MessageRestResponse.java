@@ -11,4 +11,5 @@ public class MessageRestResponse {
     private String senderType;
     private String content;
     private LocalDateTime sentAt;
+    private Boolean isRead;
 }
