@@ -44,6 +44,16 @@ public class NotificationService {
         return notificationMapper.toDTO(saved);
     }
 
+    public List<NotificationResponse> getAllNotifications() {
+        return notificationRepository.findAll()
+                .stream()
+                .map(notificationMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+
+
+
     public void sendNotificationToUser(UserNotificationRequest dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));

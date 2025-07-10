@@ -43,6 +43,7 @@ public class CoachMemberService {
                     dto.setBirthDate(member.getBirthDate());
                     dto.setAddress(member.getAddress());
                     dto.setGender(member.getGender());
+                    dto.setCreatedAt(memberUser.getCreatedAt());
 
                     return dto;
                 })

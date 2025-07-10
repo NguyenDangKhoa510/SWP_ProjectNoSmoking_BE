@@ -73,6 +73,14 @@ public class NotificationController {
 
     }
 
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
+    public ResponseEntity<List<NotificationResponse>> getAllNotifications() {
+        List<NotificationResponse> notifications = notificationService.getAllNotifications();
+        return ResponseEntity.ok(notifications);
+    }
+
+
 
     @GetMapping("/history/{userId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
