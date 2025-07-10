@@ -42,14 +42,14 @@ public class NotificationController {
     }
 
     @PostMapping("/send")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> send(@RequestBody UserNotificationRequest dto) {
         notificationService.sendNotificationToUser(dto);
         return ResponseEntity.ok("Notification sent successfully");
     }
 
     @GetMapping("/me")
-    @PreAuthorize("hasRole('MEMBER')")
+    @PreAuthorize("hasRole('MEMBER' or hasRole('COACH') )")
     public ResponseEntity<List<UserNotificationResponse>> getMyNotifications(Authentication authentication) {
         Long userId = extractUserIdFromAuthentication(authentication);
         System.out.println("UserId in /me: " + userId);
@@ -65,7 +65,7 @@ public class NotificationController {
     }
 
     @PutMapping("/mark-as-read/{id}")
-    @PreAuthorize("hasRole('MEMBER')")
+    @PreAuthorize("hasRole('MEMBER' or hasRole('COACH') )")
     public ResponseEntity<String> markAsRead(@PathVariable Long id, Authentication auth) {
         Long userId = extractUserIdFromAuthentication(auth);
         notificationService.markAsRead(id, userId);
