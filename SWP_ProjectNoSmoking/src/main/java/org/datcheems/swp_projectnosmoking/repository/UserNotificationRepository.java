@@ -12,8 +12,13 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
     List<UserNotification> findByUserId(Long userId);
     @Transactional
     @Modifying
-    @Query("DELETE FROM UserNotification u WHERE u.notification.id = :notificationId")
-    void deleteByNotificationId(Long notificationId);}
+    @Query("DELETE FROM UserNotification u WHERE u.notification.notificationId = :notificationId")
+    void deleteByNotificationId(Long notificationId);
+
+    List<UserNotification> findByNotification_CreatedBy_Id(Long coachUserId);
+
+
+}
 
 
 

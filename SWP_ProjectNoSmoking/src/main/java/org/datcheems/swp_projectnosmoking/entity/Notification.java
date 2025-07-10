@@ -43,7 +43,6 @@ public class Notification {
         updatedAt = LocalDateTime.now();
     }
 
-    @Column(name = "is_read")
-    private Boolean isRead = false;
+
 
 }

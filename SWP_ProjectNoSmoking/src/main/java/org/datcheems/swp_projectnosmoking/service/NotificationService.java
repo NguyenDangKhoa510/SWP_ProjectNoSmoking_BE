@@ -110,6 +110,17 @@ public class NotificationService {
 
 
 
+    public List<UserNotificationResponse> getSentNotificationsByCoach(Long coachUserId) {
+        List<UserNotification> sentNotifications = userNotificationRepository.findByNotification_CreatedBy_Id(coachUserId);
+
+        return sentNotifications.stream()
+                .map(notificationMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+
+
+
 
     public List<NotificationBrief> getActiveNotifications() {
         return notificationRepository.findByIsActiveTrue()

@@ -81,6 +81,24 @@ public class NotificationController {
     }
 
 
+    @DeleteMapping("/{notificationId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
+    public ResponseEntity<String> deleteNotification(@PathVariable Long notificationId) {
+        notificationService.deleteNotification(notificationId);
+        return ResponseEntity.ok("Notification deleted successfully");
+    }
+
+
+    @GetMapping("/sent-history")
+    @PreAuthorize("hasRole('COACH')")
+    public ResponseEntity<List<UserNotificationResponse>> getSentHistory(Authentication authentication) {
+        Long coachUserId = JwtUtils.extractUserIdFromAuthentication(authentication);
+        List<UserNotificationResponse> history = notificationService.getSentNotificationsByCoach(coachUserId);
+        return ResponseEntity.ok(history);
+    }
+
+
+
 
     @PostMapping("/send-to-member")
     @PreAuthorize("hasRole('COACH')")
@@ -94,13 +112,6 @@ public class NotificationController {
 
         return ResponseEntity.ok("Notification sent successfully to member.");
     }
-
-
-
-
-
-
-
 
 
 
