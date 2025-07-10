@@ -33,13 +33,13 @@ public class BadgeService {
                 .collect(Collectors.toList());
     }
 
-    public BadgeResponse getBadgeById(int id) {
+    public BadgeResponse getBadgeById(long id) {
         Badge badge = badgeRepository.findById((long) id)
                 .orElseThrow(() -> new RuntimeException("Badge not found with id: " + id));
         return mapToResponse(badge);
     }
 
-    public BadgeResponse updateBadge(int id, BadgeRequest request) {
+    public BadgeResponse updateBadge(long id, BadgeRequest request) {
         Badge badge = badgeRepository.findById((long) id)
                 .orElseThrow(() -> new RuntimeException("Badge not found with id: " + id));
         badge.setName(request.getName());
@@ -50,7 +50,7 @@ public class BadgeService {
         return mapToResponse(badge);
     }
 
-    public void deleteBadge(int id) {
+    public void deleteBadge(long id) {
         badgeRepository.deleteById((long) id);
     }
 

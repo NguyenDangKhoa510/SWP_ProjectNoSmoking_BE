@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 
 
 public class BadgeResponse {
-    int id;
+    long id;
     String name;
     String description;
     String condition_description;

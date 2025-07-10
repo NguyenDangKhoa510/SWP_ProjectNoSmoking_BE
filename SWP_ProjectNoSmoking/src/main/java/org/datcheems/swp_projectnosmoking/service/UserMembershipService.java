@@ -6,7 +6,7 @@ import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
 import org.datcheems.swp_projectnosmoking.dto.response.UserMembershipResponse;
 import org.datcheems.swp_projectnosmoking.entity.Member;
 import org.datcheems.swp_projectnosmoking.entity.MembershipPackage;
-import org.datcheems.swp_projectnosmoking.entity.User_Membership;
+import org.datcheems.swp_projectnosmoking.entity.UserMembership;
 import org.datcheems.swp_projectnosmoking.repository.MemberRepository;
 import org.datcheems.swp_projectnosmoking.repository.MembershipPackageRepository;
 import org.datcheems.swp_projectnosmoking.repository.UserMembershipRepository;
@@ -25,7 +25,7 @@ public class UserMembershipService {
     private final MemberRepository memberRepository;
     private final MembershipPackageRepository membershipPackageRepository;
 
-    private UserMembershipResponse toResponse(User_Membership entity) {
+    private UserMembershipResponse toResponse(UserMembership entity) {
         UserMembershipResponse response = UserMembershipResponse.builder()
                 .membershipId(entity.getMembershipId())
                 .userId(entity.getMember().getUserId())
@@ -40,10 +40,10 @@ public class UserMembershipService {
     }
 
     public ResponseObject<List<UserMembershipResponse>> getAll() {
-        List<User_Membership> list = userMembershipRepository.findAll();
+        List<UserMembership> list = userMembershipRepository.findAll();
         List<UserMembershipResponse> responseList = new ArrayList<>();
 
-        for (User_Membership entity : list) {
+        for (UserMembership entity : list) {
             responseList.add(toResponse(entity));
         }
 
@@ -54,10 +54,10 @@ public class UserMembershipService {
         return response;
     }
     public ResponseObject<Double> getTotalRevenue() {
-        List<User_Membership> records = userMembershipRepository.findAll();
+        List<UserMembership> records = userMembershipRepository.findAll();
         double totalRevenue = 0.0;
 
-        for (User_Membership record : records) {
+        for (UserMembership record : records) {
             MembershipPackage pack = record.getMembershipPackage();
             if (pack != null && record.getStatus() != null && record.getStatus().equalsIgnoreCase("ACTIVE")) {
                 totalRevenue += pack.getPrice() != null ? pack.getPrice() : 0.0;
@@ -73,7 +73,7 @@ public class UserMembershipService {
 
 
     public ResponseObject<UserMembershipResponse> getById(Long id) {
-        Optional<User_Membership> optional = userMembershipRepository.findById(id);
+        Optional<UserMembership> optional = userMembershipRepository.findById(id);
         ResponseObject<UserMembershipResponse> response = new ResponseObject<>();
 
         if (optional.isPresent()) {
@@ -102,14 +102,14 @@ public class UserMembershipService {
             return response;
         }
 
-        User_Membership entity = new User_Membership();
+        UserMembership entity = new UserMembership();
         entity.setMember(memberOpt.get());
         entity.setMembershipPackage(packageOpt.get());
         entity.setStartDate(request.getStartDate());
         entity.setEndDate(request.getEndDate());
         entity.setStatus(request.getStatus());
 
-        User_Membership saved = userMembershipRepository.save(entity);
+        UserMembership saved = userMembershipRepository.save(entity);
 
         response.setStatus("success");
         response.setMessage("Tạo bản ghi thành công");
@@ -120,7 +120,7 @@ public class UserMembershipService {
     public ResponseObject<UserMembershipResponse> update(Long id, UserMembershipRequest request) {
         ResponseObject<UserMembershipResponse> response = new ResponseObject<>();
 
-        Optional<User_Membership> existingOpt = userMembershipRepository.findById(id);
+        Optional<UserMembership> existingOpt = userMembershipRepository.findById(id);
         if (existingOpt.isEmpty()) {
             response.setStatus("fail");
             response.setMessage("Không tìm thấy bản ghi để cập nhật");
@@ -138,14 +138,14 @@ public class UserMembershipService {
             return response;
         }
 
-        User_Membership entity = existingOpt.get();
+        UserMembership entity = existingOpt.get();
         entity.setMember(memberOpt.get());
         entity.setMembershipPackage(packageOpt.get());
         entity.setStartDate(request.getStartDate());
         entity.setEndDate(request.getEndDate());
         entity.setStatus(request.getStatus());
 
-        User_Membership updated = userMembershipRepository.save(entity);
+        UserMembership updated = userMembershipRepository.save(entity);
 
         response.setStatus("success");
         response.setMessage("Cập nhật bản ghi thành công");
@@ -172,7 +172,7 @@ public class UserMembershipService {
     public ResponseObject<Boolean> checkUserHasActiveMembership(Long userId) {
         ResponseObject<Boolean> response = new ResponseObject<>();
 
-        List<User_Membership> memberships = userMembershipRepository.findByMember_UserId(userId);
+        List<UserMembership> memberships = userMembershipRepository.findByMember_UserId(userId);
         boolean hasActive = memberships.stream().anyMatch(m ->
                 "ACTIVE".equalsIgnoreCase(m.getStatus()) &&
                         m.getEndDate() != null &&
@@ -189,10 +189,10 @@ public class UserMembershipService {
         ResponseObject<UserMembershipResponse> response = new ResponseObject<>();
 
         try {
-            List<User_Membership> memberships = userMembershipRepository.findByMember_UserId(userId);
+            List<UserMembership> memberships = userMembershipRepository.findByMember_UserId(userId);
 
             // Tìm membership active và chưa hết hạn
-            Optional<User_Membership> activeMembership = memberships.stream()
+            Optional<UserMembership> activeMembership = memberships.stream()
                     .filter(m -> "ACTIVE".equalsIgnoreCase(m.getStatus()))
                     .filter(m -> m.getEndDate() != null && !m.getEndDate().isBefore(LocalDate.now()))
                     .findFirst();

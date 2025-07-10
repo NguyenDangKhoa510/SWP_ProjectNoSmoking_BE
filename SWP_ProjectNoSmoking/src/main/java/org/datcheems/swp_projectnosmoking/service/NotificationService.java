@@ -77,6 +77,16 @@ public class NotificationService {
                 .collect(Collectors.toList());
     }
 
+
+    public void deleteNotification(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        userNotificationRepository.deleteByNotificationId(notificationId);
+        notificationRepository.delete(notification);
+    }
+
+
     public List<NotificationBrief> getActiveNotifications() {
         return notificationRepository.findByIsActiveTrue()
                 .stream()

@@ -27,17 +27,17 @@ public class BadgeController {
     }
 
     @GetMapping("/GetById/{id}")
-    public ResponseEntity<BadgeResponse> getBadgeById(@PathVariable int id) {
+    public ResponseEntity<BadgeResponse> getBadgeById(@PathVariable long id) {
         return ResponseEntity.ok(badgeService.getBadgeById(id));
     }
 
     @PutMapping("/UpdateById/{id}")
-    public ResponseEntity<BadgeResponse> updateBadge(@PathVariable int id, @RequestBody BadgeRequest request) {
+    public ResponseEntity<BadgeResponse> updateBadge(@PathVariable long id, @RequestBody BadgeRequest request) {
         return ResponseEntity.ok(badgeService.updateBadge(id, request));
     }
 
     @DeleteMapping("/DeleteById/{id}")
-    public ResponseEntity<Void> deleteBadge(@PathVariable int id) {
+    public ResponseEntity<Void> deleteBadge(@PathVariable long id) {
         badgeService.deleteBadge(id);
         return ResponseEntity.noContent().build();
     }
