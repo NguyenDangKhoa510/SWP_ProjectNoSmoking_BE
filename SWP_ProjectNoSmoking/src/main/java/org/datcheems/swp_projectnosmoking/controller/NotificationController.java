@@ -92,6 +92,18 @@ public class NotificationController {
 
 
 
+    
+
+
+    @DeleteMapping("/{notificationId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
+    public ResponseEntity<String> deleteNotification(@PathVariable Long notificationId) {
+        notificationService.deleteNotification(notificationId);
+        return ResponseEntity.ok("Notification deleted successfully");
+    }
+
+
+
 
     @GetMapping("/history/{userId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
