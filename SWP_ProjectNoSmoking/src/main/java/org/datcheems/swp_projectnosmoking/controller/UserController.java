@@ -9,10 +9,7 @@ import org.datcheems.swp_projectnosmoking.entity.Coach;
 import org.datcheems.swp_projectnosmoking.entity.Member;
 import org.datcheems.swp_projectnosmoking.entity.MemberCoachSelection;
 import org.datcheems.swp_projectnosmoking.entity.User;
-import org.datcheems.swp_projectnosmoking.repository.CoachRepository;
-import org.datcheems.swp_projectnosmoking.repository.MemberCoachSelectionRepository;
-import org.datcheems.swp_projectnosmoking.repository.MemberRepository;
-import org.datcheems.swp_projectnosmoking.repository.UserRepository;
+import org.datcheems.swp_projectnosmoking.repository.*;
 import org.datcheems.swp_projectnosmoking.service.MemberService;
 import org.datcheems.swp_projectnosmoking.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +50,9 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private MessageRepository messageRepository;
 
     @GetMapping("/getAll")
     public List<UserResponse> getAllUsers() {
@@ -195,6 +195,9 @@ public class UserController {
                 selectionData.put("selectionId", selection.getSelectionId());
                 selectionData.put("selectedAt", selection.getSelectedAt());
 
+                Long unreadCount = messageRepository.countUnreadMessages(selection.getSelectionId());
+                selectionData.put("unreadCount", unreadCount);
+
                 Member member = selection.getMember();
                 Map<String, Object> memberData = new HashMap<>();
                 memberData.put("memberId", member.getUserId());
@@ -223,11 +226,4 @@ public class UserController {
         }
     }
 
-
-
-    // Debug endpoint để test
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("UserController is working!");
-    }
 }

@@ -24,8 +24,10 @@ public class MessageWebSocketController {
         messageResponse.setSenderType(request.getSenderType());
         messageResponse.setContent(request.getContent());
         messageResponse.setSentAt(LocalDateTime.now());
+        messageResponse.setIsRead(false);
 
         String dest = "/user/queue/messages/" + request.getSelectionId();
         messagingTemplate.convertAndSend(dest, messageResponse);
+        messagingTemplate.convertAndSend("/user/queue/messages/global", messageResponse);
     }
 }
