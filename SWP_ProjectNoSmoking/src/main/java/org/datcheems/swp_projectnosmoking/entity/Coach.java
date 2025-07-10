@@ -34,7 +34,7 @@ public class Coach {
     @Column(name = "max_members")
     private Integer maxMembers;
 
-    @Column(name = "image_url", columnDefinition = "NVARCHAR(500)")
+    @Column(name = "image_url", columnDefinition = "NVARCHAR(MAX)")
     private String imageUrl;
 
     private Double rating;
