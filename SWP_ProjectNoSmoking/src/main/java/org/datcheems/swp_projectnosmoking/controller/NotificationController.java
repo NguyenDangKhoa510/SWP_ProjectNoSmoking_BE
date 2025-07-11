@@ -1,4 +1,5 @@
 package org.datcheems.swp_projectnosmoking.controller;
+import org.datcheems.swp_projectnosmoking.dto.request.BroadcastNotificationRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.NotificationBrief;
 import org.datcheems.swp_projectnosmoking.utils.JwtUtils;
 import org.springframework.security.core.Authentication;
@@ -112,6 +113,16 @@ public class NotificationController {
 
         return ResponseEntity.ok("Notification sent successfully to member.");
     }
+
+
+
+    @PostMapping("/send-to-members-and-coaches")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> sendNotificationToMembersAndCoaches(@RequestBody BroadcastNotificationRequest dto) {
+        notificationService.sendNotificationToAllMembersAndCoaches(dto);
+        return ResponseEntity.ok("Notification sent successfully to all Members and Coaches.");
+    }
+
 
 
 
