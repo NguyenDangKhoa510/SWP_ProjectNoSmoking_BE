@@ -68,7 +68,7 @@ public class QuitPlanService {
         plan.setMember(member);
         plan.setCoach(coach);
         plan.setReasonToQuit(request.getReasonToQuit());
-        plan.setTotalStages(request.getTotalStages());
+        plan.setTotalStages(3);
         plan.setGoal(request.getGoal());
         plan.setStatus(QuitPlanStatus.active);
 
@@ -196,6 +196,7 @@ public class QuitPlanService {
 
         QuitPlan quitPlan = quitPlanRepository.findById(quitPlanId)
                 .orElseThrow(() -> new RuntimeException("Quit plan not found"));
+        quitPlan.setTotalStages(quitPlan.getTotalStages() + 1);
 
         // Check if the current user is the coach or member of the quit plan
         if ((isCoach(currentUser) && quitPlan.getCoach().getUserId().equals(currentUser.getId())) ||
@@ -251,6 +252,7 @@ public class QuitPlanService {
                 .orElseThrow(() -> new RuntimeException("Quit plan stage not found"));
 
         QuitPlan quitPlan = stage.getQuitPlan();
+        quitPlan.setTotalStages(quitPlan.getTotalStages() - 1);
 
         // Check if the current user is the coach or member of the quit plan
         if ((isCoach(currentUser) && quitPlan.getCoach().getUserId().equals(currentUser.getId())) ||
