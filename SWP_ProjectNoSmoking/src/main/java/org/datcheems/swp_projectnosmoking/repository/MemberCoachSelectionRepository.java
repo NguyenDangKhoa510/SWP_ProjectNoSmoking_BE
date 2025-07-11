@@ -21,4 +21,6 @@ public interface MemberCoachSelectionRepository extends JpaRepository<MemberCoac
     List<MemberCoachSelection> findByCoach(Coach coach);
     long countByCoach(Coach coach);
 
+    Optional<MemberCoachSelection> findFirstByMember_User_Id(Long userId);
+
 }
