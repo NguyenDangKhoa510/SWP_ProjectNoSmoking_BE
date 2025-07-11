@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -16,4 +17,6 @@ public class UserResponse {
     String email;
     String fullName;
     Set<String> roles;
+    LocalDateTime createdAt;
+    String status;
 }
