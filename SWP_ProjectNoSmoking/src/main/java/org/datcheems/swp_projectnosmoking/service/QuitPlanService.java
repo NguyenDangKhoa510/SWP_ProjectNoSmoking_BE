@@ -30,10 +30,7 @@ public class QuitPlanService {
     private final QuitPlanStageRepository quitPlanStageRepository;
     private final QuitPlanMapper quitPlanMapper;
 
-    /**
-     * Get the current authenticated user
-     * @return The current user
-     */
+
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
@@ -41,22 +38,12 @@ public class QuitPlanService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    /**
-     * Check if the current user is a coach
-     * @param user The user to check
-     * @return True if the user is a coach, false otherwise
-     */
     private boolean isCoach(User user) {
         return user.getRoles().stream()
                 .anyMatch(role -> Role.RoleName.COACH.equals(role.getName()));
     }
 
 
-    /**
-     * Check if the current user is a member
-     * @param user The user to check
-     * @return True if the user is a member, false otherwise
-     */
     private boolean isMember(User user) {
         return user.getRoles().stream()
                 .anyMatch(role -> Role.RoleName.MEMBER.equals(role.getName()));
@@ -67,11 +54,6 @@ public class QuitPlanService {
     public QuitPlanResponse createQuitPlan(QuitPlanRequest request) {
         User currentUser = getCurrentUser();
 
-        if (request.getStartDate().isBefore(LocalDate.now())) {
-            throw new RuntimeException("Start date cannot be in the past");
-        }
-
-
         if (!isCoach(currentUser)) {
             throw new RuntimeException("Only Coaches can create Quit Plans");
         }
@@ -79,37 +61,25 @@ public class QuitPlanService {
         Coach coach = coachRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("Coach profile not found"));
 
-        // Find user by username or email
-        String memberIdentifier = request.getMemberIdentifier();
-        User memberUser;
-
-        // Try to find by username first, then by email if not found
-        memberUser = userRepository.findByUsername(memberIdentifier)
-                .orElseGet(() -> userRepository.findByEmail(memberIdentifier)
-                        .orElseThrow(() -> new RuntimeException("User not found with identifier: " + memberIdentifier)));
-
-        // Find the member associated with the user
-        Member member = memberRepository.findByUserId(memberUser.getId())
-                .orElseThrow(() -> new RuntimeException("Member profile not found for user: " + memberIdentifier));
+        Member member = memberRepository.findByUserId(request.getMemberId())
+                .orElseThrow(() -> new RuntimeException("Member profile not found for userId: " + request.getMemberId()));
 
         QuitPlan plan = new QuitPlan();
         plan.setMember(member);
         plan.setCoach(coach);
-        plan.setStartDate(request.getStartDate());
+        plan.setReasonToQuit(request.getReasonToQuit());
+        plan.setTotalStages(request.getTotalStages());
         plan.setGoal(request.getGoal());
+        plan.setStatus(QuitPlanStatus.active);
 
         QuitPlan savedPlan = quitPlanRepository.save(plan);
 
-        // Auto-generate QuitPlanStages: 7, 14, 21 days
         List<QuitPlanStage> stages = new ArrayList<>();
-        int[] days = {7, 14, 21};
-
-        for (int day : days) {
+        for (int i = 1; i <= 3; i++) {
             QuitPlanStage stage = new QuitPlanStage();
             stage.setQuitPlan(savedPlan);
-            stage.setDay(day);
-            stage.setTargetDate(request.getStartDate().plusDays(day));
-            stage.setDescription("Target day " + day + " of quit plan");
+            stage.setStageNumber(i);
+            stage.setStatus(QuitPlanStageStatus.active);
             stages.add(stage);
         }
 
@@ -119,17 +89,11 @@ public class QuitPlanService {
         return quitPlanMapper.toResponse(savedPlan);
     }
 
-    /**
-     * Get a quit plan by ID
-     * @param quitPlanId The ID of the quit plan
-     * @return The quit plan response
-     */
     public QuitPlanResponse getQuitPlanById(Long quitPlanId) {
         User currentUser = getCurrentUser();
         QuitPlan quitPlan = quitPlanRepository.findById(quitPlanId)
                 .orElseThrow(() -> new RuntimeException("Quit plan not found"));
 
-        // Check if the current user is the coach or member of the quit plan
         if (isCoach(currentUser) && quitPlan.getCoach().getUserId().equals(currentUser.getId())) {
             return quitPlanMapper.toResponse(quitPlan);
         } else if (isMember(currentUser) && quitPlan.getMember().getUserId().equals(currentUser.getId())) {
@@ -139,10 +103,7 @@ public class QuitPlanService {
         }
     }
 
-    /**
-     * Get all quit plans for the current member
-     * @return List of quit plan responses
-     */
+
     public List<QuitPlanResponse> getQuitPlansForCurrentMember() {
         User currentUser = getCurrentUser();
 
@@ -159,10 +120,7 @@ public class QuitPlanService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Get all quit plans created by the current coach
-     * @return List of quit plan responses
-     */
+
     public List<QuitPlanResponse> getQuitPlansForCurrentCoach() {
         User currentUser = getCurrentUser();
 
@@ -179,12 +137,7 @@ public class QuitPlanService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Update a quit plan stage
-     * @param stageId The ID of the stage to update
-     * @param request The update request
-     * @return The updated stage response
-     */
+
     @Transactional
     public QuitPlanStageResponse updateQuitPlanStage(Long stageId, QuitPlanStageRequest request) {
         User currentUser = getCurrentUser();
@@ -198,9 +151,37 @@ public class QuitPlanService {
         if ((isCoach(currentUser) && quitPlan.getCoach().getUserId().equals(currentUser.getId())) ||
             (isMember(currentUser) && quitPlan.getMember().getUserId().equals(currentUser.getId()))) {
 
-            stage.setDay(request.getDay());
-            stage.setDescription(request.getDescription());
-            stage.setTargetDate(request.getTargetDate());
+            if (request.getStartDate() != null && request.getEndDate() != null) {
+                if (request.getStartDate().isAfter(request.getEndDate())) {
+                    throw new RuntimeException("Start date cannot be after end date.");
+                }
+            }
+
+            Integer currentStageNumber = stage.getStageNumber();
+
+            // Nếu không phải stage đầu tiên thì check phải lớn hơn endDate stage trước đó
+            if (currentStageNumber != null && currentStageNumber > 1) {
+                int previousStageNumber = currentStageNumber - 1;
+
+                // Tìm stage trước đó trong cùng plan
+                QuitPlanStage previousStage = quitPlan.getStages().stream()
+                        .filter(s -> s.getStageNumber() != null && s.getStageNumber().equals(previousStageNumber))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Previous stage not found."));
+
+                if (previousStage.getEndDate() != null && request.getStartDate() != null) {
+                    if (!request.getStartDate().isAfter(previousStage.getEndDate())) {
+                        throw new RuntimeException(
+                                "Start date of this stage must be after end date of stage " + previousStageNumber);
+                    }
+                }
+            }
+
+            stage.setStartDate(request.getStartDate());
+            stage.setEndDate(request.getEndDate());
+            stage.setTargetCigaretteCount(request.getTargetCigaretteCount());
+            stage.setAdvice(request.getAdvice());
+            stage.setStatus(QuitPlanStageStatus.active);
 
             QuitPlanStage updatedStage = quitPlanStageRepository.save(stage);
             return quitPlanMapper.toStageResponse(updatedStage);
@@ -209,12 +190,6 @@ public class QuitPlanService {
         }
     }
 
-    /**
-     * Add a new stage to a quit plan
-     * @param quitPlanId The ID of the quit plan
-     * @param request The stage request
-     * @return The created stage response
-     */
     @Transactional
     public QuitPlanStageResponse addQuitPlanStage(Long quitPlanId, QuitPlanStageRequest request) {
         User currentUser = getCurrentUser();
@@ -226,11 +201,40 @@ public class QuitPlanService {
         if ((isCoach(currentUser) && quitPlan.getCoach().getUserId().equals(currentUser.getId())) ||
             (isMember(currentUser) && quitPlan.getMember().getUserId().equals(currentUser.getId()))) {
 
+            List<QuitPlanStage> existingStages = quitPlan.getStages();
+            int nextStageNumber = (existingStages == null ? 0 : existingStages.size()) + 1;
+
+            if (request.getStartDate() != null && request.getEndDate() != null) {
+                if (request.getStartDate().isAfter(request.getEndDate())) {
+                    throw new RuntimeException("Start date cannot be after end date.");
+                }
+            }
+
+            if (nextStageNumber > 1) {
+                int previousStageNumber = nextStageNumber - 1;
+
+                QuitPlanStage previousStage = existingStages.stream()
+                        .filter(s -> s.getStageNumber() != null && s.getStageNumber().equals(previousStageNumber))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Previous stage not found."));
+
+                if (previousStage.getEndDate() != null && request.getStartDate() != null) {
+                    if (!request.getStartDate().isAfter(previousStage.getEndDate())) {
+                        throw new RuntimeException(
+                                "Start date of stage " + nextStageNumber +
+                                        " must be after end date of stage " + previousStageNumber + ".");
+                    }
+                }
+            }
+
             QuitPlanStage stage = new QuitPlanStage();
             stage.setQuitPlan(quitPlan);
-            stage.setDay(request.getDay());
-            stage.setDescription(request.getDescription());
-            stage.setTargetDate(request.getTargetDate());
+            stage.setStageNumber(nextStageNumber);
+            stage.setStartDate(request.getStartDate());
+            stage.setEndDate(request.getEndDate());
+            stage.setTargetCigaretteCount(request.getTargetCigaretteCount());
+            stage.setAdvice(request.getAdvice());
+            stage.setStatus(QuitPlanStageStatus.active);
 
             QuitPlanStage savedStage = quitPlanStageRepository.save(stage);
             return quitPlanMapper.toStageResponse(savedStage);
@@ -239,10 +243,6 @@ public class QuitPlanService {
         }
     }
 
-    /**
-     * Delete a quit plan stage
-     * @param stageId The ID of the stage to delete
-     */
     @Transactional
     public void deleteQuitPlanStage(Long stageId) {
         User currentUser = getCurrentUser();
