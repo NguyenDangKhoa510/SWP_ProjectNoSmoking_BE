@@ -10,7 +10,11 @@ public class QuitPlanResponse {
     private Long quitPlanId;
     private Long memberId;
     private Long coachId;
-    private LocalDate startDate;
+    private String reasonToQuit;
+    private Integer totalStages;
+    private String status;
+    private LocalDate createdAt;
+    private LocalDate updatedAt;
     private String goal;
     private List<QuitPlanStageResponse> stages;
 }
