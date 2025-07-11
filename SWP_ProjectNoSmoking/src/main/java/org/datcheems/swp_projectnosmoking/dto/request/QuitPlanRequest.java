@@ -6,10 +6,8 @@ import java.time.LocalDate;
 
 @Data
 public class QuitPlanRequest {
-    private String memberIdentifier;
-    private String coachIdentifier;
+    private Long memberId;
     private String reasonToQuit;
     private Integer totalStages;
     private String goal;
-    private String status;
 }
