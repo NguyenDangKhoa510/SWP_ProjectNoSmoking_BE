@@ -38,4 +38,11 @@ public class QuitPlanStage {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private QuitPlanStageStatus status;
+
+//    ALTER TABLE [NoSmoking].[dbo].[quit_plan_stage]
+//    DROP COLUMN [milestone_date],
+//            [day],
+//            [description],
+//            [target_date];
+
 }

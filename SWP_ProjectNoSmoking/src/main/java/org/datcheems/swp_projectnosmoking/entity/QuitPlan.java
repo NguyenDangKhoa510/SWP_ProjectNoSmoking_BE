@@ -49,5 +49,10 @@ public class QuitPlan {
 
     @OneToMany(mappedBy = "quitPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuitPlanStage> stages;
+
+//    ALTER TABLE [NoSmoking].[dbo].[quit_plan]
+//    DROP COLUMN [goal_description],
+//            [start_date],
+//            [selection_id];
 }
 
