@@ -25,6 +25,22 @@ public class SmokingLog {
     private Integer smokeCount;
 
 
+    @Column(name = "smoked")
+    private Boolean smoked;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "craving_level")
+    private CravingLevel cravingLevel;
+
+    @Column(name = "health_status", length = 255)
+    private String healthStatus;
+
+    public enum CravingLevel {
+        LOW,
+        MEDIUM,
+        HIGH
+    }
+
 
 
     private LocalDate logDate;

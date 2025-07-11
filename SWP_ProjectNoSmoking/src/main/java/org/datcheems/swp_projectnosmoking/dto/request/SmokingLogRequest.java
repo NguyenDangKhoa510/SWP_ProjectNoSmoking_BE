@@ -10,9 +10,22 @@ import java.time.LocalDate;
 @Data
 public class SmokingLogRequest {
 
+
+    @NotNull(message = "Smoked status is required")
+    private Boolean smoked;
+
+
+
     @NotNull(message = "Smoke count is required")
     @Min(value = 0, message = "Smoke count must be a positive number")
     private Integer smokeCount;
+
+
+
+    private SmokingLog.CravingLevel cravingLevel;
+
+    private String healthStatus;
+
 
     private LocalDate logDate;
 

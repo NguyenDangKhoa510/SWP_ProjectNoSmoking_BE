@@ -10,7 +10,10 @@ public class SmokingLogResponse {
     private Long logId;
     private Long userId;
     private String memberName;
+    private Boolean smoked;
     private Integer smokeCount;
+    private SmokingLog.CravingLevel cravingLevel;
+    private String healthStatus;
     private LocalDate logDate;
     private SmokingLog.Frequency frequency;
     private Integer previousSmokeCount; // For comparison with previous log
