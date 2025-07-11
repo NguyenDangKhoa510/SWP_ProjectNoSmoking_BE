@@ -2,6 +2,7 @@ package org.datcheems.swp_projectnosmoking.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.datcheems.swp_projectnosmoking.dto.request.BroadcastNotificationRequest;
 import org.datcheems.swp_projectnosmoking.dto.request.NotificationRequest;
 import org.datcheems.swp_projectnosmoking.dto.request.UserNotificationRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.NotificationBrief;
@@ -117,6 +118,26 @@ public class NotificationService {
                 .map(notificationMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+
+    @Transactional
+    public void sendNotificationToAllMembersAndCoaches(BroadcastNotificationRequest dto) {
+        Notification notification = notificationRepository.findById(dto.getNotificationId())
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        List<User> targetUsers = userRepository.findByRoleNames(List.of("MEMBER", "COACH"));
+
+        for (User user : targetUsers) {
+            UserNotification userNotification = new UserNotification();
+            userNotification.setUser(user);
+            userNotification.setNotification(notification);
+            userNotification.setPersonalizedReason(dto.getPersonalizedReason() != null ? dto.getPersonalizedReason() : "System-wide announcement");
+            userNotification.setDeliveryStatus(UserNotification.DeliveryStatus.SENT);
+
+            userNotificationRepository.save(userNotification);
+        }
+    }
+
 
 
 

@@ -18,6 +18,7 @@ public interface NotificationMapper {
     @Mapping(source = "sentAt", target = "sentAt")
     @Mapping(source = "personalizedReason", target = "personalizedReason")
     @Mapping(source = "isRead", target = "hasBeenRead")
+    @Mapping(source = "notification.createdBy.fullName", target = "senderName")
     UserNotificationResponse toDTO(UserNotification userNotification);
     @Mapping(source = "notificationId", target = "id")
     @Mapping(source = "title", target = "title")

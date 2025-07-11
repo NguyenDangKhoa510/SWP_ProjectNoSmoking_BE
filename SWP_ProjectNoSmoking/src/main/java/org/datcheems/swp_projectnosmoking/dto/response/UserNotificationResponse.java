@@ -13,4 +13,5 @@ public class UserNotificationResponse {
     private String personalizedReason;
     private String deliveryStatus;
     private LocalDateTime sentAt;
+    private String senderName;
 }
