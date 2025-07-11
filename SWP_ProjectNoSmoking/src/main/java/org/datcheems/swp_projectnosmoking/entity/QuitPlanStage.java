@@ -20,9 +20,22 @@ public class QuitPlanStage {
     @JoinColumn(name = "quit_plan_id", nullable = false)
     private QuitPlan quitPlan;
 
-    private int day;
+    @Column(name = "stage_number")
+    private Integer stageNumber;
 
-    private String description;
+    @Column(name = "start_date")
+    private LocalDate startDate;
 
-    private LocalDate targetDate;
+    @Column(name = "end_date")
+    private LocalDate endDate;
+
+    @Column(name = "target_cigarette_count")
+    private Integer targetCigaretteCount;
+
+    @Column(name = "advice", columnDefinition = "TEXT")
+    private String advice;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private QuitPlanStageStatus status;
 }

@@ -7,7 +7,10 @@ import java.time.LocalDate;
 @Data
 public class QuitPlanStageResponse {
     private Long stageId;
-    private int day;
-    private String description;
-    private LocalDate targetDate;
+    private Integer stageNumber;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private Integer targetCigaretteCount;
+    private String advice;
+    private String status;
 }
