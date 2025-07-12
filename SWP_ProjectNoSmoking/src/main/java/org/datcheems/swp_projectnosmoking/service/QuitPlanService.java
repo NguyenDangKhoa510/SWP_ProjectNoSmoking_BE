@@ -263,4 +263,23 @@ public class QuitPlanService {
             throw new RuntimeException("You don't have permission to delete this quit plan stage");
         }
     }
+
+    public QuitPlanStageResponse getQuitPlanStageById(Long stageId) {
+        User currentUser = getCurrentUser();
+
+        QuitPlanStage stage = quitPlanStageRepository.findById(stageId)
+                .orElseThrow(() -> new RuntimeException("Quit plan stage not found"));
+
+        QuitPlan quitPlan = stage.getQuitPlan();
+
+        if ((isCoach(currentUser) && quitPlan.getCoach().getUser().getId().equals(currentUser.getId())) ||
+                (isMember(currentUser) && quitPlan.getMember().getUser().getId().equals(currentUser.getId()))) {
+
+            return quitPlanMapper.toStageResponse(stage);
+
+        } else {
+            throw new RuntimeException("You don't have permission to view this quit plan stage");
+        }
+    }
+
 }

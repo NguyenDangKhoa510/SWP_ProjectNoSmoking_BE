@@ -88,4 +88,14 @@ public class QuitPlanController {
                 "message", "Quit plan stage deleted successfully"
         ));
     }
+
+    @GetMapping("/stage/{stageId}")
+    public ResponseEntity<?> getQuitPlanStageById(@PathVariable Long stageId) {
+        QuitPlanStageResponse response = quitPlanService.getQuitPlanStageById(stageId);
+        return ResponseEntity.ok(Map.of(
+                "message", "Quit plan stage details fetched successfully",
+                "data", response
+        ));
+    }
+
 }
