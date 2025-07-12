@@ -6,9 +6,7 @@ import org.datcheems.swp_projectnosmoking.dto.request.SmokingLogRequest;
 import org.datcheems.swp_projectnosmoking.dto.request.UserNotificationRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.NotificationResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.SmokingLogResponse;
-import org.datcheems.swp_projectnosmoking.entity.Member;
-import org.datcheems.swp_projectnosmoking.entity.SmokingLog;
-import org.datcheems.swp_projectnosmoking.entity.User;
+import org.datcheems.swp_projectnosmoking.entity.*;
 import org.datcheems.swp_projectnosmoking.mapper.SmokingLogMapper;
 import org.datcheems.swp_projectnosmoking.repository.*;
 import org.springframework.stereotype.Service;
@@ -30,6 +28,8 @@ public class SmokingLogService {
     private final SmokingLogMapper smokingLogMapper;
     private final MemberCoachSelectionRepository memberCoachSelectionRepository;
     private final MemberInitialInfoRepository memberInitialInfoRepository;
+    private final QuitPlanRepository quitPlanRepository;
+    private final QuitPlanStageRepository quitPlanStageRepository;
 
 
     @Transactional
@@ -48,7 +48,28 @@ public class SmokingLogService {
             SmokingLog log = existingLog.get();
             Integer previousCount = log.getSmokeCount();
             smokingLogMapper.updateEntityFromRequest(request, log);
+
+            QuitPlanStage matchedStage = findMatchedStageForDate(member, logDate);
+            log.setQuitPlanStage(matchedStage);
+
             SmokingLog savedLog = smokingLogRepository.save(log);
+
+            if (savedLog.getQuitPlanStage() != null) {
+                QuitPlanStage stage = savedLog.getQuitPlanStage();
+
+                double progress = calculateStageProgress(stage, member);
+                stage.setProgressPercentage(progress);
+                quitPlanStageRepository.save(stage);
+
+                boolean completed = isStageCompleted(stage, member);
+                if (completed && stage.getStatus() != QuitPlanStageStatus.completed) {
+                    stage.setStatus(QuitPlanStageStatus.completed);
+                    quitPlanStageRepository.save(stage);
+
+                    // Gửi notification chúc mừng
+                    sendStageCompletionNotification(member, stage);
+                }
+            }
 
             // Send notification based on smoking habit change
             sendSmokingHabitChangeNotification(member, previousCount, savedLog.getSmokeCount());
@@ -61,7 +82,27 @@ public class SmokingLogService {
             // Create new log
             SmokingLog log = smokingLogMapper.toEntity(request, member);
             log.setLogDate(logDate);
+
+            QuitPlanStage matchedStage = findMatchedStageForDate(member, logDate);
+            log.setQuitPlanStage(matchedStage);
+
             SmokingLog savedLog = smokingLogRepository.save(log);
+
+            if (savedLog.getQuitPlanStage() != null) {
+                QuitPlanStage stage = savedLog.getQuitPlanStage();
+
+                double progress = calculateStageProgress(stage, member);
+                stage.setProgressPercentage(progress);
+                quitPlanStageRepository.save(stage);
+
+                boolean completed = isStageCompleted(stage, member);
+                if (completed && stage.getStatus() != QuitPlanStageStatus.completed) {
+                    stage.setStatus(QuitPlanStageStatus.completed);
+                    quitPlanStageRepository.save(stage);
+
+                    sendStageCompletionNotification(member, stage);
+                }
+            }
 
             // Get previous log for comparison
             List<SmokingLog> previousLogs = smokingLogRepository.findPreviousLogs(member, logDate);
@@ -78,6 +119,36 @@ public class SmokingLogService {
             return response;
         }
     }
+
+    private QuitPlanStage findMatchedStageForDate(Member member, LocalDate logDate) {
+        List<QuitPlan> plans = quitPlanRepository.findByMember(member);
+
+        if (plans.isEmpty()) {
+            return null;
+        }
+
+        QuitPlan quitPlan = plans.stream()
+                .filter(p -> p.getStatus() == QuitPlanStatus.active)
+                .findFirst()
+                .orElse(null);
+
+        if (quitPlan == null) {
+            return null;
+        }
+
+        List<QuitPlanStage> stages = quitPlan.getStages();
+
+        return stages.stream()
+                .filter(stage ->
+                        stage.getStartDate() != null &&
+                                stage.getEndDate() != null &&
+                                !logDate.isBefore(stage.getStartDate()) &&
+                                !logDate.isAfter(stage.getEndDate())
+                )
+                .findFirst()
+                .orElse(null);
+    }
+
 
     public List<SmokingLogResponse> getMemberSmokingLogs(Long userId) {
         Member member = memberRepository.findById(userId)
@@ -217,4 +288,88 @@ public class SmokingLogService {
 
         notificationService.sendNotificationToUser(userNotificationRequest);
     }
+
+    public boolean isStageCompleted(QuitPlanStage stage, Member member) {
+        if (stage.getStartDate() == null || stage.getEndDate() == null || stage.getTargetCigaretteCount() == null) {
+            return false;
+        }
+
+        LocalDate startDate = stage.getStartDate();
+        LocalDate endDate = stage.getEndDate();
+        Integer target = stage.getTargetCigaretteCount();
+
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            Optional<SmokingLog> logOpt = smokingLogRepository.findByMemberAndLogDate(member, date);
+
+            if (logOpt.isEmpty()) {
+                return false;
+            }
+
+            SmokingLog log = logOpt.get();
+
+            if (log.getSmokeCount() != null && log.getSmokeCount() > target) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void sendStageCompletionNotification(Member member, QuitPlanStage stage) {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setTitle("Stage Completed!");
+        notificationRequest.setContent("Congratulations! You've successfully completed stage "
+                + stage.getStageNumber() + " of your quit plan. Keep going strong!");
+        notificationRequest.setIsActive(true);
+
+        User admin = userRepository.findByUsername("admin")
+                .orElseGet(() -> userRepository.findById(1L)
+                        .orElseThrow(() -> new RuntimeException("Admin user not found")));
+
+        NotificationResponse notificationResponse =
+                notificationService.createNotification(notificationRequest, admin.getId());
+
+        UserNotificationRequest userNotificationRequest = new UserNotificationRequest();
+        userNotificationRequest.setUserId(member.getUserId());
+        userNotificationRequest.setNotificationId(notificationResponse.getNotificationId());
+        userNotificationRequest.setPersonalizedReason("Quit plan stage completion");
+
+        notificationService.sendNotificationToUser(userNotificationRequest);
+    }
+
+    public double calculateStageProgress(QuitPlanStage stage, Member member) {
+        if (stage.getStartDate() == null || stage.getEndDate() == null) {
+            return 0.0;
+        }
+
+        LocalDate startDate = stage.getStartDate();
+        LocalDate endDate = stage.getEndDate();
+
+        long totalDays = startDate.datesUntil(endDate.plusDays(1)).count();
+        long daysWithLog = 0;
+
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            Optional<SmokingLog> logOpt = smokingLogRepository.findByMemberAndLogDate(member, date);
+            if (logOpt.isPresent()) {
+                SmokingLog log = logOpt.get();
+
+                // Nếu muốn tính đúng target, kiểm tra smokeCount ≤ target
+                if (stage.getTargetCigaretteCount() != null &&
+                        log.getSmokeCount() != null &&
+                        log.getSmokeCount() > stage.getTargetCigaretteCount()) {
+                    continue; // Không tính ngày vượt target
+                }
+
+                daysWithLog++;
+            }
+        }
+
+        if (totalDays == 0) return 0.0;
+
+        double percent = (double) daysWithLog / totalDays * 100;
+        return Math.round(percent * 10.0) / 10.0;
+    }
+
+
+
 }

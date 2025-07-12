@@ -35,6 +35,9 @@ public class QuitPlanStage {
     @Column(name = "advice", columnDefinition = "TEXT")
     private String advice;
 
+    @Column(name = "progress_percentage")
+    private Double progressPercentage;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private QuitPlanStageStatus status;

@@ -29,6 +29,8 @@ public interface SmokingLogMapper {
     @Mapping(target = "smoked", source = "smoked")
     @Mapping(target = "cravingLevel", source = "cravingLevel")
     @Mapping(target = "healthStatus", source = "healthStatus")
+    @Mapping(target = "quitPlanStageId", source = "quitPlanStage.id")
+    @Mapping(target = "stageNumber", source = "quitPlanStage.stageNumber")
     SmokingLogResponse toResponse(SmokingLog smokingLog);
 
     // KHÔNG cần ghi source nếu update trực tiếp từ request
