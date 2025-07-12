@@ -35,7 +35,8 @@ public class SmokingLogService {
     @Transactional
     public SmokingLogResponse createSmokingLog(SmokingLogRequest request, Long userId) {
         Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thành viên"));
+
 
         validateMemberCanLog(member);
 
@@ -152,7 +153,8 @@ public class SmokingLogService {
 
     public List<SmokingLogResponse> getMemberSmokingLogs(Long userId) {
         Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thành viên"));
+
 
         validateMemberCanLog(member);
 
@@ -176,7 +178,8 @@ public class SmokingLogService {
 
     public SmokingLogResponse getTodaySmokingLog(Long userId) {
         Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thành viên"));
+
 
         validateMemberCanLog(member);
 
@@ -205,13 +208,15 @@ public class SmokingLogService {
         // Check đã chọn coach chưa
         boolean hasCoach = memberCoachSelectionRepository.existsByMember(member);
         if (!hasCoach) {
-            throw new RuntimeException("You must select a coach before logging smoking data.");
+            throw new RuntimeException("Bạn phải chọn huấn luyện viên trước khi ghi nhật ký hút thuốc.");
+
         }
 
         // Check đã điền thông tin sơ bộ chưa
         boolean hasInitialInfo = memberInitialInfoRepository.findByMember(member).isPresent();
         if (!hasInitialInfo) {
-            throw new RuntimeException("You must submit your initial information before logging smoking data.");
+            throw new RuntimeException("Bạn cần điền thông tin sơ bộ trước khi ghi nhật ký hút thuốc.");
+
         }
     }
 
@@ -230,14 +235,16 @@ public class SmokingLogService {
     private void sendMissingLogNotification(Member member) {
         // Create notification for missing log
         NotificationRequest notificationRequest = new NotificationRequest();
-        notificationRequest.setTitle("Missing Smoking Log");
-        notificationRequest.setContent("You forgot to log your smoking data yesterday. Please remember to log your data daily to track your progress.");
+        notificationRequest.setTitle("Quên ghi nhật ký hút thuốc");
+        notificationRequest.setContent("Bạn đã quên ghi nhật ký hút thuốc ngày hôm qua. Hãy nhớ ghi nhật ký mỗi ngày để theo dõi tiến trình cai thuốc.");
         notificationRequest.setIsActive(true);
 
         // Find admin user to set as creator (using a default admin user ID or finding by username/email)
         User admin = userRepository.findByUsername("admin")
                 .orElseGet(() -> userRepository.findById(1L)
-                        .orElseThrow(() -> new RuntimeException("Admin user not found")));
+                        .orElseThrow(() -> new RuntimeException("Tài khoản quản trị viên không tồn tại")));
+
+
 
         // Create notification and get the response with the ID
         NotificationResponse notificationResponse = notificationService.createNotification(notificationRequest, admin.getId());
@@ -246,7 +253,8 @@ public class SmokingLogService {
         UserNotificationRequest userNotificationRequest = new UserNotificationRequest();
         userNotificationRequest.setUserId(member.getUserId());
         userNotificationRequest.setNotificationId(notificationResponse.getNotificationId());
-        userNotificationRequest.setPersonalizedReason("Daily smoking log reminder");
+        userNotificationRequest.setPersonalizedReason("Bạn quên ghi nhật ký hút thuốc hôm qua. Vui lòng cập nhật để theo dõi tiến trình.");
+
 
         notificationService.sendNotificationToUser(userNotificationRequest);
     }
@@ -262,18 +270,20 @@ public class SmokingLogService {
         // Find admin user to set as creator (using a default admin user ID or finding by username/email)
         User admin = userRepository.findByUsername("admin")
                 .orElseGet(() -> userRepository.findById(1L)
-                        .orElseThrow(() -> new RuntimeException("Admin user not found")));
+                        .orElseThrow(() -> new RuntimeException("Tài khoản quản trị viên không tồn tại")));
+
 
         if (currentCount < previousCount) {
             // Encouragement notification
-            notificationRequest.setTitle("Great Progress!");
+            notificationRequest.setTitle("Tiến bộ tuyệt vời!");
             notificationRequest.setContent("Congratulations! You've reduced your smoking from " + previousCount + 
                     " to " + currentCount + " cigarettes. Keep up the good work!");
         } else {
             // Warning notification
             notificationRequest.setTitle("Smoking Increase Alert");
-            notificationRequest.setContent("We noticed your smoking has increased from " + previousCount + 
-                    " to " + currentCount + " cigarettes. Remember your goal to quit smoking. Stay strong!");
+            notificationRequest.setContent("Chúc mừng bạn! Bạn đã giảm số điếu thuốc từ " + previousCount +
+                    " xuống còn " + currentCount + ". Tiếp tục phát huy nhé!");
+
         }
 
         // Create notification and get the response with the ID
@@ -283,8 +293,10 @@ public class SmokingLogService {
         UserNotificationRequest userNotificationRequest = new UserNotificationRequest();
         userNotificationRequest.setUserId(member.getUserId());
         userNotificationRequest.setNotificationId(notificationResponse.getNotificationId());
-        userNotificationRequest.setPersonalizedReason(currentCount < previousCount ? 
-                "Smoking reduction achievement" : "Smoking increase warning");
+        userNotificationRequest.setPersonalizedReason(currentCount < previousCount ?
+                "Bạn đã giảm số lượng thuốc hút – cố gắng duy trì nhé!" :
+                "Số lượng thuốc hút đã tăng – hãy kiên trì với mục tiêu cai thuốc!");
+
 
         notificationService.sendNotificationToUser(userNotificationRequest);
     }
@@ -317,14 +329,15 @@ public class SmokingLogService {
 
     private void sendStageCompletionNotification(Member member, QuitPlanStage stage) {
         NotificationRequest notificationRequest = new NotificationRequest();
-        notificationRequest.setTitle("Stage Completed!");
-        notificationRequest.setContent("Congratulations! You've successfully completed stage "
-                + stage.getStageNumber() + " of your quit plan. Keep going strong!");
+        notificationRequest.setTitle("Hoàn thành giai đoạn!");
+        notificationRequest.setContent("Chúc mừng! Bạn đã hoàn thành giai đoạn "
+                + stage.getStageNumber() + " trong kế hoạch cai thuốc. Tiếp tục cố gắng nhé!");
         notificationRequest.setIsActive(true);
 
         User admin = userRepository.findByUsername("admin")
                 .orElseGet(() -> userRepository.findById(1L)
-                        .orElseThrow(() -> new RuntimeException("Admin user not found")));
+                        .orElseThrow(() -> new RuntimeException("Tài khoản quản trị viên không tồn tại")));
+
 
         NotificationResponse notificationResponse =
                 notificationService.createNotification(notificationRequest, admin.getId());
@@ -332,7 +345,7 @@ public class SmokingLogService {
         UserNotificationRequest userNotificationRequest = new UserNotificationRequest();
         userNotificationRequest.setUserId(member.getUserId());
         userNotificationRequest.setNotificationId(notificationResponse.getNotificationId());
-        userNotificationRequest.setPersonalizedReason("Quit plan stage completion");
+        userNotificationRequest.setPersonalizedReason("Bạn đã hoàn thành một giai đoạn trong kế hoạch cai thuốc – tiếp tục cố gắng nhé!");
 
         notificationService.sendNotificationToUser(userNotificationRequest);
     }
