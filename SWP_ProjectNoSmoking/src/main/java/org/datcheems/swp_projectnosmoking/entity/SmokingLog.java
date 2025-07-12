@@ -35,13 +35,15 @@ public class SmokingLog {
     @Column(name = "health_status", length = 255)
     private String healthStatus;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quit_plan_stage_id")
+    private QuitPlanStage quitPlanStage;
+
     public enum CravingLevel {
         LOW,
         MEDIUM,
         HIGH
     }
-
-
 
     private LocalDate logDate;
 

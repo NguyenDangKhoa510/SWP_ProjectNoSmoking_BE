@@ -13,4 +13,5 @@ public class QuitPlanStageResponse {
     private Integer targetCigaretteCount;
     private String advice;
     private String status;
+    private Double progressPercentage;
 }
