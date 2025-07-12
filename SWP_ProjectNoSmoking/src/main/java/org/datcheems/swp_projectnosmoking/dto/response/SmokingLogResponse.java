@@ -18,4 +18,6 @@ public class SmokingLogResponse {
     private SmokingLog.Frequency frequency;
     private Integer previousSmokeCount; // For comparison with previous log
     private Boolean isImprovement; // True if smoke count decreased or is zero
+    private Long quitPlanStageId;
+    private Integer stageNumber;
 }

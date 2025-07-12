@@ -19,5 +19,6 @@ public interface QuitPlanMapper {
     QuitPlanResponse toResponse(QuitPlan quitPlan);
 
     @Mapping(target = "stageId", source = "id")
+    @Mapping(target = "progressPercentage", source = "progressPercentage")
     QuitPlanStageResponse toStageResponse(QuitPlanStage stage);
 }
