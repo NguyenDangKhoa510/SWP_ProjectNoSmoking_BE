@@ -57,5 +57,5 @@ public class BlogController {
     public ResponseEntity<ResponseObject<List<BlogResponse>>> getBlogsByCategory(@PathVariable Long categoryId) {
         return blogService.getBlogsByCategory(categoryId);
     }
-    
+
 }
