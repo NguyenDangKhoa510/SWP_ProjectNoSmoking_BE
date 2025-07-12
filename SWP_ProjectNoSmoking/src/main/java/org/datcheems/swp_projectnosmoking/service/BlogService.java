@@ -152,6 +152,26 @@ public class BlogService {
         }
     }
 
+    public ResponseEntity<ResponseObject<List<BlogResponse>>> getBlogsByCategory(Long categoryId) {
+        ResponseObject<List<BlogResponse>> response = new ResponseObject<>();
+
+        BlogCategory category = blogCategoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + categoryId));
+
+        List<BlogPost> blogs = blogRepository.findAllByCategory(category);
+
+        List<BlogResponse> blogResponses = blogs.stream()
+                .map(blogMapper::toResponse)
+                .toList();
+
+        response.setStatus("success");
+        response.setMessage("Blogs fetched successfully for category ID: " + categoryId);
+        response.setData(blogResponses);
+
+        return ResponseEntity.ok(response);
+    }
+
+
 
 
 }

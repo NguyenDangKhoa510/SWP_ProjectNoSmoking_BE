@@ -53,4 +53,9 @@ public class BlogController {
         return blogService.updateBlog(id, request);
     }
 
+    @GetMapping("/getBlogByCategoryId/{categoryId}")
+    public ResponseEntity<ResponseObject<List<BlogResponse>>> getBlogsByCategory(@PathVariable Long categoryId) {
+        return blogService.getBlogsByCategory(categoryId);
+    }
+    
 }
