@@ -276,13 +276,15 @@ public class SmokingLogService {
         if (currentCount < previousCount) {
             // Encouragement notification
             notificationRequest.setTitle("Tiến bộ tuyệt vời!");
-            notificationRequest.setContent("Congratulations! You've reduced your smoking from " + previousCount + 
-                    " to " + currentCount + " cigarettes. Keep up the good work!");
-        } else {
-            // Warning notification
-            notificationRequest.setTitle("Smoking Increase Alert");
             notificationRequest.setContent("Chúc mừng bạn! Bạn đã giảm số điếu thuốc từ " + previousCount +
                     " xuống còn " + currentCount + ". Tiếp tục phát huy nhé!");
+
+        } else {
+            // Warning notification
+            notificationRequest.setTitle("Cảnh báo tăng số lượng thuốc hút");
+            notificationRequest.setContent("Chúng tôi nhận thấy bạn đã hút nhiều hơn: từ " + previousCount +
+                    " lên " + currentCount + " điếu. Hãy kiên trì với mục tiêu cai thuốc nhé!");
+
 
         }
 
