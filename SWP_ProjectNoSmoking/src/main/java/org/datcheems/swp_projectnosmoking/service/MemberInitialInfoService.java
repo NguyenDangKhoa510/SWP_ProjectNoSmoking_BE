@@ -87,4 +87,12 @@ public class MemberInitialInfoService {
         return userRepository.findByUsername(auth.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
+
+    public boolean hasCurrentMemberSubmittedInitialInfo() {
+        User currentUser = getCurrentUser();
+        Member member = memberRepository.findByUserId(currentUser.getId())
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+        return repository.findByMember(member).isPresent();
+    }
+
 }

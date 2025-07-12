@@ -30,4 +30,10 @@ public class MemberInitialInfoController {
         var list = service.getInitialInfosOfMyMembers();
         return ResponseEntity.ok(Map.of("message", "Initial infos retrieved", "data", list));
     }
+
+    @GetMapping("/has-submitted")
+    public ResponseEntity<Boolean> hasSubmitted() {
+        boolean result = service.hasCurrentMemberSubmittedInitialInfo();
+        return ResponseEntity.ok(result);
+    }
 }
