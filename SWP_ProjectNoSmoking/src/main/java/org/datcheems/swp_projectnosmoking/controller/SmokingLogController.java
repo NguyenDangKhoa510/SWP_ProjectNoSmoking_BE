@@ -92,6 +92,27 @@ public class SmokingLogController {
     }
 
 
+
+    /**
+     * Get smoking logs of a member (coach only)
+     */
+    @PreAuthorize("hasRole('COACH')")
+    @GetMapping("/member/{memberId}")
+    public ResponseEntity<List<SmokingLogResponse>> getLogsForMember(@PathVariable Long memberId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String coachUsername = authentication.getName();
+
+        // Tìm user coach
+        User coachUser = userRepository.findByUsername(coachUsername)
+                .orElseThrow(() -> new RuntimeException("Coach not found"));
+
+        List<SmokingLogResponse> logs = smokingLogService.getSmokingLogsForCoach(memberId, coachUser.getId());
+
+        return ResponseEntity.ok(logs);
+    }
+
+
+
     /**
      * Manually trigger the check for missing logs (admin only)
      * @return Success message

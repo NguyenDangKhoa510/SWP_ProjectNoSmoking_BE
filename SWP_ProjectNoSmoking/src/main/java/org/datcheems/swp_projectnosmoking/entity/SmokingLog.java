@@ -3,6 +3,7 @@ package org.datcheems.swp_projectnosmoking.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDate;
 
@@ -32,6 +33,8 @@ public class SmokingLog {
     @Column(name = "craving_level")
     private CravingLevel cravingLevel;
 
+
+    @Nationalized
     @Column(name = "health_status", length = 255)
     private String healthStatus;
 
