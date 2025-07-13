@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface UserNotificationRepository extends JpaRepository<UserNotification, Long> {
@@ -19,6 +20,12 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
 
     List<UserNotification> findByNotification_CreatedBy_Id(Long coachUserId);
 
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM UserNotification u WHERE u.sentAt < :threshold")
+    void deleteAllOlderThan(@Param("threshold") LocalDateTime threshold);
+
+    List<UserNotification> findBySentAtBefore(LocalDateTime threshold);
 
 
 
