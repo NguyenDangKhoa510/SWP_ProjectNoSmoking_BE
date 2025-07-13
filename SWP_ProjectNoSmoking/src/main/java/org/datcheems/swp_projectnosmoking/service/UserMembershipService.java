@@ -101,6 +101,19 @@ public class UserMembershipService {
             response.setData(null);
             return response;
         }
+        List<UserMembership> memberships = userMembershipRepository.findByMember_UserId(request.getUserId());
+        boolean hasActive = memberships.stream().anyMatch(m ->
+                "ACTIVE".equalsIgnoreCase(m.getStatus()) &&
+                        m.getEndDate() != null &&
+                        !m.getEndDate().isBefore(LocalDate.now())
+        );
+
+        if (hasActive) {
+            response.setStatus("fail");
+            response.setMessage("Người dùng đã có gói thành viên đang hoạt động");
+            response.setData(null);
+            return response;
+        }
 
         UserMembership entity = new UserMembership();
         entity.setMember(memberOpt.get());
@@ -214,4 +227,5 @@ public class UserMembershipService {
         }
         return response;
     }
+
 }
