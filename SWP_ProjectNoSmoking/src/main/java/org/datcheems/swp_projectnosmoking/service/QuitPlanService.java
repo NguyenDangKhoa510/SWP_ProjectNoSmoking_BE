@@ -282,4 +282,35 @@ public class QuitPlanService {
         }
     }
 
+    public List<QuitPlanStageResponse> getAllQuitPlanStagesForCurrentUser() {
+        User currentUser = getCurrentUser();
+
+        List<QuitPlan> quitPlans;
+
+        if (isCoach(currentUser)) {
+            Coach coach = coachRepository.findById(currentUser.getId())
+                    .orElseThrow(() -> new RuntimeException("Coach profile not found"));
+            quitPlans = quitPlanRepository.findByCoach(coach);
+
+        } else if (isMember(currentUser)) {
+            Member member = memberRepository.findByUserId(currentUser.getId())
+                    .orElseThrow(() -> new RuntimeException("Member profile not found"));
+            quitPlans = quitPlanRepository.findByMember(member);
+
+        } else {
+            throw new RuntimeException("Unsupported role for fetching Quit Plan Stages");
+        }
+
+        List<QuitPlanStage> allStages = quitPlans.stream()
+                .flatMap(plan -> plan.getStages().stream())
+                .collect(Collectors.toList());
+
+        return allStages.stream()
+                .map(quitPlanMapper::toStageResponse)
+                .collect(Collectors.toList());
+    }
+
+
+
+
 }

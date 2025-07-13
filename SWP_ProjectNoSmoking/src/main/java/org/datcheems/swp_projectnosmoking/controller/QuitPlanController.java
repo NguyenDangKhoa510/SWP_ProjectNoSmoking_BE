@@ -98,4 +98,10 @@ public class QuitPlanController {
         ));
     }
 
+    @GetMapping("/stages/my")
+    public ResponseEntity<List<QuitPlanStageResponse>> getAllStagesForCurrentUser() {
+        List<QuitPlanStageResponse> stages = quitPlanService.getAllQuitPlanStagesForCurrentUser();
+        return ResponseEntity.ok(stages);
+    }
+
 }
