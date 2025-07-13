@@ -28,10 +28,10 @@ public class MemberInitialInfoService {
         Member member = memberRepository.findByUserId(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 
-        boolean hasCoach = memberCoachSelectionRepository.existsByMember(member);
-        if (!hasCoach) {
-            throw new RuntimeException("You must select a Coach before submitting initial information.");
-        }
+//        boolean hasCoach = memberCoachSelectionRepository.existsByMember(member);
+//        if (!hasCoach) {
+//            throw new RuntimeException("You must select a Coach before submitting initial information.");
+//        }
 
 
         MemberInitialInfo info = repository.findByMember(member).orElse(new MemberInitialInfo());
