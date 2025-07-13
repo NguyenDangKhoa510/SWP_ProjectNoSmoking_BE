@@ -221,6 +221,34 @@ public class SmokingLogService {
     }
 
 
+    public List<SmokingLogResponse> getSmokingLogsForCoach(Long memberUserId, Long coachUserId) {
+        // Kiểm tra member tồn tại
+        Member member = memberRepository.findById(memberUserId)
+                .orElseThrow(() -> new RuntimeException("Member không tồn tại"));
+
+        // Kiểm tra quan hệ giữa coach và member
+        boolean isManaging = memberCoachSelectionRepository.existsByMember_UserIdAndCoach_UserId(memberUserId, coachUserId);
+        if (!isManaging) {
+            throw new RuntimeException("Bạn không có quyền xem log của member này");
+        }
+
+        List<SmokingLog> logs = smokingLogRepository.findByMemberOrderByLogDateDesc(member);
+
+        return logs.stream().map(log -> {
+            SmokingLogResponse response = smokingLogMapper.toResponse(log);
+
+            // Lấy log trước để so sánh
+            List<SmokingLog> previousLogs = smokingLogRepository.findPreviousLogs(member, log.getLogDate());
+            Integer previousCount = previousLogs.isEmpty() ? null : previousLogs.get(0).getSmokeCount();
+
+            response.setPreviousSmokeCount(previousCount);
+            response.setIsImprovement(previousCount == null || log.getSmokeCount() <= previousCount);
+            return response;
+        }).collect(Collectors.toList());
+    }
+
+
+
 
     @Transactional
     public void checkMissingLogs() {
