@@ -3,6 +3,7 @@ package org.datcheems.swp_projectnosmoking.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDate;
 
@@ -27,6 +28,7 @@ public class CoachReview {
 
     private Integer rating;
 
+    @Nationalized
     private String comment;
 
     private LocalDate createdAt = LocalDate.now();

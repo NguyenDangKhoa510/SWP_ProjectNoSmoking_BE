@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
@@ -27,6 +28,7 @@ public class QuitPlan {
     @JoinColumn(name = "coach_id", nullable = false)
     private Coach coach;
 
+    @Nationalized
     @Column(name = "reason_to_quit")
     private String reasonToQuit;
 
@@ -45,6 +47,7 @@ public class QuitPlan {
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 
+    @Nationalized
     private String goal;
 
     @OneToMany(mappedBy = "quitPlan", cascade = CascadeType.ALL, orphanRemoval = true)

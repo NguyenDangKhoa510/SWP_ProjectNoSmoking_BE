@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Nationalized;
 
 @Entity
 @Table(name = "member_initial_info")
@@ -23,9 +24,11 @@ public class MemberInitialInfo {
     private Integer yearsSmoking;
     private Integer cigarettesPerDay;
 
+    @Nationalized
     @Column(columnDefinition = "TEXT")
     private String reasonToQuit;
 
+    @Nationalized
     @Column(columnDefinition = "TEXT")
     private String healthStatus;
 }
