@@ -15,5 +15,7 @@ public class DashboardResponse {
     private long newUsersThisMonth;
     private double growthRatePercent;
     private List<Map<String, Object>> topMembersWithSmokeCount;
+    private List<Map<String, Object>> topRatedCoaches;
+
 
 }

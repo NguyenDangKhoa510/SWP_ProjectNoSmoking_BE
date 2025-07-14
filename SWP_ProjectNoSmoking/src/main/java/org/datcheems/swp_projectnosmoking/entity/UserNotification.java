@@ -29,7 +29,7 @@ public class UserNotification {
     @Enumerated(EnumType.STRING)
     private DeliveryStatus deliveryStatus = DeliveryStatus.SENT;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String personalizedReason;
 
     public enum DeliveryStatus {

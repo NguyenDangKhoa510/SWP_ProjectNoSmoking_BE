@@ -138,7 +138,7 @@ public class CoachReviewService {
         List<CoachReview> reviews = coachReviewRepository.findAll();
 
         return reviews.stream()
-                .map(this::toResponse)
+                .map(review -> toResponse(review, true))
                 .collect(Collectors.toList());
     }
 
@@ -170,6 +170,21 @@ public class CoachReviewService {
     }
 
 
+    public void deleteReviewByAdmin(Long reviewId) {
+        User currentUser = getCurrentUser();
+
+        if (!hasRole(currentUser, "ADMIN")) {
+            throw new RuntimeException("Only admin can delete reviews");
+        }
+
+        CoachReview review = coachReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        coachReviewRepository.delete(review);
+    }
+
+
+
 
     public List<CoachReviewResponse> getReviewsByCoachId(Long coachId) {
         User currentUser = getCurrentUser();
@@ -184,7 +199,7 @@ public class CoachReviewService {
         List<CoachReview> reviews = coachReviewRepository.findByCoach(coach);
 
         return reviews.stream()
-                .map(this::toResponse)
+                .map(review -> toResponse(review, true))
                 .collect(Collectors.toList());
     }
 
@@ -194,14 +209,32 @@ public class CoachReviewService {
 
 
 
-    private CoachReviewResponse toResponse(CoachReview review) {
+
+    private CoachReviewResponse toResponse(CoachReview review, boolean isAdminView) {
         CoachReviewResponse res = new CoachReviewResponse();
         res.setReviewId(review.getId());
         res.setRating(review.getRating());
         res.setComment(review.getComment());
         res.setCreatedAt(review.getCreatedAt());
+
+        if (isAdminView) {
+            res.setReviewerName(review.getMember().getUser().getFullName());
+            res.setReviewerUsername(review.getMember().getUser().getUsername());
+        } else {
+            res.setReviewerName("Ẩn danh");
+            res.setReviewerUsername(null);
+        }
+
         return res;
     }
+
+    private CoachReviewResponse toResponse(CoachReview review) {
+        return toResponse(review, false);
+    }
+
+
+
+
 
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
