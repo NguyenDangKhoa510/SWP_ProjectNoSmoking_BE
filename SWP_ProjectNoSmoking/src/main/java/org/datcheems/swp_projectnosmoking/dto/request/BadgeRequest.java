@@ -13,5 +13,6 @@ public class BadgeRequest {
     String name;
     String description;
     String condition_description;
+    String iconUrl;
     int score;
 }

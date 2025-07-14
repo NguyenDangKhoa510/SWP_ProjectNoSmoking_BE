@@ -143,6 +143,7 @@ public class MemberBadgeService {
                     res.setId(memberBadge.getId());
                     res.setBadgeName(memberBadge.getBadge().getName());
                     res.setBadgeDescription(memberBadge.getBadge().getDescription());
+                    res.setIconUrl(memberBadge.getBadge().getIconUrl());
                     res.setScore(memberBadge.getBadge().getScore());
                     res.setAwardedDate(memberBadge.getAwardedDate());
                     return res;
