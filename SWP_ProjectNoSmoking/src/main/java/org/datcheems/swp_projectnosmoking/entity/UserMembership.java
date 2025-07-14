@@ -23,7 +23,7 @@ public class UserMembership {
     // FK tới bảng tblMembershipPackage (MembershipPackage_Id)
     @ManyToOne
     @JoinColumn(name = "membership_package_id", nullable = false)
-    private MembershipPackage membershipPackage;
+    private MembershipPackage membershipPackageId;
 
     // Có thể thêm ngày đăng ký và ngày kết thúc nếu cần
     @Column(name = "start_date")

@@ -30,8 +30,8 @@ public class UserMembershipService {
                 .membershipId(entity.getMembershipId())
                 .userId(entity.getMember().getUserId())
                 .userName(entity.getMember().getUser().getFullName())
-                .membershipPackageId(entity.getMembershipPackage().getId())
-                .membershipPackageName(entity.getMembershipPackage().getName())
+                .membershipPackageId(entity.getMembershipPackageId() .getId())
+                .membershipPackageName(entity.getMembershipPackageId().getName())
                 .startDate(entity.getStartDate())
                 .endDate(entity.getEndDate())
                 .status(entity.getStatus())
@@ -58,7 +58,7 @@ public class UserMembershipService {
         double totalRevenue = 0.0;
 
         for (UserMembership record : records) {
-            MembershipPackage pack = record.getMembershipPackage();
+            MembershipPackage pack = record.getMembershipPackageId();
             if (pack != null && record.getStatus() != null && record.getStatus().equalsIgnoreCase("ACTIVE")) {
                 totalRevenue += pack.getPrice() != null ? pack.getPrice() : 0.0;
             }
@@ -114,10 +114,22 @@ public class UserMembershipService {
             response.setData(null);
             return response;
         }
+        boolean isDuplicate = memberships.stream().anyMatch(m ->
+                m.getMembershipPackageId().getId() == request.getMembershipPackageId() &&
+                        m.getStartDate().equals(request.getStartDate()) &&
+                        m.getEndDate().equals(request.getEndDate())
+        );
+
+        if (isDuplicate) {
+            response.setStatus("fail");
+            response.setMessage("Người dùng đã đăng ký gói này trong khoảng thời gian tương ứng");
+            response.setData(null);
+            return response;
+        }
 
         UserMembership entity = new UserMembership();
         entity.setMember(memberOpt.get());
-        entity.setMembershipPackage(packageOpt.get());
+        entity.setMembershipPackageId(packageOpt.get());
         entity.setStartDate(request.getStartDate());
         entity.setEndDate(request.getEndDate());
         entity.setStatus(request.getStatus());
@@ -153,7 +165,7 @@ public class UserMembershipService {
 
         UserMembership entity = existingOpt.get();
         entity.setMember(memberOpt.get());
-        entity.setMembershipPackage(packageOpt.get());
+        entity.setMembershipPackageId(packageOpt.get());
         entity.setStartDate(request.getStartDate());
         entity.setEndDate(request.getEndDate());
         entity.setStatus(request.getStatus());
