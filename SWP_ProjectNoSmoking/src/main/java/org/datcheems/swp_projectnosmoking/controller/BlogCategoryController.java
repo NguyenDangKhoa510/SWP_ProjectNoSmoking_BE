@@ -72,4 +72,11 @@ public class BlogCategoryController {
 
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/categories/{id}")
+    public ResponseEntity<BlogCategoryResponse> deleteCategory(@PathVariable Long id) {
+        BlogCategoryResponse deleted = blogCategoryService.deleteCategory(id);
+        return ResponseEntity.ok(deleted);
+    }
+
 }
