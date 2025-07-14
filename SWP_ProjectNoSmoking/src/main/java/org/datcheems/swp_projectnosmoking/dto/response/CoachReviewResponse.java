@@ -12,4 +12,7 @@ public class CoachReviewResponse {
     private Integer rating;
     private String comment;
     private LocalDate createdAt;
+    private String reviewerName;
+    private String reviewerUsername;
+
 }

@@ -97,4 +97,13 @@ public class CoachReviewController {
     }
 
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<?> deleteReviewByAdmin(@PathVariable Long reviewId) {
+        coachReviewService.deleteReviewByAdmin(reviewId);
+        return ResponseEntity.ok(Map.of("message", "Review deleted successfully"));
+    }
+
+
+
 }

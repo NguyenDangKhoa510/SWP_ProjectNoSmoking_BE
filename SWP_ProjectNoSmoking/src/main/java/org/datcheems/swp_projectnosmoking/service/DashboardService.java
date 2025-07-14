@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.datcheems.swp_projectnosmoking.dto.response.DashboardResponse;
 import org.datcheems.swp_projectnosmoking.entity.Member;
 import org.datcheems.swp_projectnosmoking.repository.*;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -24,6 +25,7 @@ public class DashboardService {
     private final QuitPlanRepository quitPlanRepository;
     private final NotificationRepository notificationRepository;
     private final SmokingLogRepository smokingLogRepository;
+    private final CoachReviewRepository coachReviewRepository;
 
     public DashboardResponse getAdvancedDashboardStats() {
         DashboardResponse response = new DashboardResponse();
@@ -70,9 +72,25 @@ public class DashboardService {
 
         response.setTopMembersWithSmokeCount(namesWithCount);
 
+        List<Object[]> topCoachesRaw = coachReviewRepository.findTopRatedCoaches(PageRequest.of(0, 5));
+
+        List<Map<String, Object>> topCoaches = topCoachesRaw.stream()
+                .map(obj -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("coachId", obj[0]);
+                    map.put("coachName", obj[1]);
+                    map.put("averageRating", Math.round((Double)obj[2] * 100.0) / 100.0);
+                    return map;
+                })
+                .collect(Collectors.toList());
+
+        response.setTopRatedCoaches(topCoaches);
+
 
 
         return response;
     }
+
+
 
 }
