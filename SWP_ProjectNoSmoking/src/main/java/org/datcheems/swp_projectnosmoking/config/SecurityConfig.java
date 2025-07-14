@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/password/validate-code").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/blog-categories/getAll").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/blog/getAllBlog").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/badges/GetAll").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/membership-packages/getAll").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/coach/getAllCoachProfiles").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/member-badge/getallbage").permitAll()
