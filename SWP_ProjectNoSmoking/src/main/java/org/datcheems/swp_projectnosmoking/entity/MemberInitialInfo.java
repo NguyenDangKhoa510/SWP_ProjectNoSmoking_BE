@@ -25,10 +25,10 @@ public class MemberInitialInfo {
     private Integer cigarettesPerDay;
 
     @Nationalized
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String reasonToQuit;
 
     @Nationalized
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String healthStatus;
 }
