@@ -117,7 +117,7 @@ public class SmokingLogController {
      * Manually trigger the check for missing logs (admin only)
      * @return Success message
      */
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
 
     @PostMapping("/check-missing")
     @ResponseStatus(HttpStatus.OK)
