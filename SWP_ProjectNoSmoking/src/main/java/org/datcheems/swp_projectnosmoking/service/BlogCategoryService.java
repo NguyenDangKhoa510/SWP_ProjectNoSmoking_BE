@@ -66,4 +66,18 @@ public class BlogCategoryService {
 
         return response;
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public BlogCategoryResponse deleteCategory(Long id) {
+        BlogCategory category = blogCategoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        blogCategoryRepository.delete(category);
+
+        BlogCategoryResponse response = new BlogCategoryResponse();
+        response.setId(category.getId());
+        response.setName(category.getName());
+        return response;
+    }
+
 }
