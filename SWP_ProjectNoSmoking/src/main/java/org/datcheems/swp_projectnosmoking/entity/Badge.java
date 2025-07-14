@@ -21,5 +21,6 @@ public class Badge {
     private String description;
     @Nationalized
     private String condition_description;
+    private String iconUrl;
     private int score;
 }

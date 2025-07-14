@@ -8,6 +8,7 @@ public class MemberBadgeResponse {
     private Long id;
     private String badgeName;
     private String badgeDescription;
+    private String iconUrl;
     private int score;
     private LocalDate awardedDate;
 }
