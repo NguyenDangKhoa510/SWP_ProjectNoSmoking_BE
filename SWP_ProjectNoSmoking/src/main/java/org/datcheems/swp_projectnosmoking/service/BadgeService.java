@@ -62,6 +62,7 @@ public class BadgeService {
                 .name(badge.getName())
                 .description(badge.getDescription())
                 .condition_description(badge.getCondition_description())
+                .iconUrl(badge.getIconUrl())
                 .score(badge.getScore())
                 .build();
     }
