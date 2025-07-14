@@ -22,8 +22,7 @@ public class Badge {
     @Nationalized
     private String condition_description;
 
-    @Lob
-    @Column(columnDefinition = "VARCHAR(MAX)")
+    @Column(name = "icon_url", columnDefinition = "NVARCHAR(MAX)")
     private String iconUrl;
     
     private int score;
