@@ -22,6 +22,7 @@ public class Badge {
     @Nationalized
     private String condition_description;
 
+    @Nationalized
     @Column(name = "icon_url", columnDefinition = "NVARCHAR(MAX)")
     private String iconUrl;
     
