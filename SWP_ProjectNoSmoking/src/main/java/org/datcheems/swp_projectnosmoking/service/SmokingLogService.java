@@ -256,7 +256,9 @@ public class SmokingLogService {
         List<Member> membersWithoutLog = smokingLogRepository.findMembersWithoutLogForDate(yesterday);
 
         for (Member member : membersWithoutLog) {
-            sendMissingLogNotification(member);
+            boolean hasActivePlan = quitPlanRepository.existsByMemberAndStatus(member, QuitPlanStatus.active);
+            if(hasActivePlan)
+                sendMissingLogNotification(member);
         }
     }
 
