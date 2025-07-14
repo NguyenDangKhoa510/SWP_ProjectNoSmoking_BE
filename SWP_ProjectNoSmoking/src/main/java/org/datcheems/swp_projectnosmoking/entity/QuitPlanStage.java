@@ -32,7 +32,7 @@ public class QuitPlanStage {
     @Column(name = "target_cigarette_count")
     private Integer targetCigaretteCount;
 
-    @Column(name = "advice", columnDefinition = "TEXT")
+    @Column(name = "advice", columnDefinition = "NVARCHAR(255)")
     private String advice;
 
     @Column(name = "progress_percentage")
