@@ -19,7 +19,15 @@ public class Badge {
     private String name;
     @Nationalized
     private String description;
+
+    private int condition;
+
     @Nationalized
-    private String condition_description;
+    private String type;
+
+    @Nationalized
+    @Column(name = "icon_url", columnDefinition = "NVARCHAR(MAX)")
+    private String iconUrl;
+
     private int score;
 }

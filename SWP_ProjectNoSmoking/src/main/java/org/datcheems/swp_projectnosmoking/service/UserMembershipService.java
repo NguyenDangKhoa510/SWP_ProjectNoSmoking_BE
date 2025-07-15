@@ -55,6 +55,26 @@ public class UserMembershipService {
     }
 
 
+    public ResponseObject<Double> getTotalRevenue() {
+        List<UserMembership> records = userMembershipRepository.findAll();
+        double totalRevenue = 0.0;
+
+        for (UserMembership record : records) {
+            MembershipPackage pack = record.getMembershipPackageId();
+            if (pack != null && record.getStatus() != null && record.getStatus().equalsIgnoreCase("ACTIVE")) {
+                totalRevenue += pack.getPrice() != null ? pack.getPrice() : 0.0;
+            }
+        }
+
+        ResponseObject<Double> response = new ResponseObject<>();
+        response.setStatus("success");
+        response.setMessage("Tổng doanh thu tính thành công");
+        response.setData(totalRevenue);
+        return response;
+    }
+
+
+
     public ResponseObject<UserMembershipResponse> getById(Long id) {
         Optional<UserMembership> optional = userMembershipRepository.findById(id);
         ResponseObject<UserMembershipResponse> response = new ResponseObject<>();

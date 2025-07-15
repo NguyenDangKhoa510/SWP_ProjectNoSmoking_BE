@@ -20,7 +20,9 @@ public class BadgeService {
         Badge badge = new Badge();
         badge.setName(request.getName());
         badge.setDescription(request.getDescription());
-        badge.setCondition_description(request.getCondition_description());
+        badge.setCondition(request.getCondition());
+        badge.setType(request.getType());
+        badge.setIconUrl(request.getIconUrl());
         badge.setScore(request.getScore());
         badge = badgeRepository.save(badge);
         return mapToResponse(badge);
@@ -44,7 +46,9 @@ public class BadgeService {
                 .orElseThrow(() -> new RuntimeException("Badge not found with id: " + id));
         badge.setName(request.getName());
         badge.setDescription(request.getDescription());
-        badge.setCondition_description(request.getCondition_description());
+        badge.setCondition(request.getCondition());
+        badge.setType(request.getType());
+        badge.setIconUrl(request.getIconUrl());
         badge.setScore(request.getScore());
         badge = badgeRepository.save(badge);
         return mapToResponse(badge);
@@ -59,7 +63,9 @@ public class BadgeService {
                 .id(badge.getId())
                 .name(badge.getName())
                 .description(badge.getDescription())
-                .condition_description(badge.getCondition_description())
+                .condition(badge.getCondition())
+                .type(badge.getType())
+                .iconUrl(badge.getIconUrl())
                 .score(badge.getScore())
                 .build();
     }
