@@ -64,6 +64,7 @@ public class PaymentController {
 
         boolean paymentSuccess = false;
         String errorMessage = "";
+        String transactionId = params.get("vnp_TxnRef");
 
         // Verify và xử lý thanh toán
         try {
@@ -76,10 +77,24 @@ public class PaymentController {
             }
             // Chỉ verify và xử lý khi responseCode là 00
             else if (paymentService.verifyPaymentWithBypass(params)) {
-
                 log.info("VNPay signature verified successfully (or bypassed for testing)");
-                paymentService.processPayment(params); // Sẽ gọi UserMembershipService.create()
-                paymentSuccess = true;
+
+                try {
+                    paymentService.processPayment(params); // Sẽ gọi UserMembershipService.create()
+                    paymentSuccess = true;
+                    log.info("Payment processed successfully for transaction: {}", transactionId);
+                } catch (Exception e) {
+                    // Check if this is an "already processed" exception - which is actually a success case
+                    if (e.getMessage() != null && e.getMessage().contains("already_processed")) {
+                        log.info("Payment already processed for transaction: {}", transactionId);
+                        paymentSuccess = true; // This is still a success case for the frontend
+                        errorMessage = "Payment was already processed successfully";
+                    } else {
+                        log.error("Error processing payment for transaction: {}", transactionId, e);
+                        errorMessage = "Error processing payment: " + e.getMessage();
+                        paymentSuccess = false;
+                    }
+                }
             } else {
                 log.error("VNPay signature verification failed");
                 errorMessage = "Signature verification failed";
@@ -94,18 +109,22 @@ public class PaymentController {
         params.put("payment_processed", paymentSuccess ? "true" : "false");
         if (!paymentSuccess && !errorMessage.isEmpty()) {
             params.put("error_message", errorMessage);
+        } else if (paymentSuccess && !errorMessage.isEmpty()) {
+            params.put("payment_message", errorMessage); // For informational messages on success
         }
 
         // Redirect về Frontend với tất cả parameters
         StringBuilder queryString = new StringBuilder();
         params.forEach((key, value) -> {
-            if (queryString.length() > 0) {
-                queryString.append("&");
-            }
-            try {
-                queryString.append(key).append("=").append(URLEncoder.encode(value, "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                queryString.append(key).append("=").append(value);
+            if (value != null) {
+                if (queryString.length() > 0) {
+                    queryString.append("&");
+                }
+                try {
+                    queryString.append(key).append("=").append(URLEncoder.encode(value, "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    queryString.append(key).append("=").append(value);
+                }
             }
         });
 
@@ -129,19 +148,33 @@ public class PaymentController {
         });
 
         log.info("VNPay IPN parameters: {}", params);
+        String transactionId = params.get("vnp_TxnRef");
+
         // Kiểm tra responseCode trước khi verify
         String responseCode = params.get("vnp_ResponseCode");
         if (!"00".equals(responseCode)) {
-            log.warn("IPN: Payment failed with response code: {}", responseCode);
+            log.warn("IPN: Payment failed with response code: {} for transaction: {}", responseCode, transactionId);
             return ResponseEntity.ok("99"); // Lỗi
         }
 
-
         if (paymentService.verifyPayment(params)) {
-            paymentService.processPayment(params); // Cũng sẽ gọi UserMembershipService.create()
-            return ResponseEntity.ok("00"); // VNPay yêu cầu trả về "00" khi thành công
+            try {
+                paymentService.processPayment(params); // Cũng sẽ gọi UserMembershipService.create()
+                log.info("IPN: Payment processed successfully for transaction: {}", transactionId);
+                return ResponseEntity.ok("00"); // VNPay yêu cầu trả về "00" khi thành công
+            } catch (Exception e) {
+                // Check if this is an "already processed" exception - which is actually a success case
+                if (e.getMessage() != null && e.getMessage().contains("already_processed")) {
+                    log.info("IPN: Payment already processed for transaction: {}", transactionId);
+                    return ResponseEntity.ok("00"); // This is still a success case for VNPay
+                } else {
+                    log.error("IPN: Error processing payment for transaction: {}", transactionId, e);
+                    return ResponseEntity.ok("99"); // Lỗi xử lý
+                }
+            }
         }
 
+        log.error("IPN: Signature verification failed for transaction: {}", transactionId);
         return ResponseEntity.ok("99"); // Lỗi
     }
     @GetMapping("/test-callback")
