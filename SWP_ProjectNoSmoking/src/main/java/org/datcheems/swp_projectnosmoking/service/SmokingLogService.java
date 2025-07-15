@@ -69,6 +69,7 @@ public class SmokingLogService {
 
 
                     sendStageCompletionNotification(member, stage);
+                    activateNextStage(stage);
                 }
             }
 
@@ -426,6 +427,22 @@ public class SmokingLogService {
         return Math.round(percent * 10.0) / 10.0;
     }
 
+    private void activateNextStage(QuitPlanStage currentStage) {
+        QuitPlan quitPlan = currentStage.getQuitPlan();
+        Integer currentStageNumber = currentStage.getStageNumber();
+
+        int nextStageNumber = currentStageNumber + 1;
+
+        QuitPlanStage nextStage = quitPlan.getStages().stream()
+                .filter(s -> s.getStageNumber() != null && s.getStageNumber().equals(nextStageNumber))
+                .findFirst()
+                .orElse(null);
+
+        if (nextStage != null && QuitPlanStageStatus.inactive.equals(nextStage.getStatus())) {
+            nextStage.setStatus(QuitPlanStageStatus.active);
+            quitPlanStageRepository.save(nextStage);
+        }
+    }
 
 
 }

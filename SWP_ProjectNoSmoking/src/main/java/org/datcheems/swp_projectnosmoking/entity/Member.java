@@ -36,9 +36,6 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private java.util.List<SmokingLog> smokingLogs;
 
-
-
-
     private String phoneNumber;
 
 
