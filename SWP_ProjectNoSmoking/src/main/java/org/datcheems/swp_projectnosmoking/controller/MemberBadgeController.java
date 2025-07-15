@@ -21,10 +21,10 @@ public class MemberBadgeController {
     /**
      * Tự động cấp badge cho member (nếu đủ điều kiện)
      */
-//    @PostMapping("/check-and-award/{memberId}")
-//    public ResponseEntity<ResponseObject<String>> checkAndAwardBadges(@PathVariable Long memberId) {
-//        return ResponseEntity.ok(memberBadgeService.checkAndAwardBadges(memberId));
-//    }
+    @PostMapping("/check-and-award/{memberId}")
+    public ResponseEntity<ResponseObject<String>> checkAndAwardBadges(@PathVariable Long memberId) {
+        return ResponseEntity.ok(memberBadgeService.checkAndAwardBadges(memberId));
+    }
 
     /**
      * Lấy danh sách badge mà member đã nhận

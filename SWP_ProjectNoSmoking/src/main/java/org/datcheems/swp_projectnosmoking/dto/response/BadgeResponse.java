@@ -15,7 +15,8 @@ public class BadgeResponse {
     long id;
     String name;
     String description;
-    String condition_description;
+    int condition;
+    String type;
     String iconUrl;
     int score;
 }

@@ -12,7 +12,8 @@ import lombok.experimental.FieldDefaults;
 public class BadgeRequest {
     String name;
     String description;
-    String condition_description;
+    int condition;
+    String type;
     String iconUrl;
     int score;
 }

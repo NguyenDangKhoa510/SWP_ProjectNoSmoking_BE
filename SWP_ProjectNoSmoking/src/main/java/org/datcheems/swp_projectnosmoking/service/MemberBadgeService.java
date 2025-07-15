@@ -5,12 +5,8 @@ import org.datcheems.swp_projectnosmoking.dto.request.MemberBadgeRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.MemberBadgeResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.MemberRankingResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
-import org.datcheems.swp_projectnosmoking.entity.Badge;
-import org.datcheems.swp_projectnosmoking.entity.Member;
-import org.datcheems.swp_projectnosmoking.entity.MemberBadge;
-import org.datcheems.swp_projectnosmoking.repository.BadgeRepository;
-import org.datcheems.swp_projectnosmoking.repository.MemberBadgeRepository;
-import org.datcheems.swp_projectnosmoking.repository.MemberRepository;
+import org.datcheems.swp_projectnosmoking.entity.*;
+import org.datcheems.swp_projectnosmoking.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,6 +21,8 @@ public class MemberBadgeService {
     private final MemberBadgeRepository memberBadgeRepository;
     private final BadgeRepository badgeRepository;
     private final MemberRepository memberRepository;
+    private final SmokingLogRepository smokingLogRepository;
+    private final QuitPlanRepository quitPlanRepository;
 
     public ResponseObject<String> assignBadgeManually(MemberBadgeRequest request) {
         ResponseObject<String> response = new ResponseObject<>();
@@ -65,48 +63,70 @@ public class MemberBadgeService {
         return response;
     }
 
-//    public ResponseObject<String> checkAndAwardBadges(Long memberId) {
-//        Optional<Member> optionalMember = memberRepository.findById(memberId);
-//        ResponseObject<String> response = new ResponseObject<>();
-//
-//        if (optionalMember.isEmpty()) {
-//            response.setStatus("fail");
-//            response.setMessage("Không tìm thấy thành viên với ID = " + memberId);
-//            response.setData(null);
-//            return response;
-//        }
-//
-//        Member member = optionalMember.get();
-//        List<Badge> allBadges = badgeRepository.findAll();
-//        int awardedCount = 0;
-//
-//        for (Badge badge : allBadges) {
-//            boolean alreadyAwarded = memberBadgeRepository.existsByMember_UserIdAndBadge_Id(memberId, badge.getId());
-//
-//            if (!alreadyAwarded && meetsCondition(member, badge)) {
-//                MemberBadge memberBadge = new MemberBadge();
-//                memberBadge.setMember(member);
-//                memberBadge.setBadge(badge);
-//                memberBadge.setAwardedDate(LocalDate.now());
-//                memberBadgeRepository.save(memberBadge);
-//                awardedCount++;
-//            }
-//        }
-//
-//        response.setStatus("success");
-//        response.setMessage("Đã kiểm tra và cấp " + awardedCount + " badge mới (nếu có).");
-//        response.setData("Đã cấp " + awardedCount + " badge cho thành viên ID = " + memberId);
-//        return response;
-//    }
+    public ResponseObject<String> checkAndAwardBadges(Long memberId) {
+        Optional<Member> optionalMember = memberRepository.findById(memberId);
+        ResponseObject<String> response = new ResponseObject<>();
 
-//    private boolean meetsCondition(Member member, Badge badge) {
-//        // TODO: Điều kiện mẫu
-//        if ("10 ngày không hút thuốc".equalsIgnoreCase(badge.getCondition_description())) {
-//            return member.getSmokingLogs().stream()
-//                    .noneMatch(log -> log.getDate().isAfter(LocalDate.now().minusDays(10)));
-//        }
-//        return false;
-//    }
+        if (optionalMember.isEmpty()) {
+            response.setStatus("fail");
+            response.setMessage("Không tìm thấy thành viên với ID = " + memberId);
+            response.setData(null);
+            return response;
+        }
+
+        Member member = optionalMember.get();
+        List<Badge> allBadges = badgeRepository.findAll();
+        int awardedCount = 0;
+
+        for (Badge badge : allBadges) {
+            boolean alreadyAwarded = memberBadgeRepository.existsByMember_UserIdAndBadge_Id(memberId, badge.getId());
+
+            if (!alreadyAwarded && meetsCondition(member, badge)) {
+                MemberBadge memberBadge = new MemberBadge();
+                memberBadge.setMember(member);
+                memberBadge.setBadge(badge);
+                memberBadge.setAwardedDate(LocalDate.now());
+                memberBadgeRepository.save(memberBadge);
+                awardedCount++;
+            }
+        }
+
+        response.setStatus("success");
+        response.setMessage("Đã kiểm tra và cấp " + awardedCount + " badge mới (nếu có).");
+        response.setData("Đã cấp " + awardedCount + " badge cho thành viên ID = " + memberId);
+        return response;
+    }
+
+    private boolean meetsCondition(Member member, Badge badge) {
+        String type = badge.getType();
+        int condition = badge.getCondition();
+
+        // Non-smoking achievements
+        if ("non-smoking".equals(type)) {
+            return countNonSmokingDays(member) >= condition;
+        }
+        // Stage completion achievements
+        else if ("stage-completion".equals(type)) {
+            return countCompletedStages(member) >= condition;
+        }
+
+        return false;
+    }
+
+    private int countNonSmokingDays(Member member) {
+        List<SmokingLog> logs = smokingLogRepository.findByMemberOrderByLogDateDesc(member);
+        return (int) logs.stream()
+                .filter(log -> log.getSmoked() != null && !log.getSmoked())
+                .count();
+    }
+
+    private int countCompletedStages(Member member) {
+        List<QuitPlan> quitPlans = quitPlanRepository.findByMember(member);
+        return (int) quitPlans.stream()
+                .flatMap(plan -> plan.getStages().stream())
+                .filter(stage -> stage.getProgressPercentage() != null && stage.getProgressPercentage() >= 100.0)
+                .count();
+    }
 
     public ResponseObject<Integer> getTotalBadgeScore(Long memberId) {
         ResponseObject<Integer> response = new ResponseObject<>();
