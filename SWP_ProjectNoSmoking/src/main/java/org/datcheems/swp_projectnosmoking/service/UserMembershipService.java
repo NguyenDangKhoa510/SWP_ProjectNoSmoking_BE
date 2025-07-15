@@ -53,6 +53,8 @@ public class UserMembershipService {
         response.setData(responseList);
         return response;
     }
+
+
     public ResponseObject<Double> getTotalRevenue() {
         List<UserMembership> records = userMembershipRepository.findAll();
         double totalRevenue = 0.0;
@@ -70,6 +72,7 @@ public class UserMembershipService {
         response.setData(totalRevenue);
         return response;
     }
+
 
 
     public ResponseObject<UserMembershipResponse> getById(Long id) {
@@ -100,6 +103,14 @@ public class UserMembershipService {
             response.setMessage("Người dùng hoặc gói thành viên không tồn tại");
             response.setData(null);
             return response;
+        }
+        if (request.getTransactionId() != null && !request.getTransactionId().isEmpty()) {
+            if (userMembershipRepository.existsByTransactionId(request.getTransactionId())) {
+                response.setStatus("already_processed");
+                response.setMessage("Giao dịch này đã được xử lý. Membership đã tồn tại với transactionId này.");
+                response.setData(null);
+                return response;
+            }
         }
         List<UserMembership> memberships = userMembershipRepository.findByMember_UserId(request.getUserId());
         boolean hasActive = memberships.stream().anyMatch(m ->
@@ -133,12 +144,24 @@ public class UserMembershipService {
         entity.setStartDate(request.getStartDate());
         entity.setEndDate(request.getEndDate());
         entity.setStatus(request.getStatus());
+        entity.setTransactionId(request.getTransactionId());
 
-        UserMembership saved = userMembershipRepository.save(entity);
-
-        response.setStatus("success");
-        response.setMessage("Tạo bản ghi thành công");
-        response.setData(toResponse(saved));
+        try {
+            UserMembership saved = userMembershipRepository.save(entity);
+            response.setStatus("success");
+            response.setMessage("Tạo bản ghi thành công");
+            response.setData(toResponse(saved));
+        } catch (Exception ex) {
+            if (ex.getMessage() != null && ex.getMessage().contains("duplicate key")) {
+                response.setStatus("already_processed");
+                response.setMessage("Giao dịch đã được xử lý (DB unique). Membership đã tồn tại với transactionId này.");
+                response.setData(null);
+            } else {
+                response.setStatus("error");
+                response.setMessage("Lỗi hệ thống: " + ex.getMessage());
+                response.setData(null);
+            }
+        }
         return response;
     }
 
@@ -237,6 +260,24 @@ public class UserMembershipService {
             response.setMessage("Failed to check membership: " + e.getMessage());
             response.setData(null);
         }
+        return response;
+    }
+
+    public ResponseObject<Double> getTotalRevenue() {
+        List<UserMembership> records = userMembershipRepository.findAll();
+        double totalRevenue = 0.0;
+
+        for (UserMembership record : records) {
+            MembershipPackage pack = record.getMembershipPackageId();
+            if (pack != null && record.getStatus() != null && record.getStatus().equalsIgnoreCase("ACTIVE")) {
+                totalRevenue += pack.getPrice() != null ? pack.getPrice() : 0.0;
+            }
+        }
+
+        ResponseObject<Double> response = new ResponseObject<>();
+        response.setStatus("success");
+        response.setMessage("Tổng doanh thu tính thành công");
+        response.setData(totalRevenue);
         return response;
     }
 

@@ -35,4 +35,8 @@ public class UserMembership {
     // Trạng thái: ACTIVE, EXPIRED, CANCELED,...
     @Column(name = "status")
     private String status;
+
+    @Column(name = "transaction_id", unique = true)
+    private String transactionId;
+
 }

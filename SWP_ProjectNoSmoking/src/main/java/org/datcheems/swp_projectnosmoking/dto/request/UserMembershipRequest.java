@@ -16,4 +16,5 @@ public class UserMembershipRequest {
     LocalDate startDate;
     LocalDate endDate;
     String status;
+    private String transactionId;
 }

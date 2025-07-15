@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface UserMembershipRepository extends JpaRepository<UserMembership, Long> {
     List<UserMembership> findByMember_UserId(Long userId);
+    boolean existsByTransactionId(String transactionId);
 }
+
