@@ -96,7 +96,7 @@ public class NotificationService {
         Coach coach = coachRepository.findByUserId(coachUser.getId())
                 .orElseThrow(() -> new RuntimeException("Coach profile not found"));
 
-        // Check xem Member này có đang chọn Coach này không
+
         Member member = memberRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 
@@ -105,7 +105,7 @@ public class NotificationService {
             throw new RuntimeException("You can only send notifications to members who have selected you as their coach.");
         }
 
-        // Gửi notification giống Admin
+
         sendNotificationToUser(dto);
     }
 
@@ -137,7 +137,6 @@ public class NotificationService {
             userNotificationRepository.save(userNotification);
         }
     }
-
 
 
 

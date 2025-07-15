@@ -19,7 +19,7 @@ public interface SmokingLogMapper {
     @Mapping(target = "smoked", source = "request.smoked")
     @Mapping(target = "cravingLevel", source = "request.cravingLevel")
     @Mapping(target = "healthStatus", source = "request.healthStatus")
-        // KHÔNG cần dòng này nữa vì mapstruct tự lấy từ request nếu tên giống
+
     SmokingLog toEntity(SmokingLogRequest request, Member member);
 
     @Mapping(target = "userId", source = "member.userId")
@@ -33,7 +33,7 @@ public interface SmokingLogMapper {
     @Mapping(target = "stageNumber", source = "quitPlanStage.stageNumber")
     SmokingLogResponse toResponse(SmokingLog smokingLog);
 
-    // KHÔNG cần ghi source nếu update trực tiếp từ request
+
     void updateEntityFromRequest(SmokingLogRequest request, @MappingTarget SmokingLog smokingLog);
 }
 

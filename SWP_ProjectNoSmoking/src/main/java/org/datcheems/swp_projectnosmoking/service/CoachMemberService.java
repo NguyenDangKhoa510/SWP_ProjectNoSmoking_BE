@@ -33,12 +33,12 @@ public class CoachMemberService {
                     User memberUser = member.getUser();
 
                     MemberProfileResponse dto = new MemberProfileResponse();
-                    dto.setMemberId(member.getUserId());  // userId là memberId ở đây
+                    dto.setMemberId(member.getUserId());
                     dto.setUsername(memberUser.getUsername());
                     dto.setEmail(memberUser.getEmail());
                     dto.setFullName(memberUser.getFullName());
 
-                    // Những dòng dưới phải lấy từ `member` chứ không phải `memberUser`
+
                     dto.setPhoneNumber(member.getPhoneNumber());
                     dto.setBirthDate(member.getBirthDate());
                     dto.setAddress(member.getAddress());

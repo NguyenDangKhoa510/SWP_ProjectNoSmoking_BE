@@ -30,7 +30,7 @@ public class Member {
     private String avatarUrl;
 
     @Nationalized
-    @Column(name = "address", length = 1000) // hoặc bỏ length để Hibernate tự xử lý
+    @Column(name = "address", length = 1000)
     private String address;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

@@ -40,12 +40,12 @@ public class SmokingLogService {
 
         validateMemberCanLog(member);
 
-        // Check if log already exists for this date
+
         LocalDate logDate = request.getLogDate() != null ? request.getLogDate() : LocalDate.now();
         Optional<SmokingLog> existingLog = smokingLogRepository.findByMemberAndLogDate(member, logDate);
 
         if (existingLog.isPresent()) {
-            // Update existing log
+
             SmokingLog log = existingLog.get();
             Integer previousCount = log.getSmokeCount();
             smokingLogMapper.updateEntityFromRequest(request, log);
@@ -67,12 +67,12 @@ public class SmokingLogService {
                     stage.setStatus(QuitPlanStageStatus.completed);
                     quitPlanStageRepository.save(stage);
 
-                    // Gửi notification chúc mừng
+
                     sendStageCompletionNotification(member, stage);
                 }
             }
 
-            // Send notification based on smoking habit change
+
             sendSmokingHabitChangeNotification(member, previousCount, savedLog.getSmokeCount());
 
             SmokingLogResponse response = smokingLogMapper.toResponse(savedLog);
@@ -80,7 +80,7 @@ public class SmokingLogService {
             response.setIsImprovement(savedLog.getSmokeCount() <= previousCount);
             return response;
         } else {
-            // Create new log
+
             SmokingLog log = smokingLogMapper.toEntity(request, member);
             log.setLogDate(logDate);
 
@@ -105,11 +105,11 @@ public class SmokingLogService {
                 }
             }
 
-            // Get previous log for comparison
+
             List<SmokingLog> previousLogs = smokingLogRepository.findPreviousLogs(member, logDate);
             Integer previousCount = previousLogs.isEmpty() ? null : previousLogs.get(0).getSmokeCount();
 
-            // Send notification based on smoking habit change if previous log exists
+
             if (previousCount != null) {
                 sendSmokingHabitChangeNotification(member, previousCount, savedLog.getSmokeCount());
             }
@@ -164,7 +164,7 @@ public class SmokingLogService {
                 .map(log -> {
                     SmokingLogResponse response = smokingLogMapper.toResponse(log);
 
-                    // Find previous log for comparison
+
                     List<SmokingLog> previousLogs = smokingLogRepository.findPreviousLogs(member, log.getLogDate());
                     Integer previousCount = previousLogs.isEmpty() ? null : previousLogs.get(0).getSmokeCount();
 
@@ -190,7 +190,7 @@ public class SmokingLogService {
             SmokingLog log = todayLog.get();
             SmokingLogResponse response = smokingLogMapper.toResponse(log);
 
-            // Lấy log gần nhất trước hôm nay
+
             List<SmokingLog> previousLogs = smokingLogRepository.findPreviousLogs(member, today);
             Integer previousCount = previousLogs.isEmpty() ? null : previousLogs.get(0).getSmokeCount();
 
@@ -205,14 +205,14 @@ public class SmokingLogService {
 
 
     private void validateMemberCanLog(Member member) {
-        // Check đã chọn coach chưa
+
         boolean hasCoach = memberCoachSelectionRepository.existsByMember(member);
         if (!hasCoach) {
             throw new RuntimeException("Bạn phải chọn huấn luyện viên trước khi ghi nhật ký hút thuốc.");
 
         }
 
-        // Check đã điền thông tin sơ bộ chưa
+
         boolean hasInitialInfo = memberInitialInfoRepository.findByMember(member).isPresent();
         if (!hasInitialInfo) {
             throw new RuntimeException("Bạn cần điền thông tin sơ bộ trước khi ghi nhật ký hút thuốc.");
@@ -222,11 +222,11 @@ public class SmokingLogService {
 
 
     public List<SmokingLogResponse> getSmokingLogsForCoach(Long memberUserId, Long coachUserId) {
-        // Kiểm tra member tồn tại
+
         Member member = memberRepository.findById(memberUserId)
                 .orElseThrow(() -> new RuntimeException("Member không tồn tại"));
 
-        // Kiểm tra quan hệ giữa coach và member
+
         boolean isManaging = memberCoachSelectionRepository.existsByMember_UserIdAndCoach_UserId(memberUserId, coachUserId);
         if (!isManaging) {
             throw new RuntimeException("Bạn không có quyền xem log của member này");
@@ -237,7 +237,7 @@ public class SmokingLogService {
         return logs.stream().map(log -> {
             SmokingLogResponse response = smokingLogMapper.toResponse(log);
 
-            // Lấy log trước để so sánh
+
             List<SmokingLog> previousLogs = smokingLogRepository.findPreviousLogs(member, log.getLogDate());
             Integer previousCount = previousLogs.isEmpty() ? null : previousLogs.get(0).getSmokeCount();
 
@@ -280,14 +280,14 @@ public class SmokingLogService {
         notificationRequest.setContent("Bạn đã quên ghi nhật ký hút thuốc ngày hôm qua. Hãy nhớ ghi nhật ký mỗi ngày để theo dõi tiến trình cai thuốc.");
         notificationRequest.setIsActive(true);
 
-        // Find admin user to set as creator (using a default admin user ID or finding by username/email)
+
         User admin = userRepository.findByUsername("admin")
                 .orElseGet(() -> userRepository.findById(1L)
                         .orElseThrow(() -> new RuntimeException("Tài khoản quản trị viên không tồn tại")));
 
 
 
-        // Create notification and get the response with the ID
+
         NotificationResponse notificationResponse = notificationService.createNotification(notificationRequest, admin.getId());
 
         // Send notification to user
@@ -308,20 +308,20 @@ public class SmokingLogService {
         NotificationRequest notificationRequest = new NotificationRequest();
         notificationRequest.setIsActive(true);
 
-        // Find admin user to set as creator (using a default admin user ID or finding by username/email)
+
         User admin = userRepository.findByUsername("admin")
                 .orElseGet(() -> userRepository.findById(1L)
                         .orElseThrow(() -> new RuntimeException("Tài khoản quản trị viên không tồn tại")));
 
 
         if (currentCount < previousCount) {
-            // Encouragement notification
+
             notificationRequest.setTitle("Tiến bộ tuyệt vời!");
             notificationRequest.setContent("Chúc mừng bạn! Bạn đã giảm số điếu thuốc từ " + previousCount +
                     " xuống còn " + currentCount + ". Tiếp tục phát huy nhé!");
 
         } else {
-            // Warning notification
+
             notificationRequest.setTitle("Cảnh báo tăng số lượng thuốc hút");
             notificationRequest.setContent("Chúng tôi nhận thấy bạn đã hút nhiều hơn: từ " + previousCount +
                     " lên " + currentCount + " điếu. Hãy kiên trì với mục tiêu cai thuốc nhé!");
@@ -329,10 +329,10 @@ public class SmokingLogService {
 
         }
 
-        // Create notification and get the response with the ID
+
         NotificationResponse notificationResponse = notificationService.createNotification(notificationRequest, admin.getId());
 
-        // Send notification to user
+
         UserNotificationRequest userNotificationRequest = new UserNotificationRequest();
         userNotificationRequest.setUserId(member.getUserId());
         userNotificationRequest.setNotificationId(notificationResponse.getNotificationId());
