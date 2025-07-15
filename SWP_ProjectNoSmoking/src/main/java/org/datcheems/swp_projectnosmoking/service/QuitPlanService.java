@@ -79,7 +79,7 @@ public class QuitPlanService {
             QuitPlanStage stage = new QuitPlanStage();
             stage.setQuitPlan(savedPlan);
             stage.setStageNumber(i);
-            stage.setStatus(QuitPlanStageStatus.active);
+            stage.setStatus(i == 1 ? QuitPlanStageStatus.active : QuitPlanStageStatus.pending);
             stages.add(stage);
         }
 
@@ -309,8 +309,6 @@ public class QuitPlanService {
                 .map(quitPlanMapper::toStageResponse)
                 .collect(Collectors.toList());
     }
-
-
 
 
 }
