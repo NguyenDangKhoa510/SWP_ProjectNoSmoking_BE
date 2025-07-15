@@ -67,8 +67,16 @@ public class PaymentController {
 
         // Verify và xử lý thanh toán
         try {
-            // Temporary: sử dụng bypass cho sandbox testing
-            if (paymentService.verifyPaymentWithBypass(params)) {
+            // Kiểm tra responseCode trước khi verify
+            String responseCode = params.get("vnp_ResponseCode");
+            if (!"00".equals(responseCode)) {
+                log.warn("Payment failed with response code: {}", responseCode);
+                errorMessage = "Payment failed with response code: " + responseCode;
+                paymentSuccess = false;
+            }
+            // Chỉ verify và xử lý khi responseCode là 00
+            else if (paymentService.verifyPaymentWithBypass(params)) {
+
                 log.info("VNPay signature verified successfully (or bypassed for testing)");
                 paymentService.processPayment(params); // Sẽ gọi UserMembershipService.create()
                 paymentSuccess = true;
@@ -121,6 +129,13 @@ public class PaymentController {
         });
 
         log.info("VNPay IPN parameters: {}", params);
+        // Kiểm tra responseCode trước khi verify
+        String responseCode = params.get("vnp_ResponseCode");
+        if (!"00".equals(responseCode)) {
+            log.warn("IPN: Payment failed with response code: {}", responseCode);
+            return ResponseEntity.ok("99"); // Lỗi
+        }
+
 
         if (paymentService.verifyPayment(params)) {
             paymentService.processPayment(params); // Cũng sẽ gọi UserMembershipService.create()

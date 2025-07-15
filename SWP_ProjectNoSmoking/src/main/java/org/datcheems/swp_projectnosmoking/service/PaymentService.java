@@ -98,8 +98,15 @@ public class PaymentService {
             log.info("Processing payment - Response code: {}, Order info: {}, Transaction: {}",
                     responseCode, orderInfo, transactionId);
 
+            // Kiểm tra responseCode phải là "00" (thành công)
             if (!"00".equals(responseCode)) {
-                log.warn("Payment failed with response code: {}", responseCode);
+                log.warn("Payment failed with response code: {}, skipping membership creation", responseCode);
+                return;
+            }
+
+            // Kiểm tra transactionId không được null
+            if (transactionId == null || transactionId.isEmpty()) {
+                log.error("Transaction ID is missing, cannot process payment");
                 return;
             }
 
@@ -132,7 +139,7 @@ public class PaymentService {
                     member.getUserId(), paymentInfo.getPackageId());
 
             // Tạo UserMembership với Member.userId (vì @Id là userId)
-            createUserMembership(member.getUserId(), paymentInfo.getPackageId(), packageOpt.get());
+            createUserMembership(member.getUserId(), paymentInfo.getPackageId(), packageOpt.get(),transactionId);
 
             log.info("Successfully created membership for user {} with package {}",
                     member.getUserId(), paymentInfo.getPackageId());
@@ -165,20 +172,21 @@ public class PaymentService {
         return null;
     }
 
-    private void createUserMembership(Long memberId, Long packageId, MembershipPackage membershipPackage) {
+    private void createUserMembership(Long memberId, Long packageId, MembershipPackage membershipPackage, String transactionId) {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusMonths(1);
 
         UserMembershipRequest request = UserMembershipRequest.builder()
-                .userId(memberId)  // memberId chính là Member.userId (primary key)
+                .userId(memberId)
                 .membershipPackageId(packageId)
                 .startDate(startDate)
                 .endDate(endDate)
                 .status("ACTIVE")
+                .transactionId(transactionId)
                 .build();
 
-        log.info("Creating UserMembership - Member userId: {}, Package ID: {}, Start: {}, End: {}",
-                memberId, packageId, startDate, endDate);
+        log.info("Creating UserMembership - Member userId: {}, Package ID: {}, Start: {}, End: {} , Transaction ID: {}",
+                memberId, packageId, startDate, endDate,transactionId);
 
         try {
             userMembershipService.create(request);
