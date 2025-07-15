@@ -438,7 +438,7 @@ public class SmokingLogService {
                 .findFirst()
                 .orElse(null);
 
-        if (nextStage != null && QuitPlanStageStatus.inactive.equals(nextStage.getStatus())) {
+        if (nextStage != null && QuitPlanStageStatus.pending.equals(nextStage.getStatus())) {
             nextStage.setStatus(QuitPlanStageStatus.active);
             quitPlanStageRepository.save(nextStage);
         }

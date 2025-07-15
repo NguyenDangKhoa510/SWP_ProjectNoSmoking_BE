@@ -79,7 +79,7 @@ public class QuitPlanService {
             QuitPlanStage stage = new QuitPlanStage();
             stage.setQuitPlan(savedPlan);
             stage.setStageNumber(i);
-            stage.setStatus(i == 1 ? QuitPlanStageStatus.active : QuitPlanStageStatus.inactive);
+            stage.setStatus(i == 1 ? QuitPlanStageStatus.active : QuitPlanStageStatus.pending);
             stages.add(stage);
         }
 
