@@ -43,12 +43,12 @@ public class DashboardService {
 
         long currentMonthUsers = userRepository.countByCreatedAtBetween(
                 startOfCurrentMonth.atStartOfDay(),
-                LocalDateTime.now()   // Lấy đúng thời gian hiện tại
+                LocalDateTime.now()
         );
 
         long previousMonthUsers = userRepository.countByCreatedAtBetween(
                 startOfPreviousMonth.atStartOfDay(),
-                endOfPreviousMonth.atTime(23, 59, 59)  // Lấy đến cuối ngày
+                endOfPreviousMonth.atTime(23, 59, 59)
         );
 
 

@@ -22,7 +22,7 @@ public class CoachReviewService {
     private final MemberRepository memberRepository;
     private final CoachReviewRepository coachReviewRepository;
     private final MemberCoachSelectionRepository memberCoachSelectionRepository;
-    // Thêm dòng này
+
 
     public CoachReviewResponse createReview(CoachReviewRequest request) {
         User currentUser = getCurrentUser();
@@ -37,12 +37,12 @@ public class CoachReviewService {
         Coach coach = coachRepository.findById(request.getCoachId())
                 .orElseThrow(() -> new RuntimeException("Coach not found"));
 
-        // 🔒 Kiểm tra đã từng làm việc chưa
+
         boolean hasWorkedTogether = memberCoachSelectionRepository.existsByMemberAndCoach(member, coach);
         if (!hasWorkedTogether) {
             throw new RuntimeException("You cannot review a coach you have never worked with");
         }
-        // 🔒 Kiểm tra đã review trước đó chưa
+
         if (coachReviewRepository.existsByCoachAndMember(coach, member)) {
             throw new RuntimeException("You have already reviewed this coach");
         }

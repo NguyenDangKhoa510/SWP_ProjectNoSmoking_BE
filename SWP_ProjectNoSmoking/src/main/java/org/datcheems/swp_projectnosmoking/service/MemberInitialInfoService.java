@@ -22,7 +22,7 @@ public class MemberInitialInfoService {
     private final CoachRepository coachRepository;
     private final MemberCoachSelectionRepository memberCoachSelectionRepository;
 
-    // ✅ Member điền hoặc cập nhật thông tin sơ bộ
+
     public MemberInitialInfoResponse createOrUpdateInitialInfo(MemberInitialInfoRequest request) {
         User currentUser = getCurrentUser();
         Member member = memberRepository.findByUserId(currentUser.getId())
@@ -45,7 +45,7 @@ public class MemberInitialInfoService {
         return toResponse(info);
     }
 
-    // ✅ Coach lấy danh sách thông tin sơ bộ của các Member mình đang quản lý
+
     public List<MemberInitialInfoResponse> getInitialInfosOfMyMembers() {
         User currentUser = getCurrentUser();
 
@@ -64,12 +64,12 @@ public class MemberInitialInfoService {
                 .collect(Collectors.toList());
     }
 
-    // ✅ Check xem Member đã nộp thông tin sơ bộ chưa
+
     public boolean hasSubmittedInitialInfo(Member member) {
         return repository.findByMember(member).isPresent();
     }
 
-    // ✅ Convert entity sang response
+
     private MemberInitialInfoResponse toResponse(MemberInitialInfo info) {
         MemberInitialInfoResponse res = new MemberInitialInfoResponse();
         res.setMemberId(info.getMember().getUserId());
@@ -81,7 +81,6 @@ public class MemberInitialInfoService {
         return res;
     }
 
-    // ✅ Lấy thông tin user hiện tại từ token
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return userRepository.findByUsername(auth.getName())

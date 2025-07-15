@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         String message = "Invalid request body. Please check your JSON format.";
 
-        // Optional: Nếu muốn chi tiết hơn:
+
         if (ex.getCause() instanceof InvalidFormatException) {
             message = "Invalid value in request body: " + ex.getCause().getMessage();
         }
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public ResponseEntity<String> handleGenericException(Exception ex) {
-        ex.printStackTrace(); // Optional: log lỗi ra console để dễ debug khi dev
+        ex.printStackTrace();
         String message = "Internal server error: " + ex.getMessage();
         return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

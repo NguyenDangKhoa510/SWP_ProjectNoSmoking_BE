@@ -25,36 +25,29 @@ public class SmokingLogController {
     private final SmokingLogService smokingLogService;
     private final UserRepository userRepository;
 
-    /**
-     * Create or update a smoking log for the authenticated member
-     * @param request The smoking log data
-     * @return The created or updated smoking log
-     */
+
     @PreAuthorize("hasRole('MEMBER')")
     @PostMapping
     public ResponseEntity<SmokingLogResponse> createSmokingLog(@Valid @RequestBody SmokingLogRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // Lấy username từ JWT (ví dụ: "cheems")
+
         String username = authentication.getName();
 
-        // Truy tìm User dựa vào username
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Lấy userId
+
         Long userId = user.getId();
 
-        // Gọi service tạo log
+
         SmokingLogResponse response = smokingLogService.createSmokingLog(request, userId);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    /**
-     * Get all smoking logs for the authenticated member
-     * @return List of smoking logs
-     */
+
     @PreAuthorize("hasRole('MEMBER')")
     @GetMapping
     public ResponseEntity<List<SmokingLogResponse>> getMemberSmokingLogs() {
@@ -70,10 +63,7 @@ public class SmokingLogController {
         return ResponseEntity.ok(logs);
     }
 
-    /**
-     * Get today's smoking log for the authenticated member
-     * @return Today's smoking log or null if not logged yet
-     */
+
     @PreAuthorize("hasRole('MEMBER')")
     @GetMapping("/today")
     public ResponseEntity<SmokingLogResponse> getTodaySmokingLog() {
@@ -93,9 +83,7 @@ public class SmokingLogController {
 
 
 
-    /**
-     * Get smoking logs of a member (coach only)
-     */
+
     @PreAuthorize("hasRole('COACH')")
     @GetMapping("/member/{memberId}")
     public ResponseEntity<List<SmokingLogResponse>> getLogsForMember(@PathVariable Long memberId) {
@@ -113,11 +101,7 @@ public class SmokingLogController {
 
 
 
-    /**
-     * Manually trigger the check for missing logs (admin only)
-     * @return Success message
-     */
-//    @PreAuthorize("hasRole('ADMIN')")
+
 
     @PostMapping("/check-missing")
     @ResponseStatus(HttpStatus.OK)

@@ -147,7 +147,7 @@ public class QuitPlanService {
 
         QuitPlan quitPlan = stage.getQuitPlan();
 
-        // Check if the current user is the coach or member of the quit plan
+
         if ((isCoach(currentUser) && quitPlan.getCoach().getUserId().equals(currentUser.getId())) ||
             (isMember(currentUser) && quitPlan.getMember().getUserId().equals(currentUser.getId()))) {
 
@@ -159,7 +159,7 @@ public class QuitPlanService {
 
             Integer currentStageNumber = stage.getStageNumber();
 
-            // Nếu không phải stage đầu tiên thì check phải lớn hơn endDate stage trước đó
+
             if (currentStageNumber != null && currentStageNumber > 1) {
                 int previousStageNumber = currentStageNumber - 1;
 
@@ -254,7 +254,7 @@ public class QuitPlanService {
         QuitPlan quitPlan = stage.getQuitPlan();
         quitPlan.setTotalStages(quitPlan.getTotalStages() - 1);
 
-        // Check if the current user is the coach or member of the quit plan
+
         if ((isCoach(currentUser) && quitPlan.getCoach().getUserId().equals(currentUser.getId())) ||
             (isMember(currentUser) && quitPlan.getMember().getUserId().equals(currentUser.getId()))) {
 

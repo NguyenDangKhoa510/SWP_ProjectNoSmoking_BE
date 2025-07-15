@@ -36,7 +36,7 @@ public class MemberService {
     CoachRepository coachRepository;
 
     public UserProfileResponse getCurrentUserProfile(String username) {
-        // Tìm user theo username
+
         Optional<User> optionalUser = userRepository.findByUsername(username);
 
         if (!optionalUser.isPresent()) {
@@ -45,11 +45,10 @@ public class MemberService {
 
         User user = optionalUser.get();
 
-        // Tìm member tương ứng (dựa theo user_id)
         Optional<Member> optionalMember = memberRepository.findByUser(user);
         Member member = optionalMember.orElse(null);
 
-        // Tạo response object
+
         UserProfileResponse response = new UserProfileResponse();
         response.setUsername(user.getUsername());
         response.setEmail(user.getEmail());
@@ -74,7 +73,7 @@ public class MemberService {
     }
 
     public void updateCurrentUserProfile(String username, UserProfileUpdateRequest request) {
-        // Tìm user theo username
+
         Optional<User> optionalUser = userRepository.findByUsername(username);
 
         if (!optionalUser.isPresent()) {
@@ -83,11 +82,11 @@ public class MemberService {
 
         User user = optionalUser.get();
 
-        // Cập nhật thông tin User
+
         user.setFullName(request.getFullName());
         userRepository.save(user);
 
-        // Tìm hoặc tạo Member liên kết
+
         Member member = memberRepository.findByUser(user)
                 .orElseGet(() -> {
                     Member newMember = new Member();
@@ -108,21 +107,21 @@ public class MemberService {
         ResponseObject<String> response = new ResponseObject<>();
 
         try {
-            // Lấy username đang login
+
             String username = SecurityContextHolder
                     .getContext()
                     .getAuthentication()
                     .getName();
 
-            // Lấy User
+
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-            // Lấy Member
+
             Member member = memberRepository.findByUser(user)
                     .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
 
-            // Lấy Coach entity
+
             Coach coach = coachRepository.findById(coachId)
                     .orElseThrow(() -> new ResourceNotFoundException("Coach not found"));
 
