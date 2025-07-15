@@ -48,6 +48,7 @@ public class BadgeService {
         badge.setCondition_description(request.getCondition_description());
         badge.setIconUrl(request.getIconUrl());
         badge.setScore(request.getScore());
+        badge.setIconUrl(request.getIconUrl());
         badge = badgeRepository.save(badge);
         return mapToResponse(badge);
     }
