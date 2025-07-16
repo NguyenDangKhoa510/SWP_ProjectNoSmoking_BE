@@ -14,5 +14,5 @@ public class BlogPostRequest {
     private String title;
     private String content;
     private String coverImage;
-    private BlogCategory category;
+    private Long categoryId;
 }

@@ -11,9 +11,10 @@ import java.util.Date;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MembershipPackageRequest {
-    String Name;
-    String Description;
+    String name;
+    int duration;
+    String description;
     Double Price;
-    Date ReleaseDate;
-    Date EndDate;
+    Date releaseDate;
+    Date endDate;
 }

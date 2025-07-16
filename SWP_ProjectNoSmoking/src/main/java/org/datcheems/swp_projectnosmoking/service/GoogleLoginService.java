@@ -2,18 +2,22 @@ package org.datcheems.swp_projectnosmoking.service;
 
 import com.nimbusds.jose.shaded.gson.Gson;
 import org.datcheems.swp_projectnosmoking.dto.response.AuthenticationResponse;
+import org.datcheems.swp_projectnosmoking.dto.response.NeedUsernameResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
+import org.datcheems.swp_projectnosmoking.entity.Member;
 import org.datcheems.swp_projectnosmoking.entity.Role;
 import org.datcheems.swp_projectnosmoking.entity.User;
+import org.datcheems.swp_projectnosmoking.repository.MemberRepository;
 import org.datcheems.swp_projectnosmoking.repository.RoleRepository;
 import org.datcheems.swp_projectnosmoking.repository.UserRepository;
-import org.datcheems.swp_projectnosmoking.uitls.JwtUtils;
+import org.datcheems.swp_projectnosmoking.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class GoogleLoginService {
@@ -30,64 +34,104 @@ public class GoogleLoginService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
 
     private static final String GOOGLE_USER_INFO_URL = "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=";
 
-    public ResponseObject<AuthenticationResponse> authenticateWithGoogle(String googleAccessToken) {
-        ResponseObject<AuthenticationResponse> response = new ResponseObject<>();
+    public ResponseObject<?> authenticateWithGoogle(String googleAccessToken) {
+        ResponseObject<?> response = new ResponseObject<>();
 
         try {
-            // Xác minh token Google và lấy thông tin người dùng
             String userInfoJson = verifyGoogleToken(googleAccessToken);
-
             Map<String, Object> userInfo = parseGoogleUserInfo(userInfoJson);
 
-            // Tìm người dùng trong hệ thống hoặc tạo mới nếu không có
-            User user = userRepository.findByUsername((String) userInfo.get("email"))
-                    .orElseGet(() -> {
-                        User newUser = new User();
-                        newUser.setUsername((String) userInfo.get("email"));
-                        newUser.setEmail((String) userInfo.get("email"));
-                        newUser.setFullName((String) userInfo.get("name"));
-                        newUser.setPassword("defaultPassword");
+            Optional<User> optionalUser = userRepository.findByEmail((String) userInfo.get("email"));
+            if (optionalUser.isPresent()) {
+                User user = optionalUser.get();
+                String token = jwtUtils.generateToken(user);
+                String refreshToken = jwtUtils.generateRefreshToken(user);
 
-                        // Gán role mặc định cho người dùng mới
-                        Role defaultRole = roleRepository.findByName(Role.RoleName.MEMBER)
-                                .orElseThrow(() -> new RuntimeException("Default role not found"));
-                        newUser.getRoles().clear();
-                        newUser.getRoles().add(defaultRole);
+                ResponseObject<AuthenticationResponse> successResponse = new ResponseObject<>();
+                successResponse.setStatus("success");
+                successResponse.setMessage("Google authentication successful");
+                successResponse.setData(new AuthenticationResponse(token, refreshToken, true));
+                return successResponse;
+            } else {
+                NeedUsernameResponse data = new NeedUsernameResponse(
+                        (String) userInfo.get("email"),
+                        (String) userInfo.get("name")
+                );
 
-                        userRepository.save(newUser);
+                ResponseObject<NeedUsernameResponse> needUsernameResponse = new ResponseObject<>();
+                needUsernameResponse.setStatus("need_username");
+                needUsernameResponse.setMessage("First time login, please choose a username.");
+                needUsernameResponse.setData(data);
 
-                        return newUser;
-                    });
-
-            // Tạo token JWT
-            String token = jwtUtils.generateToken(user);
-
-            // Thiết lập ResponseObject với thông tin thành công
-            response.setStatus("success");
-            response.setMessage("Google authentication successful");
-            response.setData(new AuthenticationResponse(token, true));
+                return needUsernameResponse;
+            }
 
         } catch (RuntimeException e) {
-            // Trong trường hợp có lỗi, thiết lập ResponseObject lỗi
             response.setStatus("error");
             response.setMessage(e.getMessage());
-            response.setData(null);  // Có thể thêm chi tiết lỗi vào đây nếu muốn, như stack trace hoặc code lỗi.
+            response.setData(null);
         }
 
         return response;
     }
 
-    private String verifyGoogleToken(String googleAccessToken) {
+    public ResponseObject<AuthenticationResponse> createUserWithGoogle(String email, String username) {
+        ResponseObject<AuthenticationResponse> response = new ResponseObject<>();
+
+        // Check username existed
+        if (userRepository.existsByUsername(username)) {
+            response.setStatus("error");
+            response.setMessage("Username already exists!");
+            response.setData(null);
+            return response;
+        }
+
+        // Create user
+        User newUser = new User();
+        newUser.setUsername(username);
+        newUser.setEmail(email);
+        newUser.setFullName(""); // optional: lưu name lúc đầu cũng được
+        newUser.setPassword("defaultPassword");
+
+        Role defaultRole = roleRepository.findByName(Role.RoleName.MEMBER)
+                .orElseThrow(() -> new RuntimeException("Default role not found"));
+        newUser.getRoles().add(defaultRole);
+        newUser.setStatus(User.Status.ACTIVE);
+
+        userRepository.save(newUser);
+
+        Member member = new Member();
+        member.setUser(newUser);
+        memberRepository.save(member);
+
+        // Generate JWT
+        String token = jwtUtils.generateToken(newUser);
+        String refreshToken = jwtUtils.generateRefreshToken(newUser);
+
+        response.setStatus("success");
+        response.setMessage("Account created successfully");
+        response.setData(new AuthenticationResponse(token, refreshToken, true));
+
+        return response;
+    }
+
+
+
+
+    public String verifyGoogleToken(String googleAccessToken) {
         // Gửi yêu cầu tới Google để xác minh Access Token
         RestTemplate restTemplate = new RestTemplate();
         String url = GOOGLE_USER_INFO_URL + googleAccessToken;
         return restTemplate.getForObject(url, String.class);
     }
 
-    private Map<String, Object> parseGoogleUserInfo(String userInfoJson) {
+    public Map<String, Object> parseGoogleUserInfo(String userInfoJson) {
         Gson gson = new Gson();
         return gson.fromJson(userInfoJson, HashMap.class);
     }

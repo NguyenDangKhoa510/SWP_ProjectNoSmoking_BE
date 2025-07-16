@@ -2,7 +2,10 @@ package org.datcheems.swp_projectnosmoking.config;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.datcheems.swp_projectnosmoking.entity.Badge;
 import org.datcheems.swp_projectnosmoking.entity.Role;
+import org.datcheems.swp_projectnosmoking.entity.User;
+import org.datcheems.swp_projectnosmoking.repository.BadgeRepository;
 import org.datcheems.swp_projectnosmoking.repository.RoleRepository;
 import org.datcheems.swp_projectnosmoking.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.List;
 
 @Slf4j
 @Configuration
@@ -19,7 +24,7 @@ public class ApplicationInitConfig {
     ApplicationRunner initRolesAndAdmin(
             RoleRepository roleRepository,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder // thêm vào đây
+            PasswordEncoder passwordEncoder
     ) {
         return args -> {
             log.info("Starting role initialization...");
@@ -54,6 +59,7 @@ public class ApplicationInitConfig {
                 admin.setFullName("Administrator");
                 admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.getRoles().add(adminRole);
+                admin.setStatus(User.Status.valueOf("ACTIVE"));
 
                 userRepository.save(admin);
                 log.info("Default admin user created with username 'admin' and password 'admin123'");
@@ -62,4 +68,6 @@ public class ApplicationInitConfig {
             }
         };
     }
+
+    // Badge creation is now handled by the admin through the BadgeController
 }

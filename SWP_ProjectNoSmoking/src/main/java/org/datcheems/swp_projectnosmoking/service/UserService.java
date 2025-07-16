@@ -1,12 +1,17 @@
 package org.datcheems.swp_projectnosmoking.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.datcheems.swp_projectnosmoking.entity.Member;
+import org.datcheems.swp_projectnosmoking.exception.ResourceNotFoundException;
 import org.datcheems.swp_projectnosmoking.dto.request.RegisterRequest;
+import org.datcheems.swp_projectnosmoking.dto.request.UserProfileUpdateRequest;
+import org.datcheems.swp_projectnosmoking.dto.response.UserProfileResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
 import org.datcheems.swp_projectnosmoking.dto.response.UserResponse;
 import org.datcheems.swp_projectnosmoking.entity.Role;
 import org.datcheems.swp_projectnosmoking.entity.User;
 import org.datcheems.swp_projectnosmoking.mapper.UserMapper;
+import org.datcheems.swp_projectnosmoking.repository.MemberRepository;
 import org.datcheems.swp_projectnosmoking.repository.RoleRepository;
 import org.datcheems.swp_projectnosmoking.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +24,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,6 +39,10 @@ public class UserService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
 
     @Transactional
     public ResponseEntity<ResponseObject<UserResponse>> createUser(RegisterRequest request) {
@@ -60,6 +69,7 @@ public class UserService {
                     .orElseThrow(() -> new RuntimeException("Default role not found"));
             user.getRoles().clear();
             user.getRoles().add(defaultRole);
+            user.setStatus(User.Status.ACTIVE);
 
             User savedUser = userRepository.save(user);
 
@@ -77,6 +87,12 @@ public class UserService {
             response.setMessage("User created successfully");
             response.setData(userResponse);
 
+            if (savedUser.getRoles().stream().anyMatch(r -> r.getName().equals(Role.RoleName.MEMBER))) {
+                Member member = new Member();
+                member.setUser(savedUser);
+                memberRepository.save(member);
+            }
+
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (RuntimeException e) {
@@ -88,7 +104,6 @@ public class UserService {
         }
     }
 
-
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getAllUsers() {
         List<User> users = userRepository.findAll();
@@ -99,12 +114,13 @@ public class UserService {
 
 
 
-    public UserResponse getMyInfo(){
-        var context = SecurityContextHolder.getContext();
-        String name = context.getAuthentication().getName();
 
-        User user = userRepository.findByUsername(name).
-                orElseThrow(() -> new RuntimeException("User not found with username: " + name));
-        return userMapper.toUserResponse(user);
-    }
+
+
+
+
+
+
+
+
 }

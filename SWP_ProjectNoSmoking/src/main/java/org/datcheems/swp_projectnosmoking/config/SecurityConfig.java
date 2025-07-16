@@ -35,7 +35,12 @@ public class SecurityConfig {
             "/api/auth/register",
             "/api/auth/login",
             "/api/auth/introspect",
-            "/api/auth/google-login"
+            "/api/auth/google-login",
+            "/api/password/forgot",
+            "/api/password/reset",
+            "/api/password/validate-code",
+            "/api/member-badge/admin/manualadd",
+            "/api/auth/set-username"
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -44,7 +49,19 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/password/validate-code").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/blog-categories/getAll").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/blog/getAllBlog").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/badges/GetAll").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/membership-packages/getAll").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/coach/getAllCoachProfiles").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/member-badge/getallbage").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/member-badge/total-score").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/member-badge/ranking").permitAll()
+                        .requestMatchers("/api/chat/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/ws").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
@@ -95,4 +112,3 @@ public class SecurityConfig {
         return source;
     }
 }
-
