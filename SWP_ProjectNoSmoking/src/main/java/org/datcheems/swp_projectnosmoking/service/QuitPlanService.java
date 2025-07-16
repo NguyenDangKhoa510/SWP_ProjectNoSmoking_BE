@@ -175,13 +175,22 @@ public class QuitPlanService {
                                 "Start date of this stage must be after end date of stage " + previousStageNumber);
                     }
                 }
+                if (previousStage.getStatus() != QuitPlanStageStatus.completed) {
+                    stage.setStatus(QuitPlanStageStatus.pending);
+                } else {
+                    stage.setStatus(QuitPlanStageStatus.active);
+                }
+            }else {
+                // Stage đầu tiên luôn active
+                stage.setStatus(QuitPlanStageStatus.active);
             }
+
+
 
             stage.setStartDate(request.getStartDate());
             stage.setEndDate(request.getEndDate());
             stage.setTargetCigaretteCount(request.getTargetCigaretteCount());
             stage.setAdvice(request.getAdvice());
-            stage.setStatus(QuitPlanStageStatus.active);
 
             QuitPlanStage updatedStage = quitPlanStageRepository.save(stage);
             return quitPlanMapper.toStageResponse(updatedStage);
@@ -211,6 +220,8 @@ public class QuitPlanService {
                 }
             }
 
+            QuitPlanStageStatus newStageStatus = QuitPlanStageStatus.active;
+
             if (nextStageNumber > 1) {
                 int previousStageNumber = nextStageNumber - 1;
 
@@ -226,6 +237,9 @@ public class QuitPlanService {
                                         " must be after end date of stage " + previousStageNumber + ".");
                     }
                 }
+                newStageStatus = previousStage.getStatus() == QuitPlanStageStatus.completed
+                        ? QuitPlanStageStatus.active
+                        : QuitPlanStageStatus.pending;
             }
 
             QuitPlanStage stage = new QuitPlanStage();
@@ -235,7 +249,7 @@ public class QuitPlanService {
             stage.setEndDate(request.getEndDate());
             stage.setTargetCigaretteCount(request.getTargetCigaretteCount());
             stage.setAdvice(request.getAdvice());
-            stage.setStatus(QuitPlanStageStatus.active);
+            stage.setStatus(newStageStatus);
 
             QuitPlanStage savedStage = quitPlanStageRepository.save(stage);
             return quitPlanMapper.toStageResponse(savedStage);
