@@ -5,6 +5,7 @@ import org.datcheems.swp_projectnosmoking.dto.request.MemberBadgeRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.MemberBadgeResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.MemberRankingResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
+import org.datcheems.swp_projectnosmoking.entity.Badge;
 import org.datcheems.swp_projectnosmoking.service.MemberBadgeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class MemberBadgeController {
      * Tự động cấp badge cho member (nếu đủ điều kiện)
      */
     @PostMapping("/check-and-award/{memberId}")
-    public ResponseEntity<ResponseObject<String>> checkAndAwardBadges(@PathVariable Long memberId) {
+    public ResponseEntity<ResponseObject<List<Badge>>> checkAndAwardBadges(@PathVariable Long memberId) {
         return ResponseEntity.ok(memberBadgeService.checkAndAwardBadges(memberId));
     }
 
