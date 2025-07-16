@@ -10,6 +10,7 @@ import org.datcheems.swp_projectnosmoking.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -63,9 +64,9 @@ public class MemberBadgeService {
         return response;
     }
 
-    public ResponseObject<String> checkAndAwardBadges(Long memberId) {
+    public ResponseObject<List<Badge>> checkAndAwardBadges(Long memberId) {
         Optional<Member> optionalMember = memberRepository.findById(memberId);
-        ResponseObject<String> response = new ResponseObject<>();
+        ResponseObject<List<Badge>> response = new ResponseObject<>();
 
         if (optionalMember.isEmpty()) {
             response.setStatus("fail");
@@ -76,7 +77,7 @@ public class MemberBadgeService {
 
         Member member = optionalMember.get();
         List<Badge> allBadges = badgeRepository.findAll();
-        int awardedCount = 0;
+        List<Badge> awardedBadges = new ArrayList<>();
 
         for (Badge badge : allBadges) {
             boolean alreadyAwarded = memberBadgeRepository.existsByMember_UserIdAndBadge_Id(memberId, badge.getId());
@@ -87,13 +88,13 @@ public class MemberBadgeService {
                 memberBadge.setBadge(badge);
                 memberBadge.setAwardedDate(LocalDate.now());
                 memberBadgeRepository.save(memberBadge);
-                awardedCount++;
+                awardedBadges.add(badge);
             }
         }
 
         response.setStatus("success");
-        response.setMessage("Đã kiểm tra và cấp " + awardedCount + " badge mới (nếu có).");
-        response.setData("Đã cấp " + awardedCount + " badge cho thành viên ID = " + memberId);
+        response.setMessage("Đã kiểm tra và cấp " + awardedBadges.size() + " badge mới (nếu có).");
+        response.setData(awardedBadges);
         return response;
     }
 

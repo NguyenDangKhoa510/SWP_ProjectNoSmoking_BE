@@ -189,8 +189,18 @@ public class PaymentService {
                 memberId, packageId, startDate, endDate,transactionId);
 
         try {
-            userMembershipService.create(request);
-            log.info("Successfully created UserMembership for member: {}", memberId);
+            var response = userMembershipService.create(request);
+            if ("success".equals(response.getStatus())) {
+                log.info("Successfully created UserMembership for member: {}", memberId);
+            } else if ("already_processed".equals(response.getStatus())) {
+                log.info("UserMembership already exists for transaction: {}, status: {}", 
+                        transactionId, response.getStatus());
+                // Don't throw exception for already_processed - this is a valid state
+            } else {
+                log.error("Failed to create UserMembership: status={}, message={}", 
+                        response.getStatus(), response.getMessage());
+                throw new RuntimeException("Failed to create membership: " + response.getMessage());
+            }
         } catch (Exception e) {
             log.error("Failed to create UserMembership for member: {}", memberId, e);
             throw e;
