@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -55,15 +56,15 @@ public class PasswordResetService {
 
             User user = userOptional.get();
 
-            // Delete any existing code for this user
-            tokenRepository.findByUser(user).ifPresent(token -> tokenRepository.delete(token));
-
-            // Create new verification code
+            // Generate new verification code
             String code = generateVerificationCode(CODE_LENGTH);
-            PasswordResetToken resetToken = new PasswordResetToken();
+
+            // Update existing token or create new one
+            PasswordResetToken resetToken = tokenRepository.findByUser(user).orElse(new PasswordResetToken());
             resetToken.setUser(user);
             resetToken.setCode(code);
             resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(CODE_EXPIRATION_MINUTES));
+
             tokenRepository.save(resetToken);
 
             // Send email with verification code
@@ -78,12 +79,16 @@ public class PasswordResetService {
 
         } catch (Exception e) {
             log.error("Error requesting password reset", e);
+            // rollback bắt buộc nếu muốn giữ lại catch
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
             response.setStatus("error");
             response.setMessage("Failed to process password reset request: " + e.getMessage());
             response.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
 
     @Transactional
     public ResponseEntity<ResponseObject<String>> resetPassword(PasswordResetResponse resetDto) {
