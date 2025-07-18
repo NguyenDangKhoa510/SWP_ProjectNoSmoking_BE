@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/password/validate-code").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/blog-categories/getAll").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/blog-categories/getBlogCategory/{id}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/blog/getAllBlog").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/badges/GetAll").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/membership-packages/getAll").permitAll()
