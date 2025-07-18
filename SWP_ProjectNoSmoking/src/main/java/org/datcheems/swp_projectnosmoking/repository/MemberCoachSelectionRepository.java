@@ -25,6 +25,8 @@ public interface MemberCoachSelectionRepository extends JpaRepository<MemberCoac
 
     boolean existsByMember_UserIdAndCoach_UserId(Long memberId, Long coachId);
 
+    List<MemberCoachSelection> findByCoach_CoachId(Long coachId);
+
 
 
 
