@@ -155,7 +155,7 @@ public class RevenueService {
 
         // 2. Lấy danh sách member đã chọn coach đó
         List<MemberCoachSelection> coachSelections =
-                memberCoachSelectionRepository.findByCoach_CoachId(coachId);
+                memberCoachSelectionRepository.findByCoachId(coachId);
         List<Long> memberIdsOfCoach = coachSelections.stream()
                 .map(selection -> selection.getMember().getUserId())
                 .toList();
@@ -196,7 +196,7 @@ public class RevenueService {
 
         // 2. Lấy danh sách member đã chọn coach tương ứng
         List<MemberCoachSelection> coachSelections =
-                memberCoachSelectionRepository.findByCoach_CoachId(coachId);
+                memberCoachSelectionRepository.findByCoachId(coachId);
         List<Long> memberIdsOfCoach = coachSelections.stream()
                 .map(selection -> selection.getMember().getUserId())
                 .toList();
@@ -232,7 +232,7 @@ public class RevenueService {
         List<MonthlyRevenueChartResponse.MonthlyRevenueData> monthlyData = new ArrayList<>();
 
 
-        List<MemberCoachSelection> coachSelections = memberCoachSelectionRepository.findByCoach_CoachId(coachId);
+        List<MemberCoachSelection> coachSelections = memberCoachSelectionRepository.findByCoachId(coachId);
         List<Long> memberIdsOfCoach = coachSelections.stream()
                 .map(selection -> selection.getMember().getUserId())  // hoặc getId() nếu ID là memberId
                 .toList();
