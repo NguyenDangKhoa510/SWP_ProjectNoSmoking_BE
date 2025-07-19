@@ -273,7 +273,6 @@ public class UserMembershipService {
                 totalRevenue += pack.getPrice() != null ? pack.getPrice() : 0.0;
             }
         }
-
         ResponseObject<Double> response = new ResponseObject<>();
         response.setStatus("success");
         response.setMessage("Tổng doanh thu tính thành công");
@@ -281,4 +280,16 @@ public class UserMembershipService {
         return response;
     }
 
+    public void updateExpiredMembershipStatuses() {
+        List<UserMembership> memberships = userMembershipRepository.findAll();
+
+        for (UserMembership membership : memberships) {
+            if ("ACTIVE".equalsIgnoreCase(membership.getStatus())
+                    && membership.getEndDate() != null
+                    && membership.getEndDate().isBefore(LocalDate.now())) {
+                membership.setStatus("EXPIRED");
+                userMembershipRepository.save(membership);
+            }
+        }
+    }
 }

@@ -105,4 +105,80 @@ public class RevenueController {
         
         return ResponseEntity.ok(response);
     }
+    // --- Revenue for coach (current month)
+    @GetMapping("/coach/current-month")
+    public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getCoachCurrentMonthRevenue(
+            @RequestParam long coachId) {
+        RevenueStatisticsResponse statistics = revenueService.getRevenueOfCoachForCurrentMonth(coachId);
+
+        ResponseObject<RevenueStatisticsResponse> response = new ResponseObject<>();
+        response.setStatus("success");
+        response.setMessage("Coach current month revenue statistics fetched successfully");
+        response.setData(statistics);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // --- Revenue for coach by month
+    @GetMapping("/coach/month")
+    public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getCoachMonthRevenue(
+            @RequestParam int year,
+            @RequestParam int month,
+            @RequestParam long coachId) {
+
+        RevenueStatisticsResponse statistics = revenueService.getRevenueOfCoachForMonth(year, month, coachId);
+
+        ResponseObject<RevenueStatisticsResponse> response = new ResponseObject<>();
+        response.setStatus("success");
+        response.setMessage("Coach monthly revenue statistics fetched successfully");
+        response.setData(statistics);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // --- Revenue for coach (current year)
+    @GetMapping("/coach/current-year")
+    public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getCoachCurrentYearRevenue(
+            @RequestParam long coachId) {
+        RevenueStatisticsResponse statistics = revenueService.getRevenueOfCoachForCurrentYear(coachId);
+
+        ResponseObject<RevenueStatisticsResponse> response = new ResponseObject<>();
+        response.setStatus("success");
+        response.setMessage("Coach current year revenue statistics fetched successfully");
+        response.setData(statistics);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // --- Revenue for coach by year
+    @GetMapping("/coach/year")
+    public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getCoachYearRevenue(
+            @RequestParam int year,
+            @RequestParam long coachId) {
+        RevenueStatisticsResponse statistics = revenueService.getRevenueOfCoachForYear(year, coachId);
+
+        ResponseObject<RevenueStatisticsResponse> response = new ResponseObject<>();
+        response.setStatus("success");
+        response.setMessage("Coach yearly revenue statistics fetched successfully");
+        response.setData(statistics);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // --- Monthly chart for coach
+    @GetMapping("/coach/chart")
+    public ResponseEntity<ResponseObject<MonthlyRevenueChartResponse>> getCoachRevenueChart(
+            @RequestParam(defaultValue = "12") int months,
+            @RequestParam long coachId) {
+
+        MonthlyRevenueChartResponse chartData = revenueService.getMonthlyRevenueChartForCoach(months, coachId);
+
+        ResponseObject<MonthlyRevenueChartResponse> response = new ResponseObject<>();
+        response.setStatus("success");
+        response.setMessage("Coach monthly revenue chart data fetched successfully");
+        response.setData(chartData);
+
+        return ResponseEntity.ok(response);
+    }
+
 }
