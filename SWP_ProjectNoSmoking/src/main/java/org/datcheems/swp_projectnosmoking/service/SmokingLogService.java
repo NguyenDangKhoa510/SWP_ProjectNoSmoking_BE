@@ -354,22 +354,26 @@ public class SmokingLogService {
         LocalDate endDate = stage.getEndDate();
         Integer target = stage.getTargetCigaretteCount();
 
+        long totalDays = startDate.datesUntil(endDate.plusDays(1)).count();
+        long successfulDays = 0;
+
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
             Optional<SmokingLog> logOpt = smokingLogRepository.findByMemberAndLogDate(member, date);
 
-            if (logOpt.isEmpty()) {
-                return false;
-            }
-
-            SmokingLog log = logOpt.get();
-
-            if (log.getSmokeCount() != null && log.getSmokeCount() > target) {
-                return false;
+            if (logOpt.isPresent()) {
+                SmokingLog log = logOpt.get();
+                if (log.getSmokeCount() != null && log.getSmokeCount() <= target) {
+                    successfulDays++;
+                }
             }
         }
 
-        return true;
+        if (totalDays == 0) return false;
+
+        double successRate = (double) successfulDays / totalDays;
+        return successRate >= 0.8;
     }
+
 
     private void sendStageCompletionNotification(Member member, QuitPlanStage stage) {
         NotificationRequest notificationRequest = new NotificationRequest();
@@ -403,29 +407,26 @@ public class SmokingLogService {
         LocalDate endDate = stage.getEndDate();
 
         long totalDays = startDate.datesUntil(endDate.plusDays(1)).count();
-        long daysWithLog = 0;
+        long successfulDays = 0;
 
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
             Optional<SmokingLog> logOpt = smokingLogRepository.findByMemberAndLogDate(member, date);
             if (logOpt.isPresent()) {
                 SmokingLog log = logOpt.get();
-
-                // Nếu muốn tính đúng target, kiểm tra smokeCount ≤ target
                 if (stage.getTargetCigaretteCount() != null &&
                         log.getSmokeCount() != null &&
-                        log.getSmokeCount() > stage.getTargetCigaretteCount()) {
-                    continue; // Không tính ngày vượt target
+                        log.getSmokeCount() <= stage.getTargetCigaretteCount()) {
+                    successfulDays++;
                 }
-
-                daysWithLog++;
             }
         }
 
         if (totalDays == 0) return 0.0;
 
-        double percent = (double) daysWithLog / totalDays * 100;
-        return Math.round(percent * 10.0) / 10.0;
+        double percent = (double) successfulDays / totalDays * 100;
+        return Math.round(percent * 10.0) / 10.0; // làm tròn 1 chữ số thập phân
     }
+
 
     private void activateNextStage(QuitPlanStage currentStage) {
         QuitPlan quitPlan = currentStage.getQuitPlan();
