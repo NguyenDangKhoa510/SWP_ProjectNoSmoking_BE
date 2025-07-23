@@ -64,6 +64,14 @@ public class CoachReviewController {
     }
 
     @PreAuthorize("hasRole('MEMBER')")
+    @GetMapping("/public/coach/{coachId}")
+    public ResponseEntity<?> getPublicReviewsByCoachId(@PathVariable Long coachId) {
+        Map<String, Object> result = coachReviewService.getPublicReviewsAndStatsByCoachId(coachId);
+        return ResponseEntity.ok(result);
+    }
+
+
+    @PreAuthorize("hasRole('MEMBER')")
     @GetMapping("/my-reviews-member")
     public ResponseEntity<?> getMyReviewHistory() {
         List<CoachReviewResponse> responses = coachReviewService.getReviewsByCurrentMember();
