@@ -203,6 +203,31 @@ public class CoachReviewService {
                 .collect(Collectors.toList());
     }
 
+    public Map<String, Object> getPublicReviewsAndStatsByCoachId(Long coachId) {
+        Coach coach = coachRepository.findById(coachId)
+                .orElseThrow(() -> new RuntimeException("Coach not found"));
+
+        List<CoachReview> reviews = coachReviewRepository.findByCoach(coach);
+
+        double averageRating = reviews.stream()
+                .mapToInt(CoachReview::getRating)
+                .average()
+                .orElse(0.0);
+
+        int totalReviews = reviews.size();
+
+        List<CoachReviewResponse> reviewResponses = reviews.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return Map.of(
+                "averageRating", averageRating,
+                "totalReviews", totalReviews,
+                "reviews", reviewResponses
+        );
+    }
+
+
 
 
 
