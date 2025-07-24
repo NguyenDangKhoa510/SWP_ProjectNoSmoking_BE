@@ -171,7 +171,29 @@ public class BlogService {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
+    public ResponseEntity<ResponseObject<String>> deleteBlog(Long blogId) {
+        ResponseObject<String> response = new ResponseObject<>();
 
+        try {
+            BlogPost blogPost = blogRepository.findById(blogId)
+                    .orElseThrow(() -> new IllegalArgumentException("Blog not found with ID: " + blogId));
+
+            blogRepository.delete(blogPost);
+
+            response.setStatus("success");
+            response.setMessage("Xóa blog thành công");
+            response.setData("Blog ID: " + blogId + " has been deleted.");
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.setStatus("error");
+            response.setMessage("Failed to delete blog: " + e.getMessage());
+            response.setData(null);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 
 
 }

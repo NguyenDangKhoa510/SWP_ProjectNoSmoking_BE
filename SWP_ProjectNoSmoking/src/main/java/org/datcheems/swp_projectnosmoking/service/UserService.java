@@ -51,9 +51,16 @@ public class UserService {
         try {
             if (userRepository.existsByUsername(request.getUsername())) {
                 response.setStatus("error");
-                response.setMessage("Username already exists");
+                response.setMessage("Tên đăng nhập đã tồn tại");
                 response.setData(null);
 
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            }
+
+            if (userRepository.existsByEmail(request.getEmail())) {
+                response.setStatus("error");
+                response.setMessage("Gmail đã được sử dụng");
+                response.setData(null);
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
             }
 
