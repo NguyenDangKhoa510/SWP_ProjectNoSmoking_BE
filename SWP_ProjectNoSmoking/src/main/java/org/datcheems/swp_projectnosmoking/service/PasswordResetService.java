@@ -49,7 +49,7 @@ public class PasswordResetService {
             Optional<User> userOptional = userRepository.findByEmail(requestDto.getEmail());
             if (userOptional.isEmpty()) {
                 response.setStatus("error");
-                response.setMessage("No user found with this email address");
+                response.setMessage("Không tìm thấy Tài khoản nào khớp với địa chỉ email này");
                 response.setData(null);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
