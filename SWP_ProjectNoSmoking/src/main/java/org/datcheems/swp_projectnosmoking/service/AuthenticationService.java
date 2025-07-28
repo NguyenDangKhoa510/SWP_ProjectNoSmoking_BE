@@ -38,8 +38,12 @@ public class AuthenticationService {
             var user = userRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            if (user.getStatus() != User.Status.ACTIVE) {
-                throw new RuntimeException("Tài khoản của bạn đang ở trạng thái: " + user.getStatus());
+            if (user.getStatus() == User.Status.INACTIVE) {
+                throw new RuntimeException("Tài khoản của bạn đang hạn chế");
+            }
+
+            if (user.getStatus() == User.Status.BANNED) {
+                throw new RuntimeException("Tài khoản của bạn đã bị cấm");
             }
 
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
