@@ -5,6 +5,8 @@ import org.datcheems.swp_projectnosmoking.entity.Member;
 import org.datcheems.swp_projectnosmoking.entity.MemberCoachSelection;
 import org.datcheems.swp_projectnosmoking.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -24,6 +26,10 @@ public interface MemberCoachSelectionRepository extends JpaRepository<MemberCoac
     Optional<MemberCoachSelection> findFirstByMember_User_Id(Long userId);
 
     boolean existsByMember_UserIdAndCoach_UserId(Long memberId, Long coachId);
+
+    @Query("SELECT mcs FROM MemberCoachSelection mcs WHERE mcs.coach.userId = :coachId")
+    List<MemberCoachSelection> findByCoachId(@Param("coachId") Long coachId);
+
 
 
 

@@ -64,5 +64,11 @@ public class UserMembershipController {
     public ResponseEntity<ResponseObject<UserMembershipResponse>> checkUserMembership(@PathVariable Long userId) {
         return ResponseEntity.ok(userMembershipService.checkUserMembership(userId));
     }
+    @GetMapping("/memberships/expire-check")
+    public ResponseEntity<String> checkAndExpireMemberships() {
+        userMembershipService.updateExpiredMembershipStatuses();
+        return ResponseEntity.ok("Cập nhật trạng thái hết hạn thành công.");
+    }
+
 
 }

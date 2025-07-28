@@ -19,25 +19,19 @@ public class MemberBadgeController {
 
     private final MemberBadgeService memberBadgeService;
 
-    /**
-     * Tự động cấp badge cho member (nếu đủ điều kiện)
-     */
+
     @PostMapping("/check-and-award/{memberId}")
     public ResponseEntity<ResponseObject<List<Badge>>> checkAndAwardBadges(@PathVariable Long memberId) {
         return ResponseEntity.ok(memberBadgeService.checkAndAwardBadges(memberId));
     }
 
-    /**
-     * Lấy danh sách badge mà member đã nhận
-     */
+
     @GetMapping("/getallbage/{memberId}")
     public ResponseEntity<ResponseObject<List<MemberBadgeResponse>>> getMemberBadges(@PathVariable Long memberId) {
         return ResponseEntity.ok(memberBadgeService.getMemberBadges(memberId));
     }
 
-    /**
-     * Lấy tổng điểm badge của member
-     */
+
     @GetMapping("/total-score/{memberId}")
     public ResponseEntity<ResponseObject<Integer>> getTotalScore(@PathVariable Long memberId) {
         return ResponseEntity.ok(memberBadgeService.getTotalBadgeScore(memberId));
