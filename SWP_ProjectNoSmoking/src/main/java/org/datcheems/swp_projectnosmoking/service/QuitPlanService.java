@@ -64,6 +64,11 @@ public class QuitPlanService {
         Member member = memberRepository.findByUserId(request.getMemberId())
                 .orElseThrow(() -> new RuntimeException("Member profile not found for userId: " + request.getMemberId()));
 
+        List<QuitPlan> existingPlans = quitPlanRepository.findByMember(member);
+        if (!existingPlans.isEmpty()) {
+            throw new RuntimeException("Thành viên này đã có kế hoạch cai thuốc. Hãy xoá kế hoạch cũ trước khi tạo mới.");
+        }
+
         QuitPlan plan = new QuitPlan();
         plan.setMember(member);
         plan.setCoach(coach);
