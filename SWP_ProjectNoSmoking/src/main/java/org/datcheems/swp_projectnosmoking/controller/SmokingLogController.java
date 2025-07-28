@@ -54,7 +54,7 @@ public class SmokingLogController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
-        // Lấy user từ username
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Long userId = user.getId();
@@ -90,7 +90,7 @@ public class SmokingLogController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String coachUsername = authentication.getName();
 
-        // Tìm user coach
+
         User coachUser = userRepository.findByUsername(coachUsername)
                 .orElseThrow(() -> new RuntimeException("Coach not found"));
 
