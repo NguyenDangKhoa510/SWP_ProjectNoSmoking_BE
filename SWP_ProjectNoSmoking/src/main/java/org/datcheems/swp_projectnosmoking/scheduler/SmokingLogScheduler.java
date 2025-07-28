@@ -13,10 +13,9 @@ public class SmokingLogScheduler {
 
     private final SmokingLogService smokingLogService;
 
-    /**
-     * Scheduled task that runs daily at 23:00 PM to check for members who haven't logged their smoking data
-     * for the previous day and send them notifications.
-     */
+
+     // Gui tb hang ngày cho người dùng chưa ghi nhật ký hút thuốc trong ngày.
+
     @Scheduled(cron = "0 0 23 * * ?") // Run every day
     public void checkMissingSmokingLogs() {
         log.info("Starting scheduled task to check for missing smoking logs");

@@ -15,18 +15,18 @@ public class NotificationCleanupScheduler {
 
     private final UserNotificationRepository userNotificationRepository;
 
-    /**
-     * Xóa các thông báo cũ hơn 3 ngày. Chạy mỗi ngày lúc 03:00 sáng.
-     */
+
+     // Xóa các thông báo cũ hơn 3 ngày. Chạy mỗi ngày lúc 03:00 sáng.
+
     @Scheduled(cron = "0 0 3 * * ?")
     public void deleteOldUserNotifications() {
         try {
             LocalDateTime threshold = LocalDateTime.now().minusDays(3);
             int count = userNotificationRepository.findBySentAtBefore(threshold).size();
             userNotificationRepository.deleteAllOlderThan(threshold);
-            log.info("✅ Đã xóa {} thông báo cũ (gửi trước {}).", count, threshold);
+            log.info(" Đã xóa {} thông báo cũ (gửi trước {}).", count, threshold);
         } catch (Exception e) {
-            log.error("❌ Lỗi khi xóa thông báo cũ: ", e);
+            log.error(" Lỗi khi xóa thông báo cũ: ", e);
         }
     }
 }
