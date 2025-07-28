@@ -119,4 +119,32 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public ResponseEntity<ResponseObject<UserResponse>> updateUserStatus(Long userId, User.Status newStatus) {
+        ResponseObject<UserResponse> response = new ResponseObject<>();
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (optionalUser.isEmpty()) {
+            response.setStatus("error");
+            response.setMessage("Không tìm thấy người dùng với ID: " + userId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
+        User user = optionalUser.get();
+        user.setStatus(newStatus);
+
+        User updatedUser = userRepository.save(user);
+
+        UserResponse userResponse = userMapper.toUserResponse(updatedUser);
+
+        response.setStatus("success");
+        response.setMessage("Cập nhật trạng thái người dùng thành công");
+        response.setData(userResponse);
+
+        return ResponseEntity.ok(response);
+    }
+
+
 }

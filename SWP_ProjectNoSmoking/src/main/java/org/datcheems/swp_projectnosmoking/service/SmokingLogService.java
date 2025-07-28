@@ -70,6 +70,8 @@ public class SmokingLogService {
 
                     sendStageCompletionNotification(member, stage);
                     activateNextStage(stage);
+
+                    checkAndCompleteQuitPlanIfAllStagesCompleted(stage.getQuitPlan());
                 }
             }
 
@@ -103,6 +105,7 @@ public class SmokingLogService {
                     quitPlanStageRepository.save(stage);
 
                     sendStageCompletionNotification(member, stage);
+                    checkAndCompleteQuitPlanIfAllStagesCompleted(stage.getQuitPlan());
                 }
             }
 
@@ -120,6 +123,7 @@ public class SmokingLogService {
             response.setIsImprovement(previousCount == null || savedLog.getSmokeCount() <= previousCount);
             return response;
         }
+
     }
 
     private QuitPlanStage findMatchedStageForDate(Member member, LocalDate logDate) {
@@ -444,6 +448,17 @@ public class SmokingLogService {
             quitPlanStageRepository.save(nextStage);
         }
     }
+
+    private void checkAndCompleteQuitPlanIfAllStagesCompleted(QuitPlan quitPlan) {
+        boolean allStagesCompleted = quitPlan.getStages().stream()
+                .allMatch(s -> s.getStatus() == QuitPlanStageStatus.completed);
+
+        if (allStagesCompleted && quitPlan.getStatus() != QuitPlanStatus.completed) {
+            quitPlan.setStatus(QuitPlanStatus.completed);
+            quitPlanRepository.save(quitPlan);
+        }
+    }
+
 
 
 }

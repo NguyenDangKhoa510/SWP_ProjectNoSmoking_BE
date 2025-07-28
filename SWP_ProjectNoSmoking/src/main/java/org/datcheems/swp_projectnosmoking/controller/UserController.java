@@ -226,4 +226,11 @@ public class UserController {
         }
     }
 
+    @PutMapping("/admin/users/{id}/status")
+    public ResponseEntity<ResponseObject<UserResponse>> updateStatus(
+            @PathVariable Long id,
+            @RequestParam("status") User.Status status) {
+        return userService.updateUserStatus(id, status);
+    }
+
 }
