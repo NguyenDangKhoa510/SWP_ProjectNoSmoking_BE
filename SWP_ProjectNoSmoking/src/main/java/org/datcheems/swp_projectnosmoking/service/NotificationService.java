@@ -188,5 +188,41 @@ public class NotificationService {
         userNotificationRepository.save(userNotification);
     }
 
+    public void notifyMemberStageUpdatedByCoach(Long coachUserId, Long memberId, int stageNumber) {
+        User coachUser = userRepository.findById(coachUserId)
+                .orElseThrow(() -> new RuntimeException("Coach user not found"));
+
+        Coach coach = coachRepository.findByUserId(coachUser.getId())
+                .orElseThrow(() -> new RuntimeException("Coach profile not found"));
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        User memberUser = member.getUser();
+
+        boolean isLinked = memberCoachSelectionRepository.existsByMemberAndCoach(member, coach);
+        if (!isLinked) {
+            throw new RuntimeException("This coach is not assigned to the member.");
+        }
+
+        Notification notification = new Notification();
+        notification.setTitle("Huấn luyện viên đã cập nhật tiến độ");
+        notification.setContent("Huấn luyện viên " + coachUser.getFullName() +
+                " đã cập nhật bạn đến giai đoạn số " + stageNumber + ".");
+        notification.setIsActive(true);
+        notification.setCreatedBy(coachUser);
+
+        Notification savedNotification = notificationRepository.save(notification);
+
+        UserNotification userNotification = new UserNotification();
+        userNotification.setUser(memberUser);
+        userNotification.setNotification(savedNotification);
+        userNotification.setPersonalizedReason("Thông báo từ huấn luyện viên về tiến độ.");
+        userNotification.setDeliveryStatus(UserNotification.DeliveryStatus.SENT);
+
+        userNotificationRepository.save(userNotification);
+    }
+
+
 }
 
