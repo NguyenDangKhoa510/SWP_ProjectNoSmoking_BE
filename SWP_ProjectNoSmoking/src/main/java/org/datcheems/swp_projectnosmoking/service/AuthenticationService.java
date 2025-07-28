@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.datcheems.swp_projectnosmoking.dto.request.AuthenticationRequest;
 import org.datcheems.swp_projectnosmoking.dto.response.AuthenticationResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.ResponseObject;
+import org.datcheems.swp_projectnosmoking.entity.User;
 import org.datcheems.swp_projectnosmoking.repository.RoleRepository;
 import org.datcheems.swp_projectnosmoking.repository.UserRepository;
 import org.datcheems.swp_projectnosmoking.utils.JwtUtils;
@@ -36,6 +37,10 @@ public class AuthenticationService {
         try {
             var user = userRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
+
+            if (user.getStatus() != User.Status.ACTIVE) {
+                throw new RuntimeException("Tài khoản của bạn đang ở trạng thái: " + user.getStatus());
+            }
 
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
             boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
