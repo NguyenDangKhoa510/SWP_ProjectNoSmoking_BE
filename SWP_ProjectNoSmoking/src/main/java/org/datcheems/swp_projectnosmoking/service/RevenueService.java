@@ -28,22 +28,12 @@ public class RevenueService {
     private final UserMembershipRepository userMembershipRepository;
     private final MemberCoachSelectionRepository  memberCoachSelectionRepository;
 
-    /**
-     * Get revenue statistics for the most recent month
-     * @return RevenueStatisticsResponse containing total revenue and transaction count
-     */
     @PreAuthorize("hasRole('ADMIN')")
     public RevenueStatisticsResponse getRevenueForCurrentMonth() {
         YearMonth currentMonth = YearMonth.now();
         return getRevenueForMonth(currentMonth.getYear(), currentMonth.getMonthValue());
     }
 
-    /**
-     * Get revenue statistics for a specific month
-     * @param year Year
-     * @param month Month (1-12)
-     * @return RevenueStatisticsResponse containing total revenue and transaction count
-     */
     @PreAuthorize("hasRole('ADMIN')")
     public RevenueStatisticsResponse getRevenueForMonth(int year, int month) {
         List<UserMembership> memberships = userMembershipRepository.findByStartDateYearAndMonth(year, month);
@@ -57,21 +47,12 @@ public class RevenueService {
                 .build();
     }
 
-    /**
-     * Get revenue statistics for the current year
-     * @return RevenueStatisticsResponse containing total revenue and transaction count
-     */
     @PreAuthorize("hasRole('ADMIN')")
     public RevenueStatisticsResponse getRevenueForCurrentYear() {
         int currentYear = LocalDate.now().getYear();
         return getRevenueForYear(currentYear);
     }
 
-    /**
-     * Get revenue statistics for a specific year
-     * @param year Year
-     * @return RevenueStatisticsResponse containing total revenue and transaction count
-     */
     @PreAuthorize("hasRole('ADMIN')")
     public RevenueStatisticsResponse getRevenueForYear(int year) {
         List<UserMembership> memberships = userMembershipRepository.findByStartDateYear(year);
@@ -85,17 +66,12 @@ public class RevenueService {
                 .build();
     }
 
-    /**
-     * Get monthly revenue data for chart visualization
-     * @param months Number of months to include (default: 12)
-     * @return MonthlyRevenueChartResponse containing monthly revenue data
-     */
     @PreAuthorize("hasRole('ADMIN')")
     public MonthlyRevenueChartResponse getMonthlyRevenueChart(int months) {
         YearMonth currentMonth = YearMonth.now();
         List<MonthlyRevenueChartResponse.MonthlyRevenueData> monthlyData = new ArrayList<>();
         
-        // Get data for each month, starting from current month and going back
+        //Get data for each month, starting from current month and going back
         for (int i = 0; i < months; i++) {
             YearMonth targetMonth = currentMonth.minusMonths(i);
             List<UserMembership> memberships = userMembershipRepository.findByStartDateYearAndMonth(
@@ -114,7 +90,7 @@ public class RevenueService {
             monthlyData.add(data);
         }
         
-        // Reverse the list so it's in chronological order
+        //Reverse the list so it's in chronological order
         List<MonthlyRevenueChartResponse.MonthlyRevenueData> chronologicalData = 
                 monthlyData.stream()
                         .sorted((d1, d2) -> d1.getMonth().compareTo(d2.getMonth()))
@@ -124,12 +100,7 @@ public class RevenueService {
                 .monthlyData(chronologicalData)
                 .build();
     }
-    
-    /**
-     * Calculate total revenue from a list of UserMembership objects
-     * @param memberships List of UserMembership objects
-     * @return Total revenue
-     */
+
     private double calculateTotalRevenue(List<UserMembership> memberships) {
         return memberships.stream()
                 .mapToDouble(membership -> {
@@ -141,32 +112,27 @@ public class RevenueService {
                 })
                 .sum();
     }
-    /**
-     * Get revenue statistics for a specific month
-     * @param year Year
-     * @param month Month (1-12)
-     * @return RevenueStatisticsResponse containing total revenue and transaction count
-     */
+
     @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
     public RevenueStatisticsResponse getRevenueOfCoachForMonth(int year, int month, long coachId) {
-        // 1. Lấy danh sách membership trong tháng
+        //Lấy danh sách membership trong tháng
         List<UserMembership> membershipsInMonth =
                 userMembershipRepository.findByStartDateYearAndMonth(year, month);
 
-        // 2. Lấy danh sách member đã chọn coach đó
+        //Lấy danh sách member đã chọn coach đó
         List<MemberCoachSelection> coachSelections =
                 memberCoachSelectionRepository.findByCoachId(coachId);
         List<Long> memberIdsOfCoach = coachSelections.stream()
                 .map(selection -> selection.getMember().getUserId())
                 .toList();
 
-        // 3. Lọc các membership thuộc về các member đó
+        //Lọc các membership thuộc về các member đó
         List<UserMembership> membershipsOfCoach = membershipsInMonth.stream()
                 .filter(m -> m.getMember() != null &&
                         memberIdsOfCoach.contains(m.getMember().getUserId()))
                 .toList();
 
-        // 4. Tính tổng doanh thu
+        //tính tổng doanh thu
         double totalRevenue = calculateTotalRevenue(membershipsOfCoach)*0.7;
 
         return RevenueStatisticsResponse.builder()
@@ -175,39 +141,32 @@ public class RevenueService {
                 .period(YearMonth.of(year, month))
                 .build();
     }
-    /**
-     * Get revenue statistics for the most recent month
-     * @return RevenueStatisticsResponse containing total revenue and transaction count
-     */
+
     @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
     public RevenueStatisticsResponse getRevenueOfCoachForCurrentMonth(long coachId) {
         YearMonth currentMonth = YearMonth.now();
         return getRevenueOfCoachForMonth(currentMonth.getYear(), currentMonth.getMonthValue(), coachId);
     }
-    /**
-     * Get revenue statistics for a specific year
-     * @param year Year
-     * @return RevenueStatisticsResponse containing total revenue and transaction count
-     */
+
     @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
     public RevenueStatisticsResponse getRevenueOfCoachForYear(int year, long coachId) {
-        // 1. Lấy tất cả user membership trong năm đó
+        //Lấy tất cả user membership trong năm đó
         List<UserMembership> membershipsInYear = userMembershipRepository.findByStartDateYear(year);
 
-        // 2. Lấy danh sách member đã chọn coach tương ứng
+        //Lấy danh sách member đã chọn coach tương ứng
         List<MemberCoachSelection> coachSelections =
                 memberCoachSelectionRepository.findByCoachId(coachId);
         List<Long> memberIdsOfCoach = coachSelections.stream()
                 .map(selection -> selection.getMember().getUserId())
                 .toList();
 
-        // 3. Lọc các membership thuộc về các member đó
+        //Lọc các membership thuộc về các member đó
         List<UserMembership> membershipsOfCoach = membershipsInYear.stream()
                 .filter(m -> m.getMember() != null &&
                         memberIdsOfCoach.contains(m.getMember().getUserId()))
                 .toList();
 
-        // 4. Tính tổng doanh thu
+        //Tính tổng doanh thu
         double totalRevenue = calculateTotalRevenue(membershipsOfCoach)*0.7;
 
         return RevenueStatisticsResponse.builder()
@@ -216,10 +175,7 @@ public class RevenueService {
                 .year(year)
                 .build();
     }
-    /**
-     * Get revenue statistics for the current year
-     * @return RevenueStatisticsResponse containing total revenue and transaction count
-     */
+
     @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
     public RevenueStatisticsResponse getRevenueOfCoachForCurrentYear(long coachId) {
         int currentYear = LocalDate.now().getYear();

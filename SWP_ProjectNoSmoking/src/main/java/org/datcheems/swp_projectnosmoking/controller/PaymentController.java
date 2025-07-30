@@ -25,9 +25,6 @@ public class PaymentController {
     private final VNPayService vnPayService;
     private final PaymentService paymentService; // Inject PaymentService mới
 
-    /**
-     * API tạo URL thanh toán VNPay
-     */
     @GetMapping("/create-vnpay")
     public ResponseEntity<String> createPayment(
             HttpServletRequest request,
@@ -43,9 +40,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentUrl);
     }
 
-    /**
-     * API callback sau khi thanh toán (người dùng được chuyển về đây)
-     */
     @GetMapping("/vnpay-return")
     public void vnpayReturn(HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.info("VNPay return callback received");
@@ -133,77 +127,71 @@ public class PaymentController {
         response.sendRedirect(frontendUrl);
     }
 
-    /**
-     * API server nhận thông báo IPN từ VNPay (server-to-server)
-     */
-    @GetMapping("/vnpay-ipn")
-    public ResponseEntity<String> vnpayIpn(HttpServletRequest request) {
-        log.info("VNPay IPN callback received");
+//    @GetMapping("/vnpay-ipn")
+//    public ResponseEntity<String> vnpayIpn(HttpServletRequest request) {
+//        log.info("VNPay IPN callback received");
+//
+//        Map<String, String> params = new HashMap<>();
+//        request.getParameterMap().forEach((key, value) -> {
+//            if (value.length > 0) {
+//                params.put(key, value[0]);
+//            }
+//        });
+//
+//        log.info("VNPay IPN parameters: {}", params);
+//        String transactionId = params.get("vnp_TxnRef");
+//
+//        // Kiểm tra responseCode trước khi verify
+//        String responseCode = params.get("vnp_ResponseCode");
+//        if (!"00".equals(responseCode)) {
+//            log.warn("IPN: Payment failed with response code: {} for transaction: {}", responseCode, transactionId);
+//            return ResponseEntity.ok("99"); // Lỗi
+//        }
+//
+//        if (paymentService.verifyPayment(params)) {
+//            try {
+//                paymentService.processPayment(params); // Cũng sẽ gọi UserMembershipService.create()
+//                log.info("IPN: Payment processed successfully for transaction: {}", transactionId);
+//                return ResponseEntity.ok("00"); // VNPay yêu cầu trả về "00" khi thành công
+//            } catch (Exception e) {
+//                // Check if this is an "already processed" exception - which is actually a success case
+//                if (e.getMessage() != null && e.getMessage().contains("already_processed")) {
+//                    log.info("IPN: Payment already processed for transaction: {}", transactionId);
+//                    return ResponseEntity.ok("00"); // This is still a success case for VNPay
+//                } else {
+//                    log.error("IPN: Error processing payment for transaction: {}", transactionId, e);
+//                    return ResponseEntity.ok("99"); // Lỗi xử lý
+//                }
+//            }
+//        }
+//
+//        log.error("IPN: Signature verification failed for transaction: {}", transactionId);
+//        return ResponseEntity.ok("99"); // Lỗi
+//    }
+//    @GetMapping("/test-callback")
+//    public ResponseEntity<String> testCallback() {
+//        log.info("=== Testing callback manually ===");
+//
+//        // Giả lập parameters từ VNPay thành công
+//        Map<String, String> testParams = new HashMap<>();
+//        testParams.put("vnp_ResponseCode", "00");
+//        testParams.put("vnp_OrderInfo", "USER_ID:2|PACKAGE_ID:1|PACKAGE_NAME:VIP");
+//        testParams.put("vnp_TxnRef", "TEST" + System.currentTimeMillis());
+//        testParams.put("vnp_Amount", "230000000"); // VNPay amount * 100
+//        testParams.put("vnp_SecureHash", "dummy_hash");
+//
+//        log.info("Test params: {}", testParams);
+//
+//        try {
+//            // Bỏ qua verify signature cho test
+//            paymentService.processPayment(testParams);
+//            return ResponseEntity.ok("Test callback processed successfully");
+//        } catch (Exception e) {
+//            log.error("Test callback failed", e);
+//            return ResponseEntity.ok("Test callback failed: " + e.getMessage());
+//        }
+//    }
 
-        Map<String, String> params = new HashMap<>();
-        request.getParameterMap().forEach((key, value) -> {
-            if (value.length > 0) {
-                params.put(key, value[0]);
-            }
-        });
-
-        log.info("VNPay IPN parameters: {}", params);
-        String transactionId = params.get("vnp_TxnRef");
-
-        // Kiểm tra responseCode trước khi verify
-        String responseCode = params.get("vnp_ResponseCode");
-        if (!"00".equals(responseCode)) {
-            log.warn("IPN: Payment failed with response code: {} for transaction: {}", responseCode, transactionId);
-            return ResponseEntity.ok("99"); // Lỗi
-        }
-
-        if (paymentService.verifyPayment(params)) {
-            try {
-                paymentService.processPayment(params); // Cũng sẽ gọi UserMembershipService.create()
-                log.info("IPN: Payment processed successfully for transaction: {}", transactionId);
-                return ResponseEntity.ok("00"); // VNPay yêu cầu trả về "00" khi thành công
-            } catch (Exception e) {
-                // Check if this is an "already processed" exception - which is actually a success case
-                if (e.getMessage() != null && e.getMessage().contains("already_processed")) {
-                    log.info("IPN: Payment already processed for transaction: {}", transactionId);
-                    return ResponseEntity.ok("00"); // This is still a success case for VNPay
-                } else {
-                    log.error("IPN: Error processing payment for transaction: {}", transactionId, e);
-                    return ResponseEntity.ok("99"); // Lỗi xử lý
-                }
-            }
-        }
-
-        log.error("IPN: Signature verification failed for transaction: {}", transactionId);
-        return ResponseEntity.ok("99"); // Lỗi
-    }
-    @GetMapping("/test-callback")
-    public ResponseEntity<String> testCallback() {
-        log.info("=== Testing callback manually ===");
-
-        // Giả lập parameters từ VNPay thành công
-        Map<String, String> testParams = new HashMap<>();
-        testParams.put("vnp_ResponseCode", "00");
-        testParams.put("vnp_OrderInfo", "USER_ID:2|PACKAGE_ID:1|PACKAGE_NAME:VIP");
-        testParams.put("vnp_TxnRef", "TEST" + System.currentTimeMillis());
-        testParams.put("vnp_Amount", "230000000"); // VNPay amount * 100
-        testParams.put("vnp_SecureHash", "dummy_hash");
-
-        log.info("Test params: {}", testParams);
-
-        try {
-            // Bỏ qua verify signature cho test
-            paymentService.processPayment(testParams);
-            return ResponseEntity.ok("Test callback processed successfully");
-        } catch (Exception e) {
-            log.error("Test callback failed", e);
-            return ResponseEntity.ok("Test callback failed: " + e.getMessage());
-        }
-    }
-
-    /**
-     * API để Frontend kiểm tra trạng thái callback từ Backend
-     */
     @GetMapping("/check-callback")
     public ResponseEntity<Map<String, Object>> checkCallback(
             @RequestParam(required = false) String vnp_TxnRef,
@@ -228,28 +216,28 @@ public class PaymentController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/test-payment-process")
-    public ResponseEntity<String> testPaymentProcess() {
-        log.info("=== Testing payment processing with real VNPay params ===");
-
-        // Giả lập parameters từ VNPay sandbox thực tế
-        Map<String, String> testParams = new HashMap<>();
-        testParams.put("vnp_ResponseCode", "00");
-        testParams.put("vnp_OrderInfo", "USER_ID:2|PACKAGE_ID:1|PACKAGE_NAME:VIP");
-        testParams.put("vnp_TxnRef", "TEST" + System.currentTimeMillis());
-        testParams.put("vnp_Amount", "230000000");
-        testParams.put("vnp_TransactionStatus", "00");
-        testParams.put("vnp_PayDate", "20250706160709");
-
-        log.info("Test params: {}", testParams);
-
-        try {
-            // Test chỉ processPayment, skip verify
-            paymentService.processPayment(testParams);
-            return ResponseEntity.ok("Test payment processing successful");
-        } catch (Exception e) {
-            log.error("Test payment processing failed", e);
-            return ResponseEntity.ok("Test payment processing failed: " + e.getMessage());
-        }
-    }
+//    @GetMapping("/test-payment-process")
+//    public ResponseEntity<String> testPaymentProcess() {
+//        log.info("=== Testing payment processing with real VNPay params ===");
+//
+//        // Giả lập parameters từ VNPay sandbox thực tế
+//        Map<String, String> testParams = new HashMap<>();
+//        testParams.put("vnp_ResponseCode", "00");
+//        testParams.put("vnp_OrderInfo", "USER_ID:2|PACKAGE_ID:1|PACKAGE_NAME:VIP");
+//        testParams.put("vnp_TxnRef", "TEST" + System.currentTimeMillis());
+//        testParams.put("vnp_Amount", "230000000");
+//        testParams.put("vnp_TransactionStatus", "00");
+//        testParams.put("vnp_PayDate", "20250706160709");
+//
+//        log.info("Test params: {}", testParams);
+//
+//        try {
+//            // Test chỉ processPayment, skip verify
+//            paymentService.processPayment(testParams);
+//            return ResponseEntity.ok("Test payment processing successful");
+//        } catch (Exception e) {
+//            log.error("Test payment processing failed", e);
+//            return ResponseEntity.ok("Test payment processing failed: " + e.getMessage());
+//        }
+//    }
 }
