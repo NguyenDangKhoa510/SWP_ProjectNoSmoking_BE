@@ -28,12 +28,6 @@ public class MemberInitialInfoService {
         Member member = memberRepository.findByUserId(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 
-//        boolean hasCoach = memberCoachSelectionRepository.existsByMember(member);
-//        if (!hasCoach) {
-//            throw new RuntimeException("You must select a Coach before submitting initial information.");
-//        }
-
-
         MemberInitialInfo info = repository.findByMember(member).orElse(new MemberInitialInfo());
         info.setMember(member);
         info.setYearsSmoking(request.getYearsSmoking());
@@ -63,12 +57,6 @@ public class MemberInitialInfoService {
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
-
-
-    public boolean hasSubmittedInitialInfo(Member member) {
-        return repository.findByMember(member).isPresent();
-    }
-
 
     private MemberInitialInfoResponse toResponse(MemberInitialInfo info) {
         MemberInitialInfoResponse res = new MemberInitialInfoResponse();

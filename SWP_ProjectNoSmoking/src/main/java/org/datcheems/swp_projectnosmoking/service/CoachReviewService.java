@@ -227,14 +227,6 @@ public class CoachReviewService {
         );
     }
 
-
-
-
-
-
-
-
-
     private CoachReviewResponse toResponse(CoachReview review, boolean isAdminView) {
         CoachReviewResponse res = new CoachReviewResponse();
         res.setReviewId(review.getId());
@@ -256,9 +248,6 @@ public class CoachReviewService {
     private CoachReviewResponse toResponse(CoachReview review) {
         return toResponse(review, false);
     }
-
-
-
 
 
     private User getCurrentUser() {
