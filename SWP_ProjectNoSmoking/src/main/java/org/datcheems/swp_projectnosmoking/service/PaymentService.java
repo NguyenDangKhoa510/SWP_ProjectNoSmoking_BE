@@ -174,7 +174,7 @@ public class PaymentService {
 
     private void createUserMembership(Long memberId, Long packageId, MembershipPackage membershipPackage, String transactionId) {
         LocalDate startDate = LocalDate.now();
-        LocalDate endDate = startDate.plusMonths(1);
+        LocalDate endDate = startDate.plusMonths(membershipPackage.getDuration());
 
         UserMembershipRequest request = UserMembershipRequest.builder()
                 .userId(memberId)

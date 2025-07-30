@@ -105,7 +105,6 @@ public class SmokingLogService {
                     quitPlanStageRepository.save(stage);
 
                     sendStageCompletionNotification(member, stage);
-                    checkAndCompleteQuitPlanIfAllStagesCompleted(stage.getQuitPlan());
                 }
             }
 
@@ -400,6 +399,8 @@ public class SmokingLogService {
         userNotificationRequest.setPersonalizedReason("Bạn đã hoàn thành một giai đoạn trong kế hoạch cai thuốc – tiếp tục cố gắng nhé!");
 
         notificationService.sendNotificationToUser(userNotificationRequest);
+
+        notificationService.notifyCoachStageCompleted(member.getUserId(), stage.getStageNumber());
     }
 
     public double calculateStageProgress(QuitPlanStage stage, Member member) {

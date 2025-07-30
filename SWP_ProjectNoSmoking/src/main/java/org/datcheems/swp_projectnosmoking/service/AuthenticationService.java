@@ -50,7 +50,7 @@ public class AuthenticationService {
             boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
             if (!authenticated) {
-                throw new RuntimeException("Invalid username or password");
+                throw new RuntimeException("Sai tên đăng nhập hoặc mật khẩu");
             }
 
             var token = jwtUtils.generateToken(user);

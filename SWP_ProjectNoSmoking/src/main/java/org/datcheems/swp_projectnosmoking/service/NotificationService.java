@@ -159,6 +159,69 @@ public class NotificationService {
         userNotificationRepository.save(un);
     }
 
+    public void notifyCoachStageCompleted(Long memberId, int stageNumber) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        User memberUser = member.getUser();
+
+        MemberCoachSelection selection = memberCoachSelectionRepository.findByMember(member)
+                .orElseThrow(() -> new RuntimeException("No coach found for this member"));
+
+        Coach coach = selection.getCoach();
+        User coachUser = coach.getUser();
+
+        Notification notification = new Notification();
+        notification.setTitle("Thành viên đã hoàn thành giai đoạn");
+        notification.setContent("Thành viên " + memberUser.getFullName() + " đã hoàn thành giai đoạn số " + stageNumber + ".");
+        notification.setIsActive(true);
+        notification.setCreatedBy(memberUser);
+
+        Notification savedNotification = notificationRepository.save(notification);
+
+        UserNotification userNotification = new UserNotification();
+        userNotification.setUser(coachUser);
+        userNotification.setNotification(savedNotification);
+        userNotification.setPersonalizedReason("Thông báo từ hệ thống về tiến độ học viên.");
+        userNotification.setDeliveryStatus(UserNotification.DeliveryStatus.SENT);
+
+        userNotificationRepository.save(userNotification);
+    }
+
+    public void notifyMemberStageUpdatedByCoach(Long coachUserId, Long memberId, int stageNumber) {
+        User coachUser = userRepository.findById(coachUserId)
+                .orElseThrow(() -> new RuntimeException("Coach user not found"));
+
+        Coach coach = coachRepository.findByUserId(coachUser.getId())
+                .orElseThrow(() -> new RuntimeException("Coach profile not found"));
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        User memberUser = member.getUser();
+
+        boolean isLinked = memberCoachSelectionRepository.existsByMemberAndCoach(member, coach);
+        if (!isLinked) {
+            throw new RuntimeException("This coach is not assigned to the member.");
+        }
+
+        Notification notification = new Notification();
+        notification.setTitle("Huấn luyện viên đã cập nhật tiến độ");
+        notification.setContent("Huấn luyện viên " + coachUser.getFullName() +
+                " đã cập nhật bạn đến giai đoạn số " + stageNumber + ".");
+        notification.setIsActive(true);
+        notification.setCreatedBy(coachUser);
+
+        Notification savedNotification = notificationRepository.save(notification);
+
+        UserNotification userNotification = new UserNotification();
+        userNotification.setUser(memberUser);
+        userNotification.setNotification(savedNotification);
+        userNotification.setPersonalizedReason("Thông báo từ huấn luyện viên về tiến độ.");
+        userNotification.setDeliveryStatus(UserNotification.DeliveryStatus.SENT);
+
+        userNotificationRepository.save(userNotification);
+    }
 
 
 }

@@ -97,6 +97,9 @@ public class UserMembershipService {
 
         Optional<Member> memberOpt = memberRepository.findById(request.getUserId());
         Optional<MembershipPackage> packageOpt = membershipPackageRepository.findById(request.getMembershipPackageId());
+        LocalDate startDate = request.getStartDate();
+        int durationInMonths = packageOpt.get().getDuration();
+        LocalDate endDate = startDate.plusMonths(durationInMonths);
 
         if (memberOpt.isEmpty() || packageOpt.isEmpty()) {
             response.setStatus("fail");
@@ -141,8 +144,8 @@ public class UserMembershipService {
         UserMembership entity = new UserMembership();
         entity.setMember(memberOpt.get());
         entity.setMembershipPackageId(packageOpt.get());
-        entity.setStartDate(request.getStartDate());
-        entity.setEndDate(request.getEndDate());
+        entity.setStartDate(startDate);
+        entity.setEndDate(endDate);
         entity.setStatus(request.getStatus());
         entity.setTransactionId(request.getTransactionId());
 

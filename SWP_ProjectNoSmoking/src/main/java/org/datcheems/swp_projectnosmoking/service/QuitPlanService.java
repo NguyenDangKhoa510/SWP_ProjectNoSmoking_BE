@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class QuitPlanService {
-
+    private final NotificationService notificationService;
     private final UserRepository userRepository;
     private final MemberRepository memberRepository;
     private final CoachRepository coachRepository;
@@ -198,6 +198,15 @@ public class QuitPlanService {
             stage.setAdvice(request.getAdvice());
 
             QuitPlanStage updatedStage = quitPlanStageRepository.save(stage);
+
+            if (isCoach(currentUser)) {
+                notificationService.notifyMemberStageUpdatedByCoach(
+                        currentUser.getId(),
+                        quitPlan.getMember().getUserId(),
+                        updatedStage.getStageNumber()
+                );
+            }
+
             return quitPlanMapper.toStageResponse(updatedStage);
         } else {
             throw new RuntimeException("You don't have permission to update this quit plan stage");

@@ -30,8 +30,6 @@ public interface MemberCoachSelectionRepository extends JpaRepository<MemberCoac
     @Query("SELECT mcs FROM MemberCoachSelection mcs WHERE mcs.coach.userId = :coachId")
     List<MemberCoachSelection> findByCoachId(@Param("coachId") Long coachId);
 
-
-
-
+    Optional<MemberCoachSelection> findByMember(Member member);
 
 }
