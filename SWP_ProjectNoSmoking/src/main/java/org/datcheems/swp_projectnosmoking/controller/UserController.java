@@ -125,59 +125,59 @@ public class UserController {
         }
     }
 
-//    @GetMapping("/coaches/{coachId}/selections")
-//    public ResponseEntity<ResponseObject<List<Map<String, Object>>>> getCoachSelections(@PathVariable Long coachId) {
-//        ResponseObject<List<Map<String, Object>>> response = new ResponseObject<>();
-//
-//        try {
-//
-//            Optional<Coach> coachOpt = coachRepository.findById(coachId);
-//            if (coachOpt.isEmpty()) {
-//                response.setStatus("error");
-//                response.setMessage("Coach không tồn tại với ID: " + coachId);
-//                response.setData(null);
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-//            }
-//
-//            Coach coach = coachOpt.get();
-//
-//            List<MemberCoachSelection> selections = memberCoachSelectionRepository.findByCoach(coach);
-//
-//            List<Map<String, Object>> result = selections.stream().map(selection -> {
-//                Map<String, Object> selectionData = new HashMap<>();
-//                selectionData.put("selectionId", selection.getSelectionId());
-//                selectionData.put("selectedAt", selection.getSelectedAt());
-//
-//                Long unreadCount = messageRepository.countUnreadMessages(selection.getSelectionId());
-//                selectionData.put("unreadCount", unreadCount);
-//
-//                Member member = selection.getMember();
-//                Map<String, Object> memberData = new HashMap<>();
-//                memberData.put("memberId", member.getUserId());
-//                memberData.put("userId", member.getUser().getId()); // Sửa từ getUserId() thành getId()
-//                memberData.put("fullName", member.getUser().getFullName());
-//                memberData.put("username", member.getUser().getUsername());
-//                memberData.put("email", member.getUser().getEmail());
-//
-//                selectionData.put("member", memberData);
-//
-//                return selectionData;
-//            }).toList();
-//
-//            response.setStatus("success");
-//            response.setMessage("Lấy danh sách selections thành công");
-//            response.setData(result);
-//
-//            return ResponseEntity.ok(response);
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            response.setStatus("error");
-//            response.setMessage("Internal server error: " + e.getMessage());
-//            response.setData(null);
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-//        }
-//    }
+    @GetMapping("/coaches/{coachId}/selections")
+    public ResponseEntity<ResponseObject<List<Map<String, Object>>>> getCoachSelections(@PathVariable Long coachId) {
+        ResponseObject<List<Map<String, Object>>> response = new ResponseObject<>();
+
+        try {
+
+            Optional<Coach> coachOpt = coachRepository.findById(coachId);
+            if (coachOpt.isEmpty()) {
+                response.setStatus("error");
+                response.setMessage("Coach không tồn tại với ID: " + coachId);
+                response.setData(null);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            Coach coach = coachOpt.get();
+
+            List<MemberCoachSelection> selections = memberCoachSelectionRepository.findByCoach(coach);
+
+            List<Map<String, Object>> result = selections.stream().map(selection -> {
+                Map<String, Object> selectionData = new HashMap<>();
+                selectionData.put("selectionId", selection.getSelectionId());
+                selectionData.put("selectedAt", selection.getSelectedAt());
+
+                Long unreadCount = messageRepository.countUnreadMessages(selection.getSelectionId());
+                selectionData.put("unreadCount", unreadCount);
+
+                Member member = selection.getMember();
+                Map<String, Object> memberData = new HashMap<>();
+                memberData.put("memberId", member.getUserId());
+                memberData.put("userId", member.getUser().getId()); // Sửa từ getUserId() thành getId()
+                memberData.put("fullName", member.getUser().getFullName());
+                memberData.put("username", member.getUser().getUsername());
+                memberData.put("email", member.getUser().getEmail());
+
+                selectionData.put("member", memberData);
+
+                return selectionData;
+            }).toList();
+
+            response.setStatus("success");
+            response.setMessage("Lấy danh sách selections thành công");
+            response.setData(result);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus("error");
+            response.setMessage("Internal server error: " + e.getMessage());
+            response.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 
     @PutMapping("/admin/users/{id}/status")
     public ResponseEntity<ResponseObject<UserResponse>> updateStatus(
