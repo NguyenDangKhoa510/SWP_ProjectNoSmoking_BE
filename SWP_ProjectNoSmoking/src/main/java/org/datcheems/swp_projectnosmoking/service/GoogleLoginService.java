@@ -22,9 +22,6 @@ import java.util.Optional;
 @Service
 public class GoogleLoginService {
 
-
-    private String googleClientId = "82302107538-mjprlclm2pvioc2ojv5q0mjjibkbpdni.apps.googleusercontent.com";
-
     @Autowired
     private UserRepository userRepository;
 

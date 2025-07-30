@@ -19,14 +19,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class AuthenticationService {
-    @Value("${jwt.signerKey}")
-    private String SIGNING_KEY;
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
 
     @Autowired
     private JwtUtils jwtUtils;
