@@ -20,6 +20,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -34,6 +36,8 @@ public class MemberService {
     MemberCoachSelectionRepository memberCoachSelectionRepository;
 
     CoachRepository coachRepository;
+
+    NotificationService notificationService;
 
     public UserProfileResponse getCurrentUserProfile(String username) {
 
@@ -103,61 +107,46 @@ public class MemberService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseObject<String>> selectCoach(Long coachId) {
-        ResponseObject<String> response = new ResponseObject<>();
-
-        try {
-
-            String username = SecurityContextHolder
-                    .getContext()
-                    .getAuthentication()
-                    .getName();
-
-
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-
-            Member member = memberRepository.findByUser(user)
-                    .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
-
-
-            Coach coach = coachRepository.findById(coachId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Coach not found"));
-
-            boolean exists = memberCoachSelectionRepository
-                    .existsByMemberAndCoach(member, coach);
-
-            if (exists) {
-                response.setStatus("success");
-                response.setMessage("Member already selected this coach");
-                response.setData(null);
-                return ResponseEntity.status(HttpStatus.OK).body(response);
-            }
-
-            MemberCoachSelection selection = new MemberCoachSelection();
-            selection.setMember(member);
-            selection.setCoach(coach);
-            selection.setSelectedAt(LocalDateTime.now());
-
-            memberCoachSelectionRepository.save(selection);
-
-            response.setStatus("success");
-            response.setMessage("Coach selected successfully");
-            response.setData(null);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-
-        } catch (ResourceNotFoundException e) {
-            response.setStatus("error");
-            response.setMessage(e.getMessage());
-            response.setData(null);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        } catch (Exception e) {
-            response.setStatus("error");
-            response.setMessage("Internal server error: " + e.getMessage());
-            response.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    public Map<String, Object> selectCoachForMember(Long coachId, String username) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("User không tồn tại");
         }
+
+        Optional<Coach> coachOpt = coachRepository.findById(coachId);
+        if (coachOpt.isEmpty()) {
+            throw new RuntimeException("Coach không tồn tại");
+        }
+
+        Optional<Member> memberOpt = memberRepository.findByUser(userOpt.get());
+        if (memberOpt.isEmpty()) {
+            throw new RuntimeException("Member không tồn tại");
+        }
+
+        Optional<MemberCoachSelection> selectionOpt = memberCoachSelectionRepository
+                .findByMemberAndCoach(memberOpt.get(), coachOpt.get());
+
+        MemberCoachSelection selection;
+        if (selectionOpt.isEmpty()) {
+            selection = new MemberCoachSelection();
+            selection.setMember(memberOpt.get());
+            selection.setCoach(coachOpt.get());
+            selection.setSelectedAt(LocalDateTime.now());
+            selection = memberCoachSelectionRepository.save(selection);
+
+            // Gửi thông báo cho Coach
+            notificationService.notifyCoachSelectedByMember(memberOpt.get().getUserId());
+        } else {
+            selection = selectionOpt.get();
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("selectionId", selection.getSelectionId());
+        result.put("memberId", memberOpt.get().getUserId());
+        result.put("coachId", coachOpt.get().getUserId());
+
+        return result;
     }
+
 
 }

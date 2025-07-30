@@ -11,6 +11,7 @@ import org.datcheems.swp_projectnosmoking.entity.MemberCoachSelection;
 import org.datcheems.swp_projectnosmoking.entity.User;
 import org.datcheems.swp_projectnosmoking.repository.*;
 import org.datcheems.swp_projectnosmoking.service.MemberService;
+import org.datcheems.swp_projectnosmoking.service.NotificationService;
 import org.datcheems.swp_projectnosmoking.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,9 @@ public class UserController {
     @Autowired
     private MessageRepository messageRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @GetMapping("/getAll")
     public List<UserResponse> getAllUsers() {
         return userService.getAllUsers();
@@ -74,10 +78,6 @@ public class UserController {
         return "Profile updated successfully";
     }
 
-    @PostMapping("/members/select-coach/{coachId}")
-    public ResponseEntity<ResponseObject<String>> selectCoach(@PathVariable Long coachId) {
-        return memberService.selectCoach(coachId);
-    }
     @GetMapping("/getMyInfo")
     public UserProfileResponse getMyInfo(@AuthenticationPrincipal Jwt principal) {
         String username = principal.getSubject();
@@ -108,62 +108,23 @@ public class UserController {
     public ResponseEntity<ResponseObject<Map<String, Object>>> getSelectionWithCoach(
             @PathVariable Long coachId,
             @AuthenticationPrincipal Jwt principal) {
-        ResponseObject<Map<String, Object>> response = new ResponseObject<>();
 
+        ResponseObject<Map<String, Object>> response = new ResponseObject<>();
         try {
             String username = principal.getSubject();
 
-            UserProfileResponse profile = memberService.getCurrentUserProfile(username);
-
-            Optional<User> userOpt = userRepository.findByUsername(username);
-            if (userOpt.isEmpty()) {
-                response.setStatus("error");
-                response.setMessage("User không tồn tại");
-                response.setData(null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
-
-            Optional<Coach> coachOpt = coachRepository.findById(coachId);
-            if (coachOpt.isEmpty()) {
-                response.setStatus("error");
-                response.setMessage("Coach không tồn tại");
-                response.setData(null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
-
-            Optional<Member> memberOpt = memberRepository.findByUser(userOpt.get());
-            if (memberOpt.isEmpty()) {
-                response.setStatus("error");
-                response.setMessage("Member không tồn tại");
-                response.setData(null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
-
-            Optional<MemberCoachSelection> selectionOpt = memberCoachSelectionRepository
-                    .findByMemberAndCoach(memberOpt.get(), coachOpt.get());
-
-            MemberCoachSelection selection;
-            if (selectionOpt.isEmpty()) {
-                selection = new MemberCoachSelection();
-                selection.setMember(memberOpt.get());
-                selection.setCoach(coachOpt.get());
-                selection.setSelectedAt(LocalDateTime.now());
-                selection = memberCoachSelectionRepository.save(selection);
-            } else {
-                selection = selectionOpt.get();
-            }
-
-            Map<String, Object> result = new HashMap<>();
-            result.put("selectionId", selection.getSelectionId());
-            result.put("memberId", memberOpt.get().getUserId());
-            result.put("coachId", coachOpt.get().getUserId());
+            Map<String, Object> result = memberService.selectCoachForMember(coachId, username);
 
             response.setStatus("success");
             response.setMessage("Lấy selection thành công");
             response.setData(result);
-
             return ResponseEntity.ok(response);
 
+        } catch (RuntimeException e) {
+            response.setStatus("error");
+            response.setMessage(e.getMessage());
+            response.setData(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
             response.setStatus("error");
             response.setMessage("Internal server error: " + e.getMessage());
