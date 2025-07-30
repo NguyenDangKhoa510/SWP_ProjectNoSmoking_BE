@@ -36,10 +36,10 @@ public class MemberBadgeController {
     public ResponseEntity<ResponseObject<Integer>> getTotalScore(@PathVariable Long memberId) {
         return ResponseEntity.ok(memberBadgeService.getTotalBadgeScore(memberId));
     }
-    @PostMapping("/admin/manualadd")
-    public ResponseEntity<ResponseObject<String>> assignBadgeManually(@RequestBody MemberBadgeRequest request) {
-        return ResponseEntity.ok(memberBadgeService.assignBadgeManually(request));
-    }
+//    @PostMapping("/admin/manualadd")
+//    public ResponseEntity<ResponseObject<String>> assignBadgeManually(@RequestBody MemberBadgeRequest request) {
+//        return ResponseEntity.ok(memberBadgeService.assignBadgeManually(request));
+//    }
     @GetMapping("/ranking")
     public ResponseEntity<ResponseObject<List<MemberRankingResponse>>> getRanking() {
         return ResponseEntity.ok(memberBadgeService.getRankingByBadgeScore());

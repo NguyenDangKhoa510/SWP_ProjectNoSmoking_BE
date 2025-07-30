@@ -30,15 +30,15 @@ public class QuitPlanController {
         ));
     }
 
-    @PreAuthorize("hasAnyRole('COACH', 'MEMBER')")
-    @GetMapping("/{quitPlanId}")
-    public ResponseEntity<?> getQuitPlanById(@PathVariable Long quitPlanId) {
-        QuitPlanResponse response = quitPlanService.getQuitPlanById(quitPlanId);
-        return ResponseEntity.ok(Map.of(
-                "message", "Quit plan details fetched successfully",
-                "data", response
-        ));
-    }
+//    @PreAuthorize("hasAnyRole('COACH', 'MEMBER')")
+//    @GetMapping("/{quitPlanId}")
+//    public ResponseEntity<?> getQuitPlanById(@PathVariable Long quitPlanId) {
+//        QuitPlanResponse response = quitPlanService.getQuitPlanById(quitPlanId);
+//        return ResponseEntity.ok(Map.of(
+//                "message", "Quit plan details fetched successfully",
+//                "data", response
+//        ));
+//    }
 
     @PreAuthorize("hasRole('MEMBER')")
     @GetMapping("/member")

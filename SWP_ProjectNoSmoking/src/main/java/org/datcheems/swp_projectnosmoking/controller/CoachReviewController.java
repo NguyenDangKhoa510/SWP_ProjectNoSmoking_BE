@@ -20,12 +20,12 @@ public class CoachReviewController {
     private final CoachReviewService coachReviewService;
 
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/all")
-    public ResponseEntity<List<CoachReviewResponse>> getAllReviews() {
-        List<CoachReviewResponse> reviews = coachReviewService.getAllReviews();
-        return ResponseEntity.ok(reviews);
-    }
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @GetMapping("/all")
+//    public ResponseEntity<List<CoachReviewResponse>> getAllReviews() {
+//        List<CoachReviewResponse> reviews = coachReviewService.getAllReviews();
+//        return ResponseEntity.ok(reviews);
+//    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/coach/{coachId}")
@@ -94,15 +94,15 @@ public class CoachReviewController {
         ));
     }
 
-    @PreAuthorize("hasAnyRole('COACH', 'ADMIN')")
-    @GetMapping("/me/statistics")
-    public ResponseEntity<?> getMyReviewStatistics() {
-        Map<String, Object> stats = coachReviewService.getReviewStatisticsForCurrentCoach();
-        return ResponseEntity.ok(Map.of(
-                "message", "Coach review statistics retrieved successfully",
-                "data", stats
-        ));
-    }
+//    @PreAuthorize("hasAnyRole('COACH', 'ADMIN')")
+//    @GetMapping("/me/statistics")
+//    public ResponseEntity<?> getMyReviewStatistics() {
+//        Map<String, Object> stats = coachReviewService.getReviewStatisticsForCurrentCoach();
+//        return ResponseEntity.ok(Map.of(
+//                "message", "Coach review statistics retrieved successfully",
+//                "data", stats
+//        ));
+//    }
 
 
     @PreAuthorize("hasRole('ADMIN')")
