@@ -294,7 +294,46 @@ public class NotificationService {
         sendNotificationToUser(userNotificationRequest);
     }
 
+    public void notifyMemberStageResetByCoach(Long coachUserId, Long memberId, int stageNumber) {
+        // Lấy thông tin Coach
+        User coachUser = userRepository.findById(coachUserId)
+                .orElseThrow(() -> new RuntimeException("Coach user not found"));
 
+        Coach coach = coachRepository.findByUserId(coachUser.getId())
+                .orElseThrow(() -> new RuntimeException("Coach profile not found"));
+
+        // Lấy thông tin Member
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        User memberUser = member.getUser();
+
+        // Kiểm tra mối liên kết giữa Coach và Member
+        boolean isLinked = memberCoachSelectionRepository.existsByMemberAndCoach(member, coach);
+        if (!isLinked) {
+            throw new RuntimeException("This coach is not assigned to the member.");
+        }
+
+        // Tạo Notification
+        Notification notification = new Notification();
+        notification.setTitle("Tiến độ giai đoạn đã được đặt lại");
+        notification.setContent("Huấn luyện viên " + coachUser.getFullName() +
+                " đã đặt lại tiến độ cho giai đoạn số " + stageNumber + " của bạn. Hãy bắt đầu lại từ đầu.");
+        notification.setIsActive(true);
+        notification.setCreatedBy(coachUser);
+
+        Notification savedNotification = notificationRepository.save(notification);
+
+        // Gán thông báo cho Member
+        UserNotification userNotification = new UserNotification();
+        userNotification.setUser(memberUser);
+        userNotification.setNotification(savedNotification);
+        userNotification.setPersonalizedReason("Thông báo từ huấn luyện viên về việc đặt lại giai đoạn.");
+        userNotification.setDeliveryStatus(UserNotification.DeliveryStatus.SENT);
+        userNotification.setIsRead(false);
+
+        userNotificationRepository.save(userNotification);
+    }
 
 }
 

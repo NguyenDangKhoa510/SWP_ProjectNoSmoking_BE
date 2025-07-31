@@ -2,8 +2,11 @@ package org.datcheems.swp_projectnosmoking.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.datcheems.swp_projectnosmoking.dto.request.NotificationRequest;
 import org.datcheems.swp_projectnosmoking.dto.request.QuitPlanRequest;
 import org.datcheems.swp_projectnosmoking.dto.request.QuitPlanStageRequest;
+import org.datcheems.swp_projectnosmoking.dto.request.UserNotificationRequest;
+import org.datcheems.swp_projectnosmoking.dto.response.NotificationResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.QuitPlanResponse;
 import org.datcheems.swp_projectnosmoking.dto.response.QuitPlanStageResponse;
 import org.datcheems.swp_projectnosmoking.entity.*;
@@ -14,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +33,7 @@ public class QuitPlanService {
     private final QuitPlanRepository quitPlanRepository;
     private final QuitPlanStageRepository quitPlanStageRepository;
     private final QuitPlanMapper quitPlanMapper;
+    private final MemberCoachSelectionRepository memberCoachSelectionRepository;
 
 
     private User getCurrentUser() {
@@ -338,5 +343,59 @@ public class QuitPlanService {
                 .collect(Collectors.toList());
     }
 
+    public void sendRetryStageRequestToCoach(Long stageId, String username) {
+        User memberUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
 
+        Member member = memberRepository.findByUser(memberUser)
+                .orElseThrow(() -> new RuntimeException("Member không tồn tại"));
+
+        QuitPlanStage stage = quitPlanStageRepository.findById(stageId)
+                .orElseThrow(() -> new RuntimeException("Stage không tồn tại"));
+
+        if (!stage.getStatus().equals(QuitPlanStageStatus.cancelled)) {
+            throw new IllegalStateException("Chỉ có thể gửi yêu cầu làm lại cho stage bị huỷ");
+        }
+
+        MemberCoachSelection selection = memberCoachSelectionRepository.findByMember(member)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy huấn luyện viên"));
+
+        User coachUser = selection.getCoach().getUser();
+
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setTitle("Yêu cầu làm lại giai đoạn");
+        notificationRequest.setContent("Thành viên " + memberUser.getFullName() +
+                " đã gửi yêu cầu làm lại giai đoạn " + stage.getStageNumber());
+        notificationRequest.setIsActive(true);
+
+        User admin = userRepository.findByUsername("admin")
+                .orElseGet(() -> userRepository.findById(1L).orElseThrow());
+
+        NotificationResponse notificationResponse = notificationService.createNotification(notificationRequest, admin.getId());
+
+        // Gửi notification đến coach
+        UserNotificationRequest userNotificationRequest = new UserNotificationRequest();
+        userNotificationRequest.setUserId(coachUser.getId());
+        userNotificationRequest.setNotificationId(notificationResponse.getNotificationId());
+        userNotificationRequest.setPersonalizedReason("Yêu cầu làm lại stage " + stage.getStageNumber());
+
+        notificationService.sendNotificationToUser(userNotificationRequest);
+    }
+
+    @Transactional
+    public void resetQuitPlanStageProgress(Long quitPlanStageId, Long coachUserId) throws AccessDeniedException {
+        QuitPlanStage stage = quitPlanStageRepository.findById(quitPlanStageId)
+                .orElseThrow(() -> new RuntimeException("Stage không tồn tại"));
+
+        QuitPlan quitPlan = stage.getQuitPlan();
+        if (!quitPlan.getCoach().getUser().getId().equals(coachUserId)) {
+            throw new AccessDeniedException("Bạn không có quyền reset stage này");
+        }
+
+        stage.setProgressPercentage(0.0);
+        stage.setStatus(QuitPlanStageStatus.active);
+        quitPlanStageRepository.save(stage);
+
+        notificationService.notifyMemberStageResetByCoach(coachUserId, stage.getQuitPlan().getMember().getUserId(), stage.getStageNumber());
+    }
 }
