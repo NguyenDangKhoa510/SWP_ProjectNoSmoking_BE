@@ -31,7 +31,7 @@ public class AuthenticationService {
 
         try {
             var user = userRepository.findByUsername(request.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new RuntimeException("Sai tên đăng nhập hoặc mật khẩu"));
 
             if (user.getStatus() == User.Status.INACTIVE) {
                 throw new RuntimeException("Tài khoản của bạn đang hạn chế");
