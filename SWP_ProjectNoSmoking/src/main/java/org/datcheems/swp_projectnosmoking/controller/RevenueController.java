@@ -15,10 +15,6 @@ public class RevenueController {
 
     private final RevenueService revenueService;
 
-    /**
-     * Get revenue statistics for the current month
-     * @return ResponseEntity with revenue statistics
-     */
     @GetMapping("/current-month")
     public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getCurrentMonthRevenue() {
         RevenueStatisticsResponse statistics = revenueService.getRevenueForCurrentMonth();
@@ -31,31 +27,21 @@ public class RevenueController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Get revenue statistics for a specific month
-     * @param year Year
-     * @param month Month (1-12)
-     * @return ResponseEntity with revenue statistics
-     */
-    @GetMapping("/month")
-    public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getMonthRevenue(
-            @RequestParam int year,
-            @RequestParam int month) {
-        
-        RevenueStatisticsResponse statistics = revenueService.getRevenueForMonth(year, month);
-        
-        ResponseObject<RevenueStatisticsResponse> response = new ResponseObject<>();
-        response.setStatus("success");
-        response.setMessage("Monthly revenue statistics fetched successfully");
-        response.setData(statistics);
-        
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/month")
+//    public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getMonthRevenue(
+//            @RequestParam int year,
+//            @RequestParam int month) {
+//
+//        RevenueStatisticsResponse statistics = revenueService.getRevenueForMonth(year, month);
+//
+//        ResponseObject<RevenueStatisticsResponse> response = new ResponseObject<>();
+//        response.setStatus("success");
+//        response.setMessage("Monthly revenue statistics fetched successfully");
+//        response.setData(statistics);
+//
+//        return ResponseEntity.ok(response);
+//    }
 
-    /**
-     * Get revenue statistics for the current year
-     * @return ResponseEntity with revenue statistics
-     */
     @GetMapping("/current-year")
     public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getCurrentYearRevenue() {
         RevenueStatisticsResponse statistics = revenueService.getRevenueForCurrentYear();
@@ -68,30 +54,20 @@ public class RevenueController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Get revenue statistics for a specific year
-     * @param year Year
-     * @return ResponseEntity with revenue statistics
-     */
-    @GetMapping("/year")
-    public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getYearRevenue(
-            @RequestParam int year) {
-        
-        RevenueStatisticsResponse statistics = revenueService.getRevenueForYear(year);
-        
-        ResponseObject<RevenueStatisticsResponse> response = new ResponseObject<>();
-        response.setStatus("success");
-        response.setMessage("Yearly revenue statistics fetched successfully");
-        response.setData(statistics);
-        
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/year")
+//    public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getYearRevenue(
+//            @RequestParam int year) {
+//
+//        RevenueStatisticsResponse statistics = revenueService.getRevenueForYear(year);
+//
+//        ResponseObject<RevenueStatisticsResponse> response = new ResponseObject<>();
+//        response.setStatus("success");
+//        response.setMessage("Yearly revenue statistics fetched successfully");
+//        response.setData(statistics);
+//
+//        return ResponseEntity.ok(response);
+//    }
 
-    /**
-     * Get monthly revenue data for chart visualization
-     * @param months Number of months to include (default: 12)
-     * @return ResponseEntity with monthly revenue data
-     */
     @GetMapping("/chart")
     public ResponseEntity<ResponseObject<MonthlyRevenueChartResponse>> getRevenueChart(
             @RequestParam(defaultValue = "12") int months) {
@@ -105,7 +81,7 @@ public class RevenueController {
         
         return ResponseEntity.ok(response);
     }
-    // --- Revenue for coach (current month)
+    //Revenue for coach (current month)
     @GetMapping("/coach/current-month")
     public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getCoachCurrentMonthRevenue(
             @RequestParam long coachId) {
@@ -119,7 +95,7 @@ public class RevenueController {
         return ResponseEntity.ok(response);
     }
 
-    // --- Revenue for coach by month
+    //Revenue for coach by month
     @GetMapping("/coach/month")
     public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getCoachMonthRevenue(
             @RequestParam int year,
@@ -136,7 +112,7 @@ public class RevenueController {
         return ResponseEntity.ok(response);
     }
 
-    // --- Revenue for coach (current year)
+    //Revenue for coach (current year)
     @GetMapping("/coach/current-year")
     public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getCoachCurrentYearRevenue(
             @RequestParam long coachId) {
@@ -150,7 +126,7 @@ public class RevenueController {
         return ResponseEntity.ok(response);
     }
 
-    // --- Revenue for coach by year
+    //Revenue for coach by year
     @GetMapping("/coach/year")
     public ResponseEntity<ResponseObject<RevenueStatisticsResponse>> getCoachYearRevenue(
             @RequestParam int year,
@@ -165,7 +141,7 @@ public class RevenueController {
         return ResponseEntity.ok(response);
     }
 
-    // --- Monthly chart for coach
+    //Monthly chart for coach
     @GetMapping("/coach/chart")
     public ResponseEntity<ResponseObject<MonthlyRevenueChartResponse>> getCoachRevenueChart(
             @RequestParam(defaultValue = "12") int months,

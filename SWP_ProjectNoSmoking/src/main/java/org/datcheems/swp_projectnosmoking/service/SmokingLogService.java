@@ -37,7 +37,6 @@ public class SmokingLogService {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thành viên"));
 
-
         validateMemberCanLog(member);
 
 
@@ -54,6 +53,7 @@ public class SmokingLogService {
             log.setQuitPlanStage(matchedStage);
 
             SmokingLog savedLog = smokingLogRepository.save(log);
+            checkAndCancelUnsuccessfulStages(member, savedLog.getLogDate());
 
             if (savedLog.getQuitPlanStage() != null) {
                 QuitPlanStage stage = savedLog.getQuitPlanStage();
@@ -91,6 +91,7 @@ public class SmokingLogService {
             log.setQuitPlanStage(matchedStage);
 
             SmokingLog savedLog = smokingLogRepository.save(log);
+            checkAndCancelUnsuccessfulStages(member, savedLog.getLogDate());
 
             if (savedLog.getQuitPlanStage() != null) {
                 QuitPlanStage stage = savedLog.getQuitPlanStage();
@@ -105,6 +106,7 @@ public class SmokingLogService {
                     quitPlanStageRepository.save(stage);
 
                     sendStageCompletionNotification(member, stage);
+                    checkAndCompleteQuitPlanIfAllStagesCompleted(stage.getQuitPlan());
                 }
             }
 
@@ -458,6 +460,48 @@ public class SmokingLogService {
             quitPlan.setStatus(QuitPlanStatus.completed);
             quitPlanRepository.save(quitPlan);
         }
+    }
+
+    public void checkAndCancelUnsuccessfulStages(Member member, LocalDate logDate) {
+        List<QuitPlanStage> stages = quitPlanStageRepository.findByQuitPlan_Member(member);
+
+        for (QuitPlanStage stage : stages) {
+            if (stage.getEndDate() != null
+                    && !logDate.isBefore(stage.getEndDate())  // logDate >= endDate
+                    && stage.getStatus() == QuitPlanStageStatus.active) {
+
+                boolean completed = isStageCompleted(stage, member);
+                if (!completed) {
+                    stage.setStatus(QuitPlanStageStatus.cancelled);
+                    quitPlanStageRepository.save(stage);
+                    sendStageFailedNotification(member, stage);
+                }
+            }
+        }
+    }
+
+    private void sendStageFailedNotification(Member member, QuitPlanStage stage) {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setTitle("Chưa hoàn thành giai đoạn");
+        notificationRequest.setContent("Giai đoạn " + stage.getStageNumber() +
+                " đã kết thúc nhưng bạn chưa hoàn thành mục tiêu. Đừng bỏ cuộc, hãy tiếp tục cố gắng!");
+        notificationRequest.setIsActive(true);
+
+        User admin = userRepository.findByUsername("admin")
+                .orElseGet(() -> userRepository.findById(1L)
+                        .orElseThrow(() -> new RuntimeException("Tài khoản quản trị viên không tồn tại")));
+
+        NotificationResponse notificationResponse =
+                notificationService.createNotification(notificationRequest, admin.getId());
+
+        UserNotificationRequest userNotificationRequest = new UserNotificationRequest();
+        userNotificationRequest.setUserId(member.getUserId());
+        userNotificationRequest.setNotificationId(notificationResponse.getNotificationId());
+        userNotificationRequest.setPersonalizedReason("Bạn đã không hoàn thành giai đoạn " + stage.getStageNumber());
+
+        notificationService.sendNotificationToUser(userNotificationRequest);
+
+        notificationService.notifyCoachStageFailed(member.getUserId(), stage.getStageNumber());
     }
 
 

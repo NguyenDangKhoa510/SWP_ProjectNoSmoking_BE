@@ -25,10 +25,10 @@ public class UserMembershipController {
     }
 
 
-    @GetMapping("/getById/{id}")
-    public ResponseEntity<ResponseObject<UserMembershipResponse>> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(userMembershipService.getById(id));
-    }
+//    @GetMapping("/getById/{id}")
+//    public ResponseEntity<ResponseObject<UserMembershipResponse>> getById(@PathVariable Long id) {
+//        return ResponseEntity.ok(userMembershipService.getById(id));
+//    }
 
 
     @PostMapping("/create")
@@ -44,10 +44,10 @@ public class UserMembershipController {
     }
 
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<ResponseObject<String>> delete(@PathVariable Long id) {
-        return ResponseEntity.ok(userMembershipService.delete(id));
-    }
+//    @DeleteMapping("/delete/{id}")
+//    public ResponseEntity<ResponseObject<String>> delete(@PathVariable Long id) {
+//        return ResponseEntity.ok(userMembershipService.delete(id));
+//    }
 
 
     @GetMapping("/revenue")

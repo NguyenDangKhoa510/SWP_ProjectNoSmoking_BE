@@ -59,11 +59,11 @@ public class NotificationController {
 
     }
 
-    @GetMapping("/active")
-    @PreAuthorize("hasRole('COACH') or hasRole('ADMIN')")
-    public ResponseEntity<List<NotificationBrief>> getActiveNotifications() {
-        return ResponseEntity.ok(notificationService.getActiveNotifications());
-    }
+//    @GetMapping("/active")
+//    @PreAuthorize("hasRole('COACH') or hasRole('ADMIN')")
+//    public ResponseEntity<List<NotificationBrief>> getActiveNotifications() {
+//        return ResponseEntity.ok(notificationService.getActiveNotifications());
+//    }
 
     @PutMapping("/mark-as-read/{id}")
     @PreAuthorize("hasRole('MEMBER') or hasRole('COACH')")
@@ -82,21 +82,21 @@ public class NotificationController {
     }
 
 
-    @DeleteMapping("/{notificationId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
-    public ResponseEntity<String> deleteNotification(@PathVariable Long notificationId) {
-        notificationService.deleteNotification(notificationId);
-        return ResponseEntity.ok("Notification deleted successfully");
-    }
+//    @DeleteMapping("/{notificationId}")
+//    @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
+//    public ResponseEntity<String> deleteNotification(@PathVariable Long notificationId) {
+//        notificationService.deleteNotification(notificationId);
+//        return ResponseEntity.ok("Notification deleted successfully");
+//    }
 
 
-    @GetMapping("/sent-history")
-    @PreAuthorize("hasRole('COACH')")
-    public ResponseEntity<List<UserNotificationResponse>> getSentHistory(Authentication authentication) {
-        Long coachUserId = JwtUtils.extractUserIdFromAuthentication(authentication);
-        List<UserNotificationResponse> history = notificationService.getSentNotificationsByCoach(coachUserId);
-        return ResponseEntity.ok(history);
-    }
+//    @GetMapping("/sent-history")
+//    @PreAuthorize("hasRole('COACH')")
+//    public ResponseEntity<List<UserNotificationResponse>> getSentHistory(Authentication authentication) {
+//        Long coachUserId = JwtUtils.extractUserIdFromAuthentication(authentication);
+//        List<UserNotificationResponse> history = notificationService.getSentNotificationsByCoach(coachUserId);
+//        return ResponseEntity.ok(history);
+//    }
 
 
 
@@ -116,12 +116,12 @@ public class NotificationController {
 
 
 
-    @PostMapping("/send-to-members-and-coaches")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> sendNotificationToMembersAndCoaches(@RequestBody BroadcastNotificationRequest dto) {
-        notificationService.sendNotificationToAllMembersAndCoaches(dto);
-        return ResponseEntity.ok("Notification sent successfully to all Members and Coaches.");
-    }
+//    @PostMapping("/send-to-members-and-coaches")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<String> sendNotificationToMembersAndCoaches(@RequestBody BroadcastNotificationRequest dto) {
+//        notificationService.sendNotificationToAllMembersAndCoaches(dto);
+//        return ResponseEntity.ok("Notification sent successfully to all Members and Coaches.");
+//    }
 
 
 
@@ -129,11 +129,11 @@ public class NotificationController {
 
 
 
-    @GetMapping("/history/{userId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
-    public ResponseEntity<List<UserNotificationResponse>> getUserNotificationHistory(@PathVariable Long userId) {
-        return ResponseEntity.ok(notificationService.getUserNotifications(userId));
-    }
+//    @GetMapping("/history/{userId}")
+//    @PreAuthorize("hasRole('ADMIN') or hasRole('COACH')")
+//    public ResponseEntity<List<UserNotificationResponse>> getUserNotificationHistory(@PathVariable Long userId) {
+//        return ResponseEntity.ok(notificationService.getUserNotifications(userId));
+//    }
 
 }
 

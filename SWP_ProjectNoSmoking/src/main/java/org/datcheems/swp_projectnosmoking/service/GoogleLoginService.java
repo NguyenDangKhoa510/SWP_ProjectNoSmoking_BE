@@ -22,9 +22,6 @@ import java.util.Optional;
 @Service
 public class GoogleLoginService {
 
-
-    private String googleClientId = "82302107538-mjprlclm2pvioc2ojv5q0mjjibkbpdni.apps.googleusercontent.com";
-
     @Autowired
     private UserRepository userRepository;
 
@@ -87,16 +84,15 @@ public class GoogleLoginService {
         // Check username existed
         if (userRepository.existsByUsername(username)) {
             response.setStatus("error");
-            response.setMessage("Username already exists!");
+            response.setMessage("Tên đăng nhập đã tồn tại");
             response.setData(null);
             return response;
         }
 
-        // Create user
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setEmail(email);
-        newUser.setFullName(""); // optional: lưu name lúc đầu cũng được
+        newUser.setFullName("");
         newUser.setPassword("defaultPassword");
 
         Role defaultRole = roleRepository.findByName(Role.RoleName.MEMBER)
