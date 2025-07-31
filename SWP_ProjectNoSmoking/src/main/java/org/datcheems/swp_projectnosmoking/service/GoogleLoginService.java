@@ -89,11 +89,10 @@ public class GoogleLoginService {
             return response;
         }
 
-        // Create user
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setEmail(email);
-        newUser.setFullName(""); // optional: lưu name lúc đầu cũng được
+        newUser.setFullName("");
         newUser.setPassword("defaultPassword");
 
         Role defaultRole = roleRepository.findByName(Role.RoleName.MEMBER)

@@ -106,6 +106,7 @@ public class SmokingLogService {
                     quitPlanStageRepository.save(stage);
 
                     sendStageCompletionNotification(member, stage);
+                    checkAndCompleteQuitPlanIfAllStagesCompleted(stage.getQuitPlan());
                 }
             }
 
