@@ -84,7 +84,7 @@ public class GoogleLoginService {
         // Check username existed
         if (userRepository.existsByUsername(username)) {
             response.setStatus("error");
-            response.setMessage("Username already exists!");
+            response.setMessage("Tên đăng nhập đã tồn tại");
             response.setData(null);
             return response;
         }
