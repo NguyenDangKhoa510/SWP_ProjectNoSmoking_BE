@@ -9,10 +9,13 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+
     @Mapping(target = "roles", ignore = true)
     User toUser(RegisterRequest request);
 
     @Mapping(target = "roles", expression = "java(mapRolesToStrings(user))")
+    @Mapping(target = "createdAt", source = "createdAt")
+    @Mapping(target = "status", expression = "java(user.getStatus().name())")
     UserResponse toUserResponse(User user);
 
     default java.util.Set<String> mapRolesToStrings(User user) {
@@ -21,3 +24,4 @@ public interface UserMapper {
                 .collect(java.util.stream.Collectors.toSet());
     }
 }
+
